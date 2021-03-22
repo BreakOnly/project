@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbInvoiceBaseDao" >
+
+
+  <select id="selectByPrimaryKey" resultType="com.jrmf.domain.QbInvoiceBase" parameterType="java.lang.Integer" >
+    select * from qb_invoice_base
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from qb_invoice_base
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="com.jrmf.domain.QbInvoiceBase" >
+    insert into qb_invoice_base (customkey, companyId, 
+      invoiceType, billingClass, serviceType, 
+      companyName, taxRegistrationNumber, taxpayerType, 
+      remark, accountBankName, accountNo, 
+      address, phone, taxPicUrl, 
+      taxpayerPicUrl, status, addUser, 
+      reviewUser, createTime, updateTime,downReason
+      )
+    values (#{customkey,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, 
+      #{invoiceType,jdbcType=INTEGER}, #{billingClass,jdbcType=INTEGER}, #{serviceType,jdbcType=INTEGER}, 
+      #{companyName,jdbcType=VARCHAR}, #{taxRegistrationNumber,jdbcType=VARCHAR}, #{taxpayerType,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{accountBankName,jdbcType=VARCHAR}, #{accountNo,jdbcType=VARCHAR}, 
+      #{address,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{taxPicUrl,jdbcType=VARCHAR}, 
+      #{taxpayerPicUrl,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{addUser,jdbcType=VARCHAR}, 
+      #{reviewUser,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR},#{downReason,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.QbInvoiceBase" >
+    update qb_invoice_base
+    <set >
+      <if test="customkey != null" >
+        customkey = #{customkey,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        companyId = #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceType != null" >
+        invoiceType = #{invoiceType,jdbcType=INTEGER},
+      </if>
+      <if test="billingClass != null" >
+        billingClass = #{billingClass,jdbcType=INTEGER},
+      </if>
+      <if test="serviceType != null" >
+        serviceType = #{serviceType,jdbcType=INTEGER},
+      </if>
+      <if test="companyName != null" >
+        companyName = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="taxRegistrationNumber != null" >
+        taxRegistrationNumber = #{taxRegistrationNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="taxpayerType != null" >
+        taxpayerType = #{taxpayerType,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="accountBankName != null" >
+        accountBankName = #{accountBankName,jdbcType=VARCHAR},
+      </if>
+      <if test="accountNo != null" >
+        accountNo = #{accountNo,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="taxPicUrl != null" >
+        taxPicUrl = #{taxPicUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="taxpayerPicUrl != null" >
+        taxpayerPicUrl = #{taxpayerPicUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="addUser != null" >
+        addUser = #{addUser,jdbcType=VARCHAR},
+      </if>
+      <if test="reviewUser != null" >
+        reviewUser = #{reviewUser,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="downReason!=null">
+       	downReason = #{downReason}
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbInvoiceBase" >
+    update qb_invoice_base
+    set customkey = #{customkey,jdbcType=VARCHAR},
+      companyId = #{companyId,jdbcType=VARCHAR},
+      invoiceType = #{invoiceType,jdbcType=INTEGER},
+      billingClass = #{billingClass,jdbcType=INTEGER},
+      serviceType = #{serviceType,jdbcType=INTEGER},
+      companyName = #{companyName,jdbcType=VARCHAR},
+      taxRegistrationNumber = #{taxRegistrationNumber,jdbcType=VARCHAR},
+      taxpayerType = #{taxpayerType,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      accountBankName = #{accountBankName,jdbcType=VARCHAR},
+      accountNo = #{accountNo,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      taxPicUrl = #{taxPicUrl,jdbcType=VARCHAR},
+      taxpayerPicUrl = #{taxpayerPicUrl,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      addUser = #{addUser,jdbcType=VARCHAR},
+      reviewUser = #{reviewUser,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      downReason = #{downReason}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="queryInvoiceBaseList" parameterType="com.jrmf.domain.Page" resultType="map">
+	  select cc.companyName merchantName,qc.companyName serviceName,qib.*,qic.billingClassName,qic.serviceTypeName from qb_invoice_base qib
+	  left join channel_custom cc on qib.customkey=cc.customkey
+	  left join qb_company qc on qib.companyId=qc.userId
+	  left join qb_invoice_class qic on qic.id = qib.billingClass
+	  where 1=1
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like concat('%',#{params.merchantName},'%')
+	  </if>
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qib.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qib.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qib.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if> 
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qib.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qib.status = #{params.status}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qib.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qib.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qib.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qib.customkey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qib.customkey =#{params.customkey}
+	  </if>
+      <if test="params.customKey!=null and params.customKey!=''">
+          and qib.customkey =#{params.customKey}
+      </if>
+      <if test="params.originalIds != null and params.originalIds != ''">
+          or FIND_IN_SET(qib.customkey, #{params.originalIds})
+      </if>
+	  ORDER BY qib.id desc
+	  <if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+      </if>
+  </select>
+  
+  <select id="queryInvoiceBaseListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  	select count(1) from (
+  	  select cc.companyName merchantName,qc.companyName serviceName,qib.*,qic.billingClassName,qic.serviceTypeName from qb_invoice_base qib
+	  left join channel_custom cc on qib.customkey=cc.customkey
+	  left join qb_company qc on qib.companyId=qc.userId
+	  left join qb_invoice_class qic on qic.id = qib.billingClass
+	  where 1=1
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like concat('%',#{params.merchantName},'%')
+	  </if>
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qib.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qib.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qib.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if>
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qib.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qib.status = #{params.status}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qib.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qib.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qib.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qib.customkey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qib.customkey =#{params.customkey}
+	  </if>
+      <if test="params.customKey!=null and params.customKey!=''">
+          and qib.customkey =#{params.customKey}
+      </if>
+    <if test="params.originalIds != null and params.originalIds != ''">
+      or FIND_IN_SET(qib.customkey, #{params.originalIds})
+    </if>
+	  ORDER BY qib.id desc
+  	)temp
+  </select>
+  
+  <select id="queryInvoiceClassInfoListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  select count(1) from (select * from qb_invoice_class where 1=1
+  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+   	and serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+  </if>
+  <if test="params.billingClassName!=null and params.billingClassName!=''">
+   	and billingClassName like concat('%',#{params.billingClassName},'%')
+  </if>
+  ORDER BY id desc
+  )temp
+  </select>
+  
+  <select id="queryInvoiceClassInfoList" parameterType="com.jrmf.domain.Page" resultType="map">
+  select * from qb_invoice_class where 1=1
+  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+   	and serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+  </if>
+  <if test="params.billingClassName!=null and params.billingClassName!=''">
+   	and billingClassName like concat('%',#{params.billingClassName},'%')
+  </if>
+  ORDER BY id desc
+  	  <if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+      </if>
+  </select>
+  
+  <select id="queryServiceContent" parameterType="int" resultType="String">
+  select contextInfo from qb_invoice_service where id =#{value}
+  </select>
+  
+  <select id="queryInvoiceBaseListNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+	  select cc.companyName merchantName,qc.companyName serviceName,qib.*,qic.billingClassName,qic.serviceTypeName,cg.companyName agentName from qb_invoice_base qib
+	  left join channel_custom cc on qib.customkey=cc.customkey
+	  left join channel_custom cg on cc.businessChannel = cg.customkey
+	  left join qb_company qc on qib.companyId=qc.userId
+	  left join qb_invoice_class qic on qic.id = qib.billingClass
+	  where 1=1
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like concat('%',#{params.merchantName},'%')
+	  </if>
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qib.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qib.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qib.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if>
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qib.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qib.status = #{params.status}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qib.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qib.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qib.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qib.customKey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qib.customkey =#{params.customkey}
+	  </if>
+      <if test="params.customKey!=null and params.customKey!=''">
+          and qib.customkey =#{params.customKey}
+      </if>
+      <if test="params.originalIds != null and params.originalIds != ''">
+        OR FIND_IN_SET(qib.customKey,#{params.originalIds})
+      </if>
+	  ORDER BY qib.id desc
+  </select>
+  
+  <select id="getMerInfo" parameterType="String" resultType="com.jrmf.domain.QbInvoiceBase">
+  select * from qb_invoice_base where customkey = #{value}
+  </select>
+  
+  <select id="getMerInfoByInvoice" parameterType="map" resultType="com.jrmf.domain.QbInvoiceBase">
+  select * from qb_invoice_base where customkey = #{customkey} and invoiceType=#{invoiceType}
+  </select>
+  
+  <!-- 获取商户已申请的开票基础信息  -->
+  <select id="getMerInvoiceBaseByRecord" parameterType="com.jrmf.domain.Page" resultType="map">
+  select qib.* from qb_invoice_base qib 
+	left join qb_invoice_record qir
+	on qib.invoiceType=qir.invoiceType
+	and qib.billingClass=qir.billingClass
+	and qib.taxRegistrationNumber=qir.taxRegistrationNumber
+	and qib.serviceType=qir.serviceType
+	and qib.taxpayerType=qir.taxpayerType
+	and qib.companyName=qir.companyName
+	and qib.accountBankName=qir.accountBankName
+	and qib.accountNo=qir.accountNo
+	where qir.customkey=#{customkey} and qir.companyId=#{companyId}
+    ORDER BY qib.id desc
+	<if test="pageSize !=null and offset !=null">
+    limit #{offset},#{pageSize}
+    </if>
+  </select>
+  
+  <!-- 获取商户已申请的开票基础信息数量 -->
+  <select id="getMerInvoiceBaseByRecordCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  select count(1) from (
+    select qib.* from qb_invoice_base qib 
+	left join qb_invoice_record qir
+	on qib.invoiceType=qir.invoiceType
+	and qib.billingClass=qir.billingClass
+	and qib.taxRegistrationNumber=qir.taxRegistrationNumber
+	and qib.serviceType=qir.serviceType
+	and qib.taxpayerType=qir.taxpayerType
+	and qib.companyName=qir.companyName
+	and qib.accountBankName=qir.accountBankName
+	and qib.accountNo=qir.accountNo
+	where qir.customkey=#{customkey} and qir.companyId=#{companyId}
+    ORDER BY qib.id desc
+  )temp
+  </select>
+    <select id="queryInvoiceClassCount" resultType="java.lang.Integer">
+        select count(*) from qb_invoice_class where id = #{billingClass}
+    </select>
+  <select id="getServiceTypeNamesByCustomKeyAndCompanyId" resultType="java.lang.String">
+    SELECT
+      GROUP_CONCAT( qic.serviceTypeName ) serviceTypeNames
+    FROM
+      qb_invoice_base qib
+      LEFT JOIN qb_invoice_class qic ON qic.id = qib.billingClass
+    WHERE
+      qib.customkey = #{customKey}
+      AND qib.companyId = #{companyId}
+  </select>
+
+  <update id="updateTaxPicUrl" parameterType="map">
+  update qb_invoice_base set taxPicUrl=#{taxPicUrl},taxpayerPicUrl=#{taxpayerPicUrl} where customkey=#{customkey} and invoiceType=#{invoiceType}
+  </update>
+</mapper>

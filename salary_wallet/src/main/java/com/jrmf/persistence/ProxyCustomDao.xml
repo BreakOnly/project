@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.ProxyCustomDao" >
+    <insert id="addCustomProxySubCommission">
+        INSERT INTO custom_proxy_sub_commission (
+        time,
+        proxyCustomKey,
+        proxyCustomName,
+        customKey,
+        customName,
+        proxyType,
+        companyId,
+        companyName,
+        amount,
+        returnCommissionAmount,
+        customServiceFee,
+        proxyFeeRate,
+        companyNetFileRateConfId,
+        directProxyCustomKey,
+        directProxyCustomName,
+        countType,
+        nextLevelProxyDiffEarnRate,
+        createTime,
+        updateTime,
+        modifyRate,
+        modifyProxyFee,
+        modifyEffectStartTime,
+        modifyEffectEndTime,
+        modifyAddUser
+        )
+        VALUES
+        <foreach collection="customProxySubCommissions" item="customProxySubCommission" separator=",">
+            (#{customProxySubCommission.time},
+            #{customProxySubCommission.proxyCustomKey},
+            #{customProxySubCommission.proxyCustomName},
+            #{customProxySubCommission.customKey},
+            #{customProxySubCommission.customName},
+            #{customProxySubCommission.proxyType},
+            #{customProxySubCommission.companyId},
+            #{customProxySubCommission.companyName},
+            #{customProxySubCommission.amount},
+            #{customProxySubCommission.returnCommissionAmount},
+            #{customProxySubCommission.customServiceFee},
+            #{customProxySubCommission.proxyFeeRate},
+            #{customProxySubCommission.companyNetFileRateConfId},
+            #{customProxySubCommission.directProxyCustomKey},
+            #{customProxySubCommission.directProxyCustomName},
+            #{customProxySubCommission.countType},
+            #{customProxySubCommission.nextLevelProxyDiffEarnRate},
+            now(),
+            now(),
+            #{customProxySubCommission.modifyRate},
+            #{customProxySubCommission.modifyProxyFee},
+            #{customProxySubCommission.modifyEffectStartTime},
+            #{customProxySubCommission.modifyEffectEndTime},
+            #{customProxySubCommission.modifyAddUser}
+            )
+        </foreach>
+    </insert>
+    <delete id="deleteByParam">
+        DELETE FROM custom_proxy_sub_commission
+        WHERE time = #{time}
+        <if test="companyId!=null and companyId!=''">
+            and companyId  = #{companyId}
+        </if>
+        <if test="proxyCustomKey!=null and proxyCustomKey!=''">
+            and proxyCustomKey  = #{proxyCustomKey}
+        </if>
+        <if test="proxyCustomKeys!=null and proxyCustomKeys!=''">
+            and FIND_IN_SET(proxyCustomKey,#{proxyCustomKeys})
+        </if>
+        <if test="customKey!=null and customKey!=''">
+            and customKey  = #{customKey}
+        </if>
+        <if test="proxyType!=null and proxyType!=''">
+            and proxyType  = #{proxyType}
+        </if>
+    </delete>
+
+
+    <select id="countByPage" resultType="java.lang.Integer">
+        SELECT count(a.id) FROM custom_proxy_sub_commission a LEFT JOIN
+        company_netfile_rate_conf b on a.companyNetFileRateConfId = b.id
+        where 1=1
+        <if test="params.merchantName!=null and params.merchantName!=''">
+            and a.customName like concat('%',#{params.merchantName},'%')
+        </if>
+        <if test="params.companyId!=null and params.companyId!=''">
+            and a.companyId = #{params.companyId}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and a.time &gt;= #{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and a.time &lt;= #{params.endTime}
+        </if>
+        <if test="params.gearLabel!=null and params.gearLabel!=''">
+            and b.gearLabel = #{params.gearLabel}
+        </if>
+        <if test="params.proxyCustomName!=null and params.proxyCustomName!=''">
+            and a.proxyCustomName like concat('%',#{params.proxyCustomName},'%')
+        </if>
+        <if test="params.proxyType!=null and params.proxyType!=''">
+            and a.proxyType = #{params.proxyType}
+        </if>
+        <if test="params.returnCommissionAmountStart!=null and params.returnCommissionAmountStart!=''">
+            and  CAST(a.returnCommissionAmount as DECIMAL(16,2)) &gt;= #{params.returnCommissionAmountStart}
+        </if>
+        <if test="params.returnCommissionAmountEnd!=null and params.returnCommissionAmountEnd!=''">
+            and  CAST(a.returnCommissionAmount as DECIMAL(16,2)) &lt;= #{params.returnCommissionAmountEnd}
+        </if>
+    </select>
+    <select id="listByPage" resultType="com.jrmf.domain.CustomProxySubCommission">
+        SELECT a.*,b.gearLabel,b.amountStart,b.operator,b.amountEnd
+        FROM custom_proxy_sub_commission a
+            LEFT JOIN company_netFile_rate_conf b on a.companyNetFileRateConfId = b.id
+            LEFT JOIN channel_custom cc on cc.customkey = a.proxyCustomKey
+        where 1=1
+        <if test="params.merchantName!=null and params.merchantName!=''">
+            and a.customName like concat('%',#{params.merchantName},'%')
+        </if>
+        <if test="params.companyId!=null and params.companyId!=''">
+            and a.companyId = #{params.companyId}
+        </if>
+        <if test="params.businessPlatformId!=null and params.businessPlatformId!=''">
+            and cc.businessPlatformId = #{params.businessPlatformId}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and a.time &gt;= #{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and a.time &lt;= #{params.endTime}
+        </if>
+        <if test="params.gearLabel!=null and params.gearLabel!=''">
+            and b.gearLabel = #{params.gearLabel}
+        </if>
+        <if test="params.proxyCustomName!=null and params.proxyCustomName!=''">
+            and a.proxyCustomName like concat('%',#{params.proxyCustomName},'%')
+        </if>
+        <if test="params.proxyType!=null and params.proxyType!=''">
+            and a.proxyType = #{params.proxyType}
+        </if>
+        <if test="params.returnCommissionAmountStart!=null and params.returnCommissionAmountStart!=''">
+            and CAST(a.returnCommissionAmount as DECIMAL(16,2))  &gt;= #{params.returnCommissionAmountStart}
+        </if>
+        <if test="params.returnCommissionAmountEnd!=null and params.returnCommissionAmountEnd!=''">
+            and CAST(a.returnCommissionAmount as DECIMAL(16,2)) &lt;= #{params.returnCommissionAmountEnd}
+        </if>
+        order by a.createTime desc
+    </select>
+    <select id="listByNoPage" resultType="com.jrmf.domain.CustomProxySubCommission">
+        SELECT a.*,b.gearLabel,b.amountStart,b.operator,b.amountEnd FROM
+        custom_proxy_sub_commission a LEFT JOIN company_netFile_rate_conf b
+        on a.companyNetFileRateConfId = b.id where 1=1
+        <if test="params.merchantName!=null and params.merchantName!=''">
+            and a.customName like concat('%',#{params.merchantName},'%')
+        </if>
+        <if test="params.companyId!=null and params.companyId!=''">
+            and a.companyId = #{params.companyId}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and a.time &gt;= #{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and a.time &lt;= #{params.endTime}
+        </if>
+        <if test="params.gearLabel!=null and params.gearLabel!=''">
+            and b.gearLabel = #{params.gearLabel}
+        </if>
+        <if test="params.proxyCustomName!=null and params.proxyCustomName!=''">
+            and a.proxyCustomName like concat('%',#{params.proxyCustomName},'%')
+        </if>
+        <if test="params.proxyType!=null and params.proxyType!=''">
+            and a.proxyType = #{params.proxyType}
+        </if>
+        <if test="params.returnCommissionAmountStart!=null and params.returnCommissionAmountStart!=''">
+            and  CAST(a.returnCommissionAmount as DECIMAL(16,2)) &gt;= #{params.returnCommissionAmountStart}
+        </if>
+        <if test="params.returnCommissionAmountEnd!=null and params.returnCommissionAmountEnd!=''">
+            and  CAST(a.returnCommissionAmount as DECIMAL(16,2)) &lt;= #{params.returnCommissionAmountEnd}
+        </if>
+        order by a.createTime desc
+
+    </select>
+    <select id="calculateByParam" resultType="com.jrmf.domain.CustomProxySubCommission">
+        SELECT
+        time,
+        proxyCustomName,
+        proxyCustomKey,
+        directProxyCustomName,
+        directProxyCustomKey,
+        customName,
+        customkey,
+        companyId,
+        companyName,
+        CAST(sum( amount ) as DECIMAL(16,2)) amount,
+        CAST(sum( customServiceFee ) as DECIMAL(16,2)) customServiceFee,
+        gearLabel,
+        amountStart,
+        operator,
+        amountEnd,
+        proxyFeeRate,
+        countType,
+        companyNetFileRateConfId,
+        parentId,
+        rateInterval,
+        modifyAddUser,
+        modifyRate,
+        modifyEffectStartTime,
+        modifyEffectEndTime
+        FROM
+        (
+        SELECT DISTINCT qu.id mainId,
+        DATE_FORMAT( qu.createtime, '%Y-%m' ) time,
+        qu.businessChannel proxyCustomName,
+        qu.businessChannelKey proxyCustomKey,
+        qu.businessChannel directProxyCustomName,
+        qu.businessChannelKey directProxyCustomKey,
+        qu.customName,
+        qu.originalId customkey,
+        qu.companyId,
+        qu.companyName,
+        qu.amount,
+
+        CASE qu.feeRuleType
+        WHEN 1 THEN  qu.calculationRates * qu.amount
+        WHEN 2 THEN qu.amount / (1-qu.calculationRates) * qu.calculationRates
+        ELSE qu.calculationRates * qu.amount
+        END as customServiceFee,
+
+        cnrc.gearLabel,
+        cnrc.amountStart,
+        cnrc.operator,
+        cnrc.amountEnd,
+        pcm.proxyFeeRate,
+        pcm.countType,
+        cnrc.id companyNetFileRateConfId,
+        qu.rateInterval,
+        cp.parentId,
+        cswr.modifyAddUser,
+        cswr.modifyRate,
+        cswr.modifyEffectStartTime,
+        cswr.modifyEffectEndTime
+        FROM
+        qb_usercommission qu
+        LEFT JOIN company_rate_conf crc ON qu.rateInterval = concat( crc.amountStart, crc.operator, crc.amountEnd )
+        AND qu.companyId = crc.companyId
+        LEFT JOIN company_netfile_rate_conf cnrc ON crc.netfileId = cnrc.id
+        LEFT JOIN proxy_cost_maintain pcm ON qu.businessChannelKey = pcm.customkey
+        AND qu.companyId = pcm.companyId
+        AND pcm.netfileId = crc.netfileId
+        LEFT JOIN custom_proxy cp ON pcm.customkey = cp.customkey
+        LEFT JOIN  custom_settle_with_rate cswr
+        on qu.businessChannelKey=cswr.customkey
+        and qu.companyId=cswr.companyId
+        and pcm.netfileId=cswr.netfileId
+        and DATE_FORMAT(qu.createtime,'%Y-%m-%d') BETWEEN cswr.modifyEffectStartTime and cswr.modifyEffectEndTime
+        WHERE
+        qu.STATUS = 1
+        <if test="proxyCustomKeys!=null and proxyCustomKeys!=''">
+            and FIND_IN_SET(qu.businessChannelKey,#{proxyCustomKeys})
+        </if>
+        AND DATE_FORMAT( qu.createtime, '%Y-%m' )= #{time}
+        AND qu.rateInterval IS NOT NULL
+        AND (qu.businessChannelKey IS NOT NULL and qu.businessChannelKey != '')
+        AND pcm.proxyFeeRate IS NOT NULL
+        AND cnrc.gearLabel IS NOT NULL
+        <if test="companyId!=null and companyId!=''">
+            and qu.companyId  = #{companyId}
+        </if>
+        <if test="proxyCustomKey!=null and proxyCustomKey!=''">
+            and qu.businessChannelKey  = #{proxyCustomKey}
+        </if>
+        <if test="customKey!=null and customKey!=''">
+            and qu.originalId  = #{customKey}
+        </if>
+        ) a
+        GROUP BY
+        time,
+        companyNetFileRateConfId,
+        <!--rateInterval,-->
+        customkey,
+        companyId,
+        proxyCustomKey
+    </select>
+</mapper>

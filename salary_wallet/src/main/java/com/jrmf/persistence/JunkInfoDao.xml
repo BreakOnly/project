@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.JunkInfoDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.JunkInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="type" jdbcType="INTEGER" property="type" />
+    <result column="parameter1" jdbcType="VARCHAR" property="parameter1" />
+    <result column="parameter2" jdbcType="VARCHAR" property="parameter2" />
+    <result column="parameter3" jdbcType="VARCHAR" property="parameter3" />
+    <result column="parameter4" jdbcType="VARCHAR" property="parameter4" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, type, parameter1, parameter2, parameter3, parameter4, createTime
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from junk_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from junk_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.jrmf.domain.JunkInfo">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into junk_info (type, parameter1, parameter2, 
+      parameter3, parameter4, createTime
+      )
+    values (#{type,jdbcType=INTEGER}, #{parameter1,jdbcType=VARCHAR}, #{parameter2,jdbcType=VARCHAR}, 
+      #{parameter3,jdbcType=VARCHAR}, #{parameter4,jdbcType=VARCHAR}, now()
+      )
+  </insert>
+
+</mapper>

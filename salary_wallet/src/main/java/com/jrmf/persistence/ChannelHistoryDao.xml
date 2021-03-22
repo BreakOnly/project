@@ -1,0 +1,1749 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--suppress ALL -->
+<mapper namespace="com.jrmf.persistence.ChannelHistoryDao">
+    <insert id="addChannelHistory" parameterType="com.jrmf.domain.ChannelHistory"
+            useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+		INSERT INTO qb_channelHistory (
+		createtime,
+		amount,
+		ordername,
+		orderno,
+		originalBeachNo,
+		accountNo,
+		accountName,
+        transfertype,
+        customkey,
+        recCustomkey,
+        updatetime,
+		providetime,
+		serviceFee,
+		supplementServiceFee,
+		payType,
+		status,
+		operatorName,
+		mfkjServiceFee,
+		remark,
+		passNum,
+		failedNum,
+		failedAmount,
+		batchNum,
+		batchAmount,
+		handleAmount,
+		menuId,
+		batchName,
+		batchDesc,
+		fileName,
+		deductionAmount,
+		inAccountNo,
+		inAccountName,
+		taskAttachmentFile,
+		inAccountBankName,
+		serviceFeeType,
+		rechargeType,
+		rechargeAmount,
+		serviceFeeRate,
+		rechargeFile,
+		rechargeFileNum,
+		invoiceStatus,
+		invoiceAmount,
+		unInvoiceAmount,
+		invoiceingAmount,
+        customOrderNo,
+        notifyUrl,
+		rechargeConfirmType,
+		linkPhone,
+		oemUrl,
+		payUserName,
+		realCompanyAmount,
+		forwardCompanyName,
+        forwardCommissionAmount,
+		realCompanyId,rechargeLetterStatus)
+		VALUES (
+		now(),
+		#{amount},
+		#{ordername},
+		#{orderno},
+		#{originalBeachNo},
+		#{accountNo},
+		#{accountName},
+		#{transfertype},
+		#{customkey},
+		#{recCustomkey},
+		now(),
+		#{providetime},
+		#{serviceFee},
+		#{supplementServiceFee},
+		#{payType},
+		#{status},
+		#{operatorName},
+		#{mfkjServiceFee},
+		#{remark},
+		#{passNum},
+		#{failedNum},
+		#{failedAmount},
+		#{batchNum},
+		#{batchAmount},
+		#{handleAmount},
+		#{menuId},
+		#{batchName},
+		#{batchDesc},
+		#{fileName},
+		#{deductionAmount},
+		#{inAccountNo},
+		#{inAccountName},
+		#{taskAttachmentFile},
+		#{inAccountBankName},
+		#{serviceFeeType},
+		#{rechargeType},
+		#{rechargeAmount},
+		#{serviceFeeRate},
+		#{rechargeFile},
+		#{rechargeFileNum},
+		#{invoiceStatus},
+		#{invoiceAmount},
+		#{unInvoiceAmount},
+		#{invoiceingAmount},
+        #{customOrderNo},
+        #{notifyUrl},
+		#{rechargeConfirmType},
+		#{linkPhone},
+		#{oemUrl},
+		#{payUserName},
+		#{realCompanyAmount},
+		#{forwardCompanyName},
+		#{forwardCommissionAmount},
+		#{realCompanyId},#{rechargeLetterStatus})
+	</insert>
+    <select id="getChannelHistoryByParam" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT * FROM qb_channelHistory WHERE status != 8
+        <if test="customkey !=null and customkey !=''">
+            and customkey = #{customkey}
+        </if>
+        <if test="recCustomkey !=null and recCustomkey !=''">
+            and recCustomkey = #{recCustomkey}
+        </if>
+        <if test="payType !=null and payType !=''">
+            and payType = #{payType}
+        </if>
+        <if test="transfertype !=null and transfertype !=''">
+            and transfertype =#{transfertype}
+        </if>
+        <if test="status !=null and status !=''">
+            and FIND_IN_SET(status,#{status})
+        </if>
+        <if test="status ==null or status ==''">
+            and status IN (1,2,3,4,5)
+        </if>
+        <if test="name !=null and name !=''">
+            and (amount like concat('%', #{name}, '%')
+            or passNum like concat('%', #{name}, '%')
+            or batchNum like concat('%', #{name}, '%')
+            )
+        </if>
+        <if test="orderno !=null and orderno !=''">
+            and orderno like concat('%', #{orderno}, '%')
+        </if>
+        <if test="originalBeachNo !=null and originalBeachNo !=''">
+            and originalBeachNo = #{originalBeachNo}
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(createtime) &lt;= #{endTime}
+        </if>
+        <if test="batchName !=null and batchName !=''">
+            and batchName = #{batchName}
+        </if>
+        <if test="fileName !=null and fileName !=''">
+            and fileName = #{fileName}
+        </if>
+        <if test="menuId !=null and menuId !=''">
+            and FIND_IN_SET(menuId,#{menuId})
+        </if>
+        <if test="batchDesc !=null and batchDesc !=''">
+            and batchDesc like concat('%', #{batchDesc}, '%')
+        </if>
+        <if test="customOrderNo !=null and customOrderNo !=''">
+            and customOrderNo = #{customOrderNo}
+        </if>
+        order by createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getChannelHistoryByParamOnJob" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT * FROM qb_channelHistory WHERE status != 8
+        <if test="transfertype !=null and transfertype !=''">
+            and transfertype =#{transfertype}
+        </if>
+        <if test="status !=null and status !=''">
+            and status =#{status}
+        </if>
+    </select>
+
+    <select id="getChannelHistoryByCompany" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT h.*,c.companyName as companyName ,
+        (SELECT companyName FROM channel_custom WHERE customkey = c.AgentId) as agentName FROM qb_channelHistory h,
+        channel_custom c WHERE h.customkey = c.customkey and h.status IN (1,2,5,7) and h.transfertype = 2
+        <if test="recCustomkey !=null and recCustomkey !=''">
+            and h.recCustomkey = #{recCustomkey}
+        </if>
+        <if test="payType !=null and payType !=''">
+            and h.payType = #{payType}
+        </if>
+        <if test="transfertype !=null and transfertype !=''">
+            and h.transfertype =#{transfertype}
+        </if>
+        <if test="status !=null and status !=''">
+            and FIND_IN_SET(h.status,#{status})
+        </if>
+        <if test="name !=null and name !=''">
+            and (h.amount like concat('%', #{name}, '%')
+            or h.accountNo like concat('%', #{name}, '%')
+            or h.orderno like concat('%', #{name}, '%')
+            or h.accountName like concat('%', #{name}, '%')
+            or c.companyName like concat('%', #{name}, '%')
+            )
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(h.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(h.createtime) &lt;= #{endTime}
+        </if>
+        <if test="customkey !=null and customkey !=''">
+            and h.customkey = #{customkey}
+        </if>
+        order by createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <!--公共查询充值、下发等，根据transfertype判别具体业务-->
+    <select id="getChannelHistoryList" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT h.*,c.companyName as companyName
+        FROM qb_channelHistory h,channel_custom c WHERE h.customkey = c.customkey
+        AND h.status != 8
+        <if test="recCustomkey !=null and recCustomkey !=''">
+            and h.recCustomkey = #{recCustomkey}
+        </if>
+        <if test="payType !=null and payType !=''">
+            and h.payType = #{payType}
+        </if>
+        <if test="amount !=null and amount !=''">
+            and h.amount = #{amount}
+        </if>
+        <if test="transfertype !=null and transfertype !=''">
+            and h.transfertype =#{transfertype}
+        </if>
+        <if test="status !=null and status !=''">
+            and FIND_IN_SET(h.status,#{status})
+        </if>
+        <if test="name !=null and name !=''">
+            and (h.amount like concat('%', #{name}, '%')
+            or h.accountNo like concat('%', #{name}, '%')
+            or h.accountName like concat('%', #{name}, '%')
+            or c.companyName like concat('%', #{name}, '%')
+            )
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(h.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(h.createtime) &lt;= #{endTime}
+        </if>
+        <if test="customkey !=null and customkey !=''">
+            and h.customkey = #{customkey}
+        </if>
+        <if test="customOrderNo !=null and customOrderNo !=''">
+            and customOrderNo = #{customOrderNo}
+        </if>
+        order by createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <update id="updateChannelHistory" parameterType="com.jrmf.domain.ChannelHistory">
+        update qb_channelHistory
+        <trim prefix="SET" suffixOverrides=",">
+            updatetime = now(),
+            <if test="serviceFee !=null and serviceFee !=''">
+                serviceFee = #{serviceFee},
+            </if>
+            <if test="mfkjServiceFee !=null and mfkjServiceFee !=''">
+                mfkjServiceFee = #{mfkjServiceFee},
+            </if>
+            <if test="amount !=null and amount !=''">
+                amount = #{amount},
+            </if>
+            <if test="orderno !=null and orderno !=''">
+                orderno = #{orderno},
+            </if>
+            <if test="status !=null">
+                status = #{status},
+            </if>
+            <if test="accountName !=null and accountName !=''">
+                accountName = #{accountName},
+            </if>
+            <if test="operatorName !=null and operatorName !=''">
+                operatorName = #{operatorName},
+            </if>
+            <if test="remark !=null and remark !=''">
+                remark = #{remark},
+            </if>
+            <if test="ordername !=null and ordername !=''">
+                ordername = #{ordername},
+            </if>
+            <if test="passNum !=null">
+                passNum = #{passNum},
+            </if>
+            <if test="failedNum !=null">
+                failedNum = #{failedNum},
+            </if>
+            <if test="failedAmount !=null and failedAmount !=''">
+                failedAmount = #{failedAmount},
+            </if>
+            <if test="batchNum !=null">
+                batchNum = #{batchNum},
+            </if>
+            <if test="batchAmount !=null and batchAmount !=''">
+                batchAmount = #{batchAmount},
+            </if>
+            <if test="providetime !=null and providetime !=''">
+                providetime = #{providetime},
+            </if>
+            <if test="handleAmount !=null and handleAmount !=''">
+                handleAmount = #{handleAmount},
+            </if>
+            <if test="deductionAmount !=null and deductionAmount !=''">
+                deductionAmount = #{deductionAmount},
+            </if>
+            <if test="taskAttachmentFile !=null and taskAttachmentFile !=''">
+                taskAttachmentFile = #{taskAttachmentFile},
+            </if>
+            <if test="companyOperatorName !=null and companyOperatorName !=''">
+                companyOperatorName = #{companyOperatorName},
+            </if>
+            <if test="invoiceingAmount!=null and invoiceingAmount!=''">
+                invoiceingAmount = #{invoiceingAmount},
+            </if>
+            <if test="unInvoiceAmount!=null and unInvoiceAmount!=''">
+                unInvoiceAmount=#{unInvoiceAmount},
+            </if>
+            <if test="invoiceAmount!=null and invoiceAmount!=''">
+                invoiceAmount=#{invoiceAmount},
+            </if>
+            <if test="invoiceStatus!=null">
+                invoiceStatus=#{invoiceStatus},
+            </if>
+            <if test="rechargeAmount!=null">
+                rechargeAmount=#{rechargeAmount},
+            </if>
+            <if test="realRechargeAmount!=null">
+                realRechargeAmount=#{realRechargeAmount},
+            </if>
+            <if test="refundAmount!=null and refundAmount!=''">
+                refundAmount=#{refundAmount},
+            </if>
+            <if test="realCompanyAmount!=null and realCompanyAmount!=''">
+                realCompanyAmount=#{realCompanyAmount},
+            </if>
+            <if test="forwardRechargeRecordIds!=null and forwardRechargeRecordIds!=''">
+                forwardRechargeRecordIds=#{forwardRechargeRecordIds},
+            </if>
+            <if test="rechargeLetterStatus!=null and rechargeLetterStatus!=''">
+              rechargeLetterStatus=#{rechargeLetterStatus},
+            </if>
+            <if test="rechargeLetterUrl!=null and rechargeLetterUrl!=''">
+              rechargeLetterUrl=#{rechargeLetterUrl},
+            </if>
+            <if test="rechargeLetterType!=null and rechargeLetterType!=''">
+              rechargeLetterType=#{rechargeLetterType},
+            </if>
+            <if test="rechargeLetterErrMsg!=null and rechargeLetterErrMsg!=''">
+              rechargeLetterErrMsg=#{rechargeLetterErrMsg}
+            </if>
+        </trim>
+        where id = #{id}
+        <if test="currentStatus!=null">
+            and status=#{currentStatus}
+        </if>
+    </update>
+
+    <update id="updateChannelHistorySummary" parameterType="com.jrmf.domain.ChannelHistory">
+		update qb_channelHistory Set updatetime = now(),
+			serviceFee = #{serviceFee},
+			mfkjServiceFee = #{mfkjServiceFee},
+			amount = #{amount},
+			handleAmount = #{handleAmount},
+			passNum = #{passNum},
+			failedNum = #{failedNum},
+			failedAmount = #{failedAmount}
+		where id = #{id}
+	</update>
+
+    <update id="deleteById" parameterType="int">
+		 update  qb_channelHistory Set status = 8, updatetime = now()
+		 WHERE id = #{id}
+	</update>
+
+    <update id="deleteByOrderno" parameterType="String">
+		 update FROM qb_channelHistory Set status = 8 , updatetime = now()
+		 WHERE orderno = #{orderno}
+	</update>
+
+    <select id="getRechangeSum" resultType="String">
+	SELECT ROUND(SUM(amount),2) FROM qb_channelHistory  WHERE  transfertype =1 and customkey = #{customkey} AND  `status` = 1
+	and payType = #{payType}
+	</select>
+
+    <select id="getCommissionSum" resultType="String">
+	SELECT ROUND(SUM( amount),2)  FROM qb_userCommission  WHERE  originalId  = #{customkey}  AND `status` IN (0,1,3)
+	and  payType = #{payType}
+	</select>
+
+    <select id="getCommissionSerFreeSum" resultType="String">
+	SELECT ROUND(SUM(sumFee),2)  FROM qb_userCommission  WHERE   originalId  = #{customkey} AND `status` IN (0,1,3)
+	and  payType = #{payType}
+	</select>
+
+    <select id="getChannelHistoryById" resultType="com.jrmf.domain.ChannelHistory">
+		SELECT * FROM qb_channelHistory  WHERE  id = #{id}
+	</select>
+
+    <select id="getChannelHistoryByOrderno" resultType="com.jrmf.domain.ChannelHistory" parameterType="String">
+		SELECT * FROM qb_channelHistory  WHERE  orderno = #{orderno}
+	</select>
+
+    <!-- 账户充值记录  -->
+    <select id="getChannelHistoryBySubmit" resultType="com.jrmf.domain.ChannelHistory" parameterType="Map">
+        SELECT * FROM qb_channelHistory WHERE transfertype = 1
+        <if test="status !=null and status !=''">
+            and status = #{status}
+        </if>
+        <if test="customkey !=null and customkey !=''">
+            and customkey = #{customkey}
+        </if>
+        <if test="amount !=null and amount !=''">
+            and amount = #{amount}
+        </if>
+        <if test="payType !=null and payType !=''">
+            and payType = #{payType}
+        </if>
+        <if test="recCustomkey !=null and recCustomkey !=''">
+            and recCustomkey = #{recCustomkey}
+        </if>
+        <if test="orderno !=null and orderno !=''">
+            and orderno like concat('%', #{orderno}, '%')
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(createtime) &lt;= #{endTime}
+        </if>
+        order by createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <select id="batchResultQuery" resultType="java.util.HashMap" parameterType="Map">
+        SELECT
+        c.id id,
+        c.batchAmount batchAmount,
+        c.batchName batchName,
+        c.batchDesc batchDesc,
+        c.`status` `status`,
+        c.payType payType,
+        c.createtime createTime,
+        c.handleAmount handleAmount,
+        c.batchNum batchNum,
+        c.serviceFee serviceFee,
+        c.passNum passNum,
+        c.failedNum failedNum,
+        c.amount amount,
+        c.failedAmount failedAmount,
+        c.updatetime updateTime,
+        c.providetime provideTime,
+        c.operatorName ,
+        c.reviewName ,
+        m.contentName contentName,
+        u.companyName companyName,
+        c.fileName fileName,
+        c.supplementServiceFee,
+        c.taskAttachmentFile,
+        c2.companyName merchantName,
+        qc.sourceFileNum,
+        qc.splitOrderNum,
+        qc.mergeOrderNum,
+        qc.mergeUserNum,
+        qc.inputPathNo
+        FROM
+        qb_channelhistory c
+        LEFT JOIN custom_menu m ON c.menuId = m.id
+        LEFT JOIN channel_custom u ON c.recCustomkey = u.customkey
+        LEFT JOIN channel_custom c2 ON c2.customkey = c.customkey
+        LEFT JOIN qb_channelinterimbatch qc on qc.orderno=c.originalBeachNo
+        WHERE 1=1 and c.transfertype = 2
+        <if test="customkey !=null and customkey !=''">
+            and FIND_IN_SET(c.customkey,#{customkey}) and c.customkey != ''
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName like concat('%', #{batchName}, '%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%', #{batchDesc}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            and c.status = #{status}
+        </if>
+        <if test="amount != null and amount != ''">
+            and c.amount = #{amount}
+        </if>
+        <if test="batchAmount != null and batchAmount != ''">
+            and c.batchAmount = #{batchAmount}
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and m.contentName like concat('%',#{contentName},'%')
+        </if>
+        <if test="fileName != null and fileName != ''">
+            and c.fileName like concat('%',#{fileName},'%')
+        </if>
+        <if test="recCustomkey != null and recCustomkey != ''">
+            and c.recCustomKey = #{recCustomkey}
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            and FIND_IN_SET(c.menuId,#{menuIds})
+        </if>
+        <if test="submitTimeStart != null and submitTimeStart != ''">
+            and date(c.createtime) &gt;= #{submitTimeStart}
+        </if>
+        <if test="submitTimeEnd != null and submitTimeEnd != ''">
+            and date(c.createtime) &lt;= #{submitTimeEnd}
+        </if>
+        <if test="completeTimeStart != null and completeTimeStart != ''">
+            and date(c.providetime) &gt;= #{completeTimeStart}
+        </if>
+        <if test="completeTimeEnd != null and completeTimeEnd != ''">
+            and date(c.providetime) &lt;= #{completeTimeEnd}
+        </if>
+        <if test="operatorName !=null and operatorName !=''">
+            and (c.operatorName = #{operatorName} or c.payUserName=#{operatorName})
+        </if>
+        order by c.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="batchResultQueryByCompany" resultType="java.util.HashMap" parameterType="Map">
+        SELECT
+        c.id id,
+        c.batchName batchName,
+        r.companyName customName,
+        r.businessPlatform businessPlatform,
+        c.batchAmount batchAmount,
+        c.batchDesc batchDesc,
+        c.status status,
+        c.payType payType,
+        c.createtime createTime,
+        c.handleAmount handleAmount,
+        c.batchNum batchNum,
+        c.serviceFee serviceFee,
+        c.supplementServiceFee supplementServiceFee,
+        c.passNum passNum,
+        c.failedNum failedNum,
+        c.amount amount,
+        c.failedAmount failedAmount,
+        c.updatetime updateTime,
+        c.providetime providetime,
+        m.contentName contentName,
+        u.companyName companyName,
+        u.customkey companyId,
+        c.fileName fileName,
+        c.taskAttachmentFile,
+        c.realCompanyId,
+        qc.companyName realCompanyName
+        FROM
+        qb_channelhistory c
+        LEFT JOIN custom_menu m ON c.menuId = m.id
+        LEFT JOIN channel_custom u ON c.recCustomkey = u.customkey
+        LEFT JOIN channel_custom r ON c.customkey = r.customkey
+        LEFT JOIN qb_company qc ON c.realCompanyId = qc.userId
+        WHERE
+        c.transfertype = 2
+        <if test="customkey != null and customkey != ''">
+          AND (FIND_IN_SET (c.recCustomkey, #{customkey}) OR FIND_IN_SET (c.realCompanyId, #{customkey}))
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName like concat('%', #{batchName}, '%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%', #{batchDesc}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            and c.status = #{status}
+        </if>
+        <if test="amount != null and amount != ''">
+            and c.amount = #{amount}
+        </if>
+        <if test="businessPlatform != null and businessPlatform != ''">
+            and r.businessPlatform = #{businessPlatform}
+        </if>
+        <if test="customName != null and customName != ''">
+            and r.companyName = #{customName}
+        </if>
+        <if test="batchAmount != null and batchAmount != ''">
+            and c.batchAmount = #{batchAmount}
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and m.contentName like concat('%',#{contentName},'%')
+        </if>
+        <if test="fileName != null and fileName != ''">
+            and c.fileName like concat('%',#{fileName},'%')
+        </if>
+        <if test="recCustomKey != null and recCustomKey != ''">
+            and c.recCustomKey = #{recCustomKey}
+        </if>
+        <if test="submitTimeStart != null and submitTimeStart != ''">
+            and date(c.createtime) &gt;= #{submitTimeStart}
+        </if>
+        <if test="submitTimeEnd != null and submitTimeEnd != ''">
+            and date(c.createtime) &lt;= #{submitTimeEnd}
+        </if>
+        <if test="completeTimeStart != null and completeTimeStart != ''">
+            and date(c.providetime) &gt;= #{completeTimeStart}
+        </if>
+        <if test="completeTimeEnd != null and completeTimeEnd != ''">
+            and date(c.providetime) &lt;= #{completeTimeEnd}
+        </if>
+        order by c.id desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="geCustomChargeDetail" resultType="java.util.HashMap">
+        SELECT
+        qch.id,
+        if(cc.customType = 2,qch.forwardCompanyName,cc.companyName) customName,
+        cc.customkey originalId,
+        qch.createtime createTime,
+        qch.updatetime updateTime,
+        qch.transfertype transferType,
+        qch.payType payType,
+        qch.amount amount,
+        qch.`status` status,
+        qc.companyName companyName,
+        qc.userId companyId,
+        qc.companyType,
+        qch.operatorName,
+        qch.companyOperatorName,
+        qch.inAccountNo inAccountNo,
+        qch.inAccountName inAccountName,
+        qch.inAccountBankName inAccountBankName,
+        if(cc.customType = 2,qch.forwardCompanyName,cc.contractCompanyName) payAccountName,
+        qch.accountNo payAccountNo,
+        qch.accountName payAccountBankName,
+        qch.serviceFeeType,
+        qch.rechargeType,
+        qch.rechargeAmount,
+        qch.serviceFeeRate,
+        qch.rechargeFile,
+        qch.rechargeFileNum,
+        qch.orderno orderNo,
+        qch.serviceFee,
+        qch.remark,
+        qch.rechargeConfirmType,
+        qch.invoiceStatus,
+        qch.invoiceAmount,
+        qch.unInvoiceAmount,
+        qch.invoiceingAmount,
+        qch.realRechargeAmount,
+        cc.businessPlatform,
+        qch.refundAmount,
+        qch.realCompanyAmount,
+        qch.forwardCommissionAmount,
+        qch.rechargeLetterStatus,
+        qch.rechargeLetterUrl,
+        if(qch.forwardRechargeRecordIds is null or qch.forwardRechargeRecordIds = '',false,true) forwardRechargeRecord
+        FROM
+        qb_channelhistory qch
+        LEFT JOIN channel_custom cc ON qch.customkey = cc.customkey
+        LEFT JOIN qb_company qc ON qch.recCustomkey = qc.userId
+        <trim prefix=" where " suffixOverrides="AND">
+            qch.transfertype = 1 AND
+            <if test="customkey != null and customkey != ''">
+                FIND_IN_SET (qch.customkey,#{customkey}) AND
+            </if>
+            <if test="startTime != null and startTime != ''">
+                date(qch.createtime) &gt;= #{startTime} AND
+            </if>
+            <if test="endTime != null and endTime != ''">
+                date(qch.createtime) &lt;= #{endTime} AND
+            </if>
+            <if test="amount != null and amount != ''">
+                qch.amount = #{amount} AND
+            </if>
+            <if test="status != null and status != ''">
+                qch.status = #{status} AND
+            </if>
+            <if test="payType != null and payType != ''">
+                qch.payType = #{payType} AND
+            </if>
+            <if test="companyId != null and companyId != ''">
+                qch.recCustomkey = #{companyId} AND
+            </if>
+            <if test="customName != null and customName != ''">
+                cc.companyName like CONCAT('%',#{customName},'%') AND
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                qch.orderNo = #{orderNo} AND
+            </if>
+            <if test="rechargeType != null and rechargeType != ''">
+                qch.rechargeType = #{rechargeType} AND
+            </if>
+            <if test="rechargeConfirmType != null and rechargeConfirmType != ''">
+                qch.rechargeConfirmType = #{rechargeConfirmType} AND
+            </if>
+            <if test="rechargeAmount != null and rechargeAmount != ''">
+                qch.rechargeAmount = #{rechargeAmount} AND
+            </if>
+            <if test="businessPlatform!=null and businessPlatform!=''">
+                cc.businessPlatform like CONCAT('%',#{businessPlatform},'%') AND
+            </if>
+        </trim>
+        order by qch.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getHistoryList" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT h.createtime,h.amount,COALESCE(h.serviceFee,0.00) as
+        serviceFee,h.transfertype,h.updatetime,h.payType,h.`status`,h.operatorName,
+        case
+        when h.transfertype=1 and `status`=0 then '充值待确认'
+        when h.transfertype=1 and`status`=1 then '充值成功'
+        when h.transfertype=1 and`status`=2 then '充值失败'
+        when h.transfertype=2 and `status`=1 then '发放全部成功'
+        when h.transfertype=2 and`status`=2 then '发放全部失败'
+        when h.transfertype=2 and `status`=3 then '发放处理中'
+        when h.transfertype=2 and `status`=5 then '发放部分失败' END as 'statusStr',
+        c.companyName as companyName
+        FROM qb_channelHistory h,channel_custom c WHERE h.customkey = c.customkey AND h.status != 8
+        <if test="recCustomkey !=null and recCustomkey !=''">
+            and h.recCustomkey = #{recCustomkey}
+        </if>
+        <if test="payType !=null and payType !=''">
+            and h.payType = #{payType}
+        </if>
+        <if test="transfertype !=null and transfertype !=''">
+            and h.transfertype =#{transfertype}
+        </if>
+        <if test="status !=null and status !=''">
+            and FIND_IN_SET(h.status,#{status})
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(h.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(h.createtime) &lt;= #{endTime}
+        </if>
+        <if test="customkey !=null and customkey !=''">
+            and h.customkey = #{customkey}
+        </if>
+        order by createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <select id="selectTransactionList" resultType="com.jrmf.domain.MerchantTransaction">
+        select
+        cc.companyName,
+        cc.customType,
+        cc.customkey,
+        cc.operationsManager,
+        cc.businessManager,
+        CASE WHEN qu.businessCount IS NULL THEN 0 ELSE qu.businessCount END as businessCount,
+        CASE WHEN qu.businessAmount IS NULL THEN 0.0 ELSE qu.businessAmount END as businessAmount,
+        cc2.companyName as agentName,
+        CASE WHEN h.historyAmount IS NULL THEN 0.0 ELSE h.historyAmount END as historyAmount,
+        cast(COALESCE(SUM(qc.balance/100),0) as decimal(15,2)) as balance,
+        cc.businessPlatform,
+        qu2.lastPaymentTime
+        from channel_custom cc
+        left join (select originalId,count(id) as businessCount,cast(COALESCE(SUM(amount),0) as decimal(15,2)) as
+        businessAmount from qb_usercommission where `status` = 1
+        <if test="startTime !=null and startTime !=''">
+            and date(createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(createtime) &lt;= #{endTime}
+        </if>
+        group by originalId
+        ) qu on cc.customkey=qu.originalId
+        left join (select customkey,cast(COALESCE(SUM(amount),0) as decimal(15,2)) as historyAmount from
+        qb_channelhistory where transfertype=1 and status=1
+        <if test="startTime !=null and startTime !=''">
+            and date(createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(createtime) &lt;= #{endTime}
+        </if>
+        group by customkey) h on cc.customkey=h.customkey
+        left join channel_custom cc2 on cc2.customkey=cc.AgentId
+        left join qb_custombalance qc on qc.customKey=cc.customkey
+        LEFT JOIN ( SELECT originalId, MAX( paymentTime ) lastPaymentTime FROM qb_usercommission WHERE `status` = 1 GROUP BY originalId ) qu2 ON cc.customkey = qu2.originalId
+        <trim prefix=" where " suffixOverrides="and">
+            (cc.customType=1 or cc.customType=5)
+            <if test="companyName !=null and companyName !=''">
+                and cc.companyName like concat('%', #{companyName}, '%')
+            </if>
+            <if test="agentName !=null and agentName !=''">
+                and cc2.companyName like concat('%', #{agentName}, '%')
+            </if>
+            <if test="businessPlatform !=null and businessPlatform !=''">
+                and cc.businessPlatform like concat('%', #{businessPlatform}, '%')
+            </if>
+            <if test="startAmount !=null and startAmount !=''">
+                and qu.businessAmount &gt;= #{startAmount}
+            </if>
+            <if test="endAmount !=null and endAmount !=''">
+                and qu.businessAmount &lt;= #{endAmount}
+            </if>
+          <if test="businessManager !=null and businessManager !=''">
+            and cc.businessManager like concat('%', #{businessManager}, '%')
+          </if>
+          <if test="operationsManager !=null and operationsManager !=''">
+            and cc.operationsManager like concat('%', #{operationsManager}, '%')
+          </if>
+        </trim>
+        group by cc.customkey
+        having businessCount
+        <if test="resultState == 0">
+            = 0
+        </if>
+        <if test="resultState != 0">
+            > 0
+        </if>
+        order by businessAmount desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <select id="selectTransactionListByProxy" resultType="com.jrmf.domain.MerchantTransaction">
+        select
+        cc.companyName as customName,
+        cc3.companyName,
+        cc.customType,
+        cc.customkey,
+        CASE WHEN qu.businessCount IS NULL THEN 0 ELSE qu.businessCount END as businessCount,
+        CASE WHEN qu.businessAmount IS NULL THEN 0.0 ELSE qu.businessAmount END as businessAmount,
+        cc2.companyName as agentName,
+        CASE WHEN h.historyAmount IS NULL THEN 0.0 ELSE h.historyAmount END as historyAmount,
+        cast(COALESCE(SUM(qc.balance/100),0) as decimal(15,2)) as balance
+        from channel_custom cc
+        left join qb_channelrelated qcr on qcr.originalId=cc.customkey
+        left join channel_custom cc3 on qcr.companyId=cc3.customkey
+        left join (select originalId,companyId,count(id) as businessCount,cast(COALESCE(SUM(amount),0) as decimal(15,2))
+        as businessAmount from qb_usercommission where `status` = 1
+        <if test="startTime !=null and startTime !=''">
+            and date(createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(createtime) &lt;= #{endTime}
+        </if>
+        group by originalId,companyId) qu on cc.customkey=qu.originalId and qu.companyId=cc3.customkey
+        left join (select customkey,recCustomkey,cast(COALESCE(SUM(amount),0) as decimal(15,2)) as historyAmount from
+        qb_channelhistory where transfertype=1 and status=1
+        <if test="startTime !=null and startTime !=''">
+            and date(createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(createtime) &lt;= #{endTime}
+        </if>
+        group by customkey,recCustomkey) h on cc.customkey=h.customkey and h.recCustomkey=cc3.customkey
+        left join channel_custom cc2 on cc2.customkey=cc.AgentId
+        left join qb_custombalance qc on qc.customKey=cc.customkey and qc.companyId=cc3.customkey
+        <trim prefix=" where " suffixOverrides="and">
+            (cc.customType=1 or cc.customType=5)
+            <!-- 			and cc.AgentId!='' -->
+            <if test="companyName !=null and companyName !=''">
+                and cc.companyName like concat('%', #{companyName}, '%')
+            </if>
+            <if test="agentName !=null and agentName !=''">
+                and cc2.companyName like concat('%', #{agentName}, '%')
+            </if>
+            <if test="agentId !=null and agentId !=''">
+                and FIND_IN_SET(cc.AgentId,#{agentId})
+            </if>
+            <if test="customKeys !=null and customKeys !=''">
+                and (FIND_IN_SET(cc.customkey,#{customKeys}) or FIND_IN_SET(cc.AgentId,#{customKeys}))
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                and cc3.customKey = #{companyId}
+            </if>
+            <if test="startAmount !=null and startAmount !=''">
+                and qu.businessAmount &gt;= #{startAmount}
+            </if>
+            <if test="endAmount !=null and endAmount !=''">
+                and qu.businessAmount &lt;= #{endAmount}
+            </if>
+        </trim>
+        group by cc.customkey,cc3.customkey order by businessAmount desc
+    </select>
+
+    <select id="querybillingListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+        select count(1) from (
+        select cc.companyName merchantName,qm.companyName serviceName,qc.* from qb_channelhistory qc
+        left join channel_custom cc on qc.customkey=cc.customkey
+        left join qb_company qm on qc.recCustomkey = qm.userId
+        where if(date_format(qc.createTime,'%Y-%m-%d')>='2020-08-01', !find_in_set(qc.recCustomkey,#{params.commissionCompanyIds}),1)
+        <if test="params.orderNo!=null and params.orderNo!=''">
+            and qc.orderno=#{params.orderNo}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(qc.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(qc.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.companyId !=null and params.companyId !=''">
+            and qc.recCustomkey =#{params.companyId}
+        </if>
+        <if test="params.companyIds !=null and params.companyIds !=''">
+            and FIND_IN_SET(qc.recCustomkey,#{params.companyIds})
+        </if>
+        <if test="params.payType!=null and params.payType!=''">
+            and qc.payType=#{params.payType}
+        </if>
+        <if test="params.startUnInvoiceAmount!=null and params.startUnInvoiceAmount!=''">
+            and qc.unInvoiceAmount&gt;=#{params.startUnInvoiceAmount}+0
+        </if>
+        <if test="params.endUnInvoiceAmount!=null and params.endUnInvoiceAmount!=''">
+            and qc.unInvoiceAmount&lt;=#{params.endUnInvoiceAmount}+0
+        </if>
+        <if test="params.startAmount!=null and params.startAmount!=''">
+            and qc.rechargeAmount&gt;=#{params.startAmount}+0
+        </if>
+        <if test="params.endAmount!=null and params.endAmount!=''">
+            and qc.rechargeAmount&lt;=#{params.endAmount}+0
+        </if>
+        <if test="params.merchantName!=null and params.merchantName!=''">
+	        <choose>
+	        	<when test="params.searchType!=null and params.searchType==1">
+	        	and cc.companyName = #{params.merchantName}
+	        	</when>
+	        	<otherwise>
+	        	and cc.companyName like concat('%', #{params.merchantName}, '%')
+	        	</otherwise>
+	        </choose>
+        </if>
+        <if test="params.invoiceStatus!=null and params.invoiceStatus!=''">
+            and FIND_IN_SET(qc.invoiceStatus,#{params.invoiceStatus})
+        </if>
+        <if test="params.rechargeType!=null and params.rechargeType!=''">
+            and qc.rechargeType=#{params.rechargeType}
+        </if>
+        <if test="params.businessPlatform!=null and params.businessPlatform!=''">
+            and cc.businessPlatform like CONCAT('%',#{params.businessPlatform},'%')
+        </if>
+        <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+            and FIND_IN_SET(qc.customKey,#{params.loginCustomer})
+        </if>
+        <if test="params.originalIds!=null and params.originalIds!=''">
+            or FIND_IN_SET(qc.customKey, #{params.originalIds})
+        </if>
+        and qc.status=1
+        and qc.transfertype=1
+        and qc.isInvoiceFlag=1
+        order by qc.id desc
+        ) temp
+    </select>
+
+    <select id="billingList" parameterType="com.jrmf.domain.Page" resultType="map">
+        select cc.companyName merchantName,qm.companyName serviceName,qc.* from qb_channelhistory qc
+        left join channel_custom cc on qc.customkey=cc.customkey
+        left join qb_company qm on qc.recCustomkey = qm.userId
+        where if(date_format(qc.createTime,'%Y-%m-%d')>='2020-08-01', !find_in_set(qc.recCustomkey,#{params.commissionCompanyIds}),1)
+        <if test="params.orderNo!=null and params.orderNo!=''">
+            and qc.orderno=#{params.orderNo}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(qc.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(qc.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.companyId !=null and params.companyId !=''">
+            and qc.recCustomkey =#{params.companyId}
+        </if>
+        <if test="params.companyIds !=null and params.companyIds !=''">
+            and FIND_IN_SET(qc.recCustomkey,#{params.companyIds})
+        </if>
+        <if test="params.payType!=null and params.payType!=''">
+            and qc.payType=#{params.payType}
+        </if>
+        <if test="params.startUnInvoiceAmount!=null and params.startUnInvoiceAmount!=''">
+            and qc.unInvoiceAmount&gt;=#{params.startUnInvoiceAmount}+0
+        </if>
+        <if test="params.endUnInvoiceAmount!=null and params.endUnInvoiceAmount!=''">
+            and qc.unInvoiceAmount&lt;=#{params.endUnInvoiceAmount}+0
+        </if>
+        <if test="params.startAmount!=null and params.startAmount!=''">
+            and qc.rechargeAmount&gt;=#{params.startAmount}+0
+        </if>
+        <if test="params.endAmount!=null and params.endAmount!=''">
+            and qc.rechargeAmount&lt;=#{params.endAmount}+0
+        </if>
+        <if test="params.merchantName!=null and params.merchantName!=''">
+	        <choose>
+	        	<when test="params.searchType!=null and params.searchType==1">
+	        	and cc.companyName = #{params.merchantName}
+	        	</when>
+	        	<otherwise>
+	        	and cc.companyName like concat('%', #{params.merchantName}, '%')
+	        	</otherwise>
+	        </choose>
+        </if>
+        <if test="params.invoiceStatus!=null and params.invoiceStatus!=''">
+            and FIND_IN_SET(qc.invoiceStatus,#{params.invoiceStatus})
+        </if>
+        <if test="params.rechargeType!=null and params.rechargeType!=''">
+            and qc.rechargeType=#{params.rechargeType}
+        </if>
+        <if test="params.businessPlatform!=null and params.businessPlatform!=''">
+            and cc.businessPlatform like CONCAT('%',#{params.businessPlatform},'%')
+        </if>
+        <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+            and FIND_IN_SET(qc.customKey,#{params.loginCustomer})
+        </if>
+        <if test="params.originalIds!=null and params.originalIds!=''">
+            or FIND_IN_SET(qc.customKey, #{params.originalIds})
+        </if>
+        and qc.status=1
+        and qc.transfertype=1
+        and qc.isInvoiceFlag=1
+        order by qc.id desc
+        <if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+        </if>
+    </select>
+
+    <select id="getTotalAmountByOrderNo" parameterType="String" resultType="String">
+	select cast(sum(unInvoiceAmount) as decimal(15,2)) from qb_channelhistory where FIND_IN_SET(orderno,#{orderNo})
+	</select>
+
+    <select id="checkCommonCompanyAndCustom" parameterType="String" resultType="map">
+	select count(1) count, customkey,recCustomkey from qb_channelhistory where FIND_IN_SET(orderno,#{value}) GROUP BY recCustomkey,customkey
+	</select>
+
+    <select id="queryBillingListNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+        select cc.companyName merchantName,cg.companyName agentName,qm.companyName serviceName,qc.* from qb_channelhistory qc
+        left join channel_custom cc on qc.customkey=cc.customkey
+        left join channel_custom cg on cc.businessChannel = cg.customkey
+        left join qb_company qm on qc.recCustomkey = qm.userId
+        where if(date_format(qc.createTime,'%Y-%m-%d')>='2020-08-01', !find_in_set(qc.recCustomkey,#{params.commissionCompanyIds}),1)
+        <if test="params.orderNo!=null and params.orderNo!=''">
+            and qc.orderno=#{params.orderNo}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(qc.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(qc.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.companyId !=null and params.companyId !=''">
+            and qc.recCustomkey =#{params.companyId}
+        </if>
+        <if test="params.payType!=null and params.payType!=''">
+            and qc.payType=#{params.payType}
+        </if>
+        <if test="params.startUnInvoiceAmount!=null and params.startUnInvoiceAmount!=''">
+            and qc.unInvoiceAmount&gt;=#{params.startUnInvoiceAmount}+0
+        </if>
+        <if test="params.endUnInvoiceAmount!=null and params.endUnInvoiceAmount!=''">
+            and qc.unInvoiceAmount&lt;=#{params.endUnInvoiceAmount}+0
+        </if>
+        <if test="params.startAmount!=null and params.startAmount!=''">
+            and qc.rechargeAmount&gt;=#{params.startAmount}+0
+        </if>
+        <if test="params.endAmount!=null and params.endAmount!=''">
+            and qc.rechargeAmount&lt;=#{params.endAmount}+0
+        </if>
+        <if test="params.merchantName!=null and params.merchantName!=''">
+        	<choose>
+	        	<when test="params.searchType!=null and params.searchType==1">
+	        	and cc.companyName = #{params.merchantName}
+	        	</when>
+	        	<otherwise>
+	        	and cc.companyName like concat('%', #{params.merchantName}, '%')
+	        	</otherwise>
+	        </choose>
+        </if>
+        <if test="params.invoiceStatus!=null and params.invoiceStatus!=''">
+            and FIND_IN_SET(qc.invoiceStatus,#{params.invoiceStatus})
+        </if>
+        <if test="params.rechargeType!=null and params.rechargeType!=''">
+            and qc.rechargeType=#{params.rechargeType}
+        </if>
+        <if test="params.businessPlatform!=null and params.businessPlatform!=''">
+            and cc.businessPlatform like CONCAT('%',#{params.businessPlatform},'%')
+        </if>
+        <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+            and FIND_IN_SET(qc.customKey,#{params.loginCustomer})
+        </if>
+        <if test="params.originalIds!=null and params.originalIds!=''">
+            or FIND_IN_SET(qc.customKey, #{params.originalIds})
+        </if>
+        and qc.status=1
+        and qc.transfertype=1
+        and qc.isInvoiceFlag=1
+        order by qc.id desc
+    </select>
+
+    <select id="getAutoConfirmList" resultType="com.jrmf.domain.ChannelHistory">
+		SELECT
+            cc.contractCompanyName customName,
+            qc.*
+        FROM
+            qb_channelhistory qc
+            LEFT JOIN channel_custom cc ON qc.customkey = cc.customkey
+        WHERE
+            qc.transfertype = 1
+            AND qc.`status` = 0
+            AND qc.rechargeConfirmType = 1
+            AND TO_DAYS( qc.createtime ) >= ( TO_DAYS( NOW( ) ) - 5 )
+	</select>
+
+    <select id="getToBeConfirmedCount" resultType="java.lang.Integer">
+			 SELECT
+			COUNT( qc.id )
+			FROM
+				qb_channelhistory qc
+			WHERE
+				qc.transfertype = 1
+				AND qc.`status` = 0
+				AND qc.customkey = #{customKey}
+				AND qc.recCustomkey = #{companyId}
+				AND qc.payType = #{payType}
+    </select>
+
+
+    <select id="getRechargeInfoById" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT
+            cc.companyName customName,
+            qm.companyName companyName,
+            qc.*
+        FROM
+            qb_channelhistory qc
+            LEFT JOIN channel_custom cc ON qc.customkey = cc.customkey
+            LEFT JOIN qb_company qm ON qc.recCustomkey = qm.userId
+        WHERE
+            qc.id = #{id}
+	</select>
+
+    <select id="getProxyCustomCompanyDetail" resultType="java.util.HashMap"  parameterType="Map">
+        SELECT
+        qch.id,
+        cc.companyName customName,
+        qch.createtime createTime,
+        qch.updatetime updateTime,
+        qch.transfertype transferType,
+        qch.payType payType,
+        qch.amount amount,
+        qch.`status` status,
+        qc.companyName companyName,
+        qch.operatorName,
+        qch.companyOperatorName,
+        qch.inAccountNo inAccountNo,
+        qch.inAccountName inAccountName,
+        qch.inAccountBankName inAccountBankName,
+        cc.companyName payAccountName,
+        qch.accountNo payAccountNo,
+        qch.accountName payAccountBankName,
+        qch.serviceFeeType,
+        qch.rechargeType,
+        qch.rechargeAmount,
+        qch.serviceFeeRate,
+        qch.rechargeFile,
+        qch.rechargeFileNum,
+        qch.orderno orderNo,
+        qch.serviceFee,
+        qch.remark,
+        qch.rechargeConfirmType,
+        qch.invoiceStatus,
+        qch.invoiceAmount,
+        qch.unInvoiceAmount,
+        qch.invoiceingAmount,
+        qch.realRechargeAmount,
+        cc.businessPlatform,
+        qch.refundAmount
+        FROM
+        qb_channelhistory qch
+        LEFT JOIN channel_custom cc ON qch.customkey = cc.customkey
+        LEFT JOIN qb_company qc ON qch.recCustomkey = qc.userId
+        <trim prefix=" where " suffixOverrides="AND">
+            qch.transfertype = 1 AND
+            FIND_IN_SET (qch.customkey,#{customkey}) AND
+            <if test="startTime != null and startTime != ''">
+                date(qch.createtime) &gt;= #{startTime} AND
+            </if>
+            <if test="endTime != null and endTime != ''">
+                date(qch.createtime) &lt;= #{endTime} AND
+            </if>
+            <if test="amount != null and amount != ''">
+                qch.amount = #{amount} AND
+            </if>
+            <if test="status != null and status != ''">
+                qch.status = #{status} AND
+            </if>
+            <if test="payType != null and payType != ''">
+                qch.payType = #{payType} AND
+            </if>
+            <if test="companyId != null and companyId != ''">
+                qch.recCustomkey = #{companyId} AND
+            </if>
+            <if test="customName != null and customName != ''">
+                cc.companyName like CONCAT('%',#{customName},'%') AND
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                qch.orderNo = #{orderNo} AND
+            </if>
+            <if test="rechargeType != null and rechargeType != ''">
+                qch.rechargeType = #{rechargeType} AND
+            </if>
+            <if test="rechargeConfirmType != null and rechargeConfirmType != ''">
+                qch.rechargeConfirmType = #{rechargeConfirmType} AND
+            </if>
+            <if test="rechargeAmount != null and rechargeAmount != ''">
+                qch.rechargeAmount = #{rechargeAmount} AND
+            </if>
+            <if test="businessPlatform!=null and businessPlatform!=''">
+                cc.businessPlatform like CONCAT('%',#{businessPlatform},'%') AND
+            </if>
+        </trim>
+        order by qch.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getWarningRechargeList" resultType="com.jrmf.domain.ChannelHistory">
+        SELECT
+        qc.id,
+        cc.companyName customName,
+        cc2.companyName,
+        qc.amount,
+        qc.createtime,
+        qc.orderno
+        FROM
+        qb_channelhistory qc
+        LEFT JOIN channel_custom cc ON cc.customkey = qc.customkey
+        LEFT JOIN channel_custom cc2 ON cc2.customkey = qc.recCustomkey
+        WHERE
+        qc.transfertype = 1
+        AND qc.`status` = 0
+        AND qc.sendStatus = 0
+        AND qc.rechargeConfirmType = 1
+        AND date_format( qc.createtime, '%Y-%c-%d %H:%i:%s' ) &lt;= DATE_SUB( NOW( ), INTERVAL #{minute} MINUTE )
+        AND cc.businessPlatform = '金融魔方'
+	</select>
+
+    <update id="updateSendStatus" parameterType="com.jrmf.domain.ChannelHistory">
+		update qb_channelHistory set sendStatus = 1
+		where id = #{id}
+	</update>
+
+	<!-- 用户下发匹配签约信息 -->
+	<select id="queryUserAgreementMatch" parameterType="com.jrmf.domain.Page" resultType="map">
+	select count(temp.certId)count,temp.originalId,temp.companyId,temp.merchantName,temp.companyName,temp.businessPlatform,temp.businessChannel
+	from (
+		select DISTINCT qu.certId,qu.originalId,qu.companyId,cc.companyName merchantName,qc.companyName companyName,qu.businessPlatform,qu.businessChannel
+		from qb_usercommission qu
+		left join channel_custom cc on qu.originalId=cc.customkey
+		left join qb_company qc on qu.companyId=qc.userId
+		where qu.`status`=1
+		<if test="params.startTime!=null and params.startTime!=''">
+			and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+	    <if test="params.endTime!=null and params.endTime!=''">
+	    	and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.businessPlatform!=null and params.businessPlatform!=''">
+			and qu.businessPlatform like concat('%',#{params.businessPlatform},'%')
+		</if>
+		<if test="params.businessChannel!=null and params.businessChannel!=''">
+			and qu.businessChannel like concat('%',#{params.businessChannel},'%')
+		</if>
+		<if test="params.companyId!=null and params.companyId!=''">
+			and qc.userId = #{params.companyId}
+		</if>
+	)temp
+	GROUP BY temp.originalId,temp.companyId,temp.businessChannel,temp.businessPlatform
+	<if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+    </if>
+	</select>
+
+	<!-- 用户下发匹配签约信息 -->
+	<select id="queryUserAgreementMatchNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+	select count(DISTINCT temp.certId,temp.userName)count,temp.originalId,temp.companyId,temp.merchantName,temp.companyName,temp.businessPlatform,temp.businessChannel
+	from (
+		select DISTINCT qu.certId,qu.userName,qu.originalId,qu.companyId,cc.companyName merchantName,qc.companyName companyName,qu.businessPlatform,qu.businessChannel
+		from qb_usercommission qu
+		left join channel_custom cc on qu.originalId=cc.customkey
+		left join qb_company qc on qu.companyId=qc.userId
+		where qu.`status`=1
+		<if test="params.startTime!=null and params.startTime!=''">
+			and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+	    <if test="params.endTime!=null and params.endTime!=''">
+	    	and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.businessPlatform!=null and params.businessPlatform!=''">
+			and qu.businessPlatform like concat('%',#{params.businessPlatform},'%')
+		</if>
+		<if test="params.businessChannel!=null and params.businessChannel!=''">
+			and qu.businessChannel like concat('%',#{params.businessChannel},'%')
+		</if>
+		<if test="params.customkey!=null and params.customkey!=''">
+			and qu.originalId=#{params.customkey}
+		</if>
+		<if test="params.companyId!=null and params.companyId!=''">
+			and qc.userId = #{params.companyId}
+		</if>
+	)temp
+	GROUP BY temp.originalId,temp.companyId,temp.businessChannel,temp.businessPlatform
+	</select>
+
+	<!-- 用户下发匹配签约信息 -->
+	<select id="queryUserAgreementMatchCount" parameterType="com.jrmf.domain.Page" resultType="int">
+	select count(1) from (
+		select count(DISTINCT temp.certId,temp.userName)count,temp.originalId,temp.companyId,temp.merchantName,temp.companyName,temp.businessPlatform,temp.businessChannel
+		from (
+			select DISTINCT qu.certId,qu.userName,qu.originalId,qu.companyId,cc.companyName merchantName,qc.companyName companyName,qu.businessPlatform,qu.businessChannel
+			from qb_usercommission qu
+			left join channel_custom cc on qu.originalId=cc.customkey
+			left join qb_company qc on qu.companyId=qc.userId
+			where qu.`status`=1
+			<if test="params.startTime!=null and params.startTime!=''">
+				and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{params.startTime}
+			</if>
+		    <if test="params.endTime!=null and params.endTime!=''">
+		    	and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{params.endTime}
+			</if>
+			<if test="params.merchantName!=null and params.merchantName!=''">
+				and cc.companyName like concat('%',#{params.merchantName},'%')
+		    </if>
+			<if test="params.businessPlatform!=null and params.businessPlatform!=''">
+				and qu.businessPlatform like concat('%',#{params.businessPlatform},'%')
+			</if>
+			<if test="params.businessChannel!=null and params.businessChannel!=''">
+				and qu.businessChannel like concat('%',#{params.businessChannel},'%')
+			</if>
+			<if test="params.companyId!=null and params.companyId!=''">
+				and qc.userId = #{params.companyId}
+			</if>
+		)temp
+		GROUP BY temp.originalId,temp.companyId,temp.businessChannel,temp.businessPlatform
+	)summary
+	</select>
+
+	<!-- 本服务公司未签约用户数 -->
+	<select id="noAgreementCount" parameterType="map" resultType="map">
+	select DISTINCT qu.certId,qu.userName from qb_usercommission qu
+	left join users_agreement ua on qu.certId = ua.certId and qu.originalId = ua.originalId
+	and qu.userName=ua.userName
+	and qu.companyId = ua.companyId
+	where
+	qu.`status`=1
+	and qu.originalId=#{originalId}
+	and qu.companyId=#{companyId}
+	<if test="startTime!=null and startTime!=''">
+		and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{startTime}
+	</if>
+    <if test="endTime!=null and endTime!=''">
+    	and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{endTime}
+	</if>
+	and (ua.certId is null or ua.signStatus!=5)
+	</select>
+
+	<!-- 未签约在其他服务公司签约成功数 -->
+	<select id="agreementOtherCompanyCount" parameterType="map" resultType="int">
+	select count(1) from users_agreement where originalId=#{originalId} and signStatus=5 and certId=#{certId} and userName=#{userName}
+	</select>
+
+	<!-- 未签约在其他服务公司签约的服务公司信息 -->
+	<select id="agreementOtherCompanyNames" parameterType="map" resultType="String">
+	select GROUP_CONCAT(DISTINCT(qc.companyName)) from users_agreement ua
+	left join qb_company qc on ua.companyId=qc.userId
+	where ua.originalId=#{originalId} and ua.signStatus=5 and ua.certId=#{certId} and ua.userName=#{userName}
+	</select>
+
+	<!-- 下发用户数 -->
+	<select id="payUsers" parameterType="map" resultType="map">
+	select DISTINCT qu.certId,qu.userName
+	from qb_usercommission qu
+	left join channel_custom cc on qu.originalId=cc.customkey
+	left join qb_company qc on qu.companyId=qc.userId
+	where qu.`status`=1
+	and qu.companyId = #{companyId}
+	and qu.originalId = #{customkey}
+	<if test="startTime!=null and startTime!=''">
+		and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{startTime}
+	</if>
+    <if test="endTime!=null and endTime!=''">
+    	and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{endTime}
+	</if>
+	</select>
+
+
+    <update id="updateByInvoice" parameterType="com.jrmf.domain.ChannelHistory">
+        update qb_channelHistory
+        <trim prefix="SET" suffixOverrides=",">
+            updatetime = now(),
+                unInvoiceAmount=#{unInvoiceAmount},
+                invoiceAmount=#{invoiceAmount},
+                invoiceStatus=#{invoiceStatus}
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="selectTransactionListCount" resultType="int">
+        select count(1) from ( select
+        cc.createTime,
+        cc.companyName,
+        cc.customType,
+        cc.customkey,
+        CASE WHEN qu.businessCount IS NULL THEN 0 ELSE qu.businessCount END as businessCount,
+        CASE WHEN qu.businessAmount IS NULL THEN 0.0 ELSE qu.businessAmount END as businessAmount,
+        cc2.companyName as agentName,
+        CASE WHEN h.historyAmount IS NULL THEN 0.0 ELSE h.historyAmount END as historyAmount,
+        cast(COALESCE(SUM(qc.balance/100),0) as decimal(15,2)) as balance,
+        cc.businessPlatform
+        from channel_custom cc
+        left join (select originalId,count(id) as businessCount,cast(COALESCE(SUM(amount),0) as decimal(15,2)) as
+        businessAmount from qb_usercommission where `status` = 1
+        group by originalId) qu on cc.customkey=qu.originalId
+        left join (select customkey,cast(COALESCE(SUM(amount),0) as decimal(15,2)) as historyAmount from
+        qb_channelhistory where transfertype=1 and status=1
+        group by customkey) h on cc.customkey=h.customkey
+        left join channel_custom cc2 on cc2.customkey=cc.AgentId
+        left join qb_custombalance qc on qc.customKey=cc.customkey
+        <trim prefix=" where " suffixOverrides="and">
+            (cc.customType=1 or cc.customType=5)
+            <if test="companyName !=null and companyName !=''">
+                and cc.companyName like concat('%', #{companyName}, '%')
+            </if>
+            <if test="agentName !=null and agentName !=''">
+                and cc2.companyName like concat('%', #{agentName}, '%')
+            </if>
+            <if test="businessPlatform !=null and businessPlatform !=''">
+                and cc.businessPlatform like concat('%', #{businessPlatform}, '%')
+            </if>
+            <if test="startAmount !=null and startAmount !=''">
+                and qu.businessAmount &gt;= #{startAmount}
+            </if>
+            <if test="endAmount !=null and endAmount !=''">
+                and qu.businessAmount &lt;= #{endAmount}
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                and date(cc.createTime) &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and date(cc.createTime) &lt;= #{endTime}
+            </if>
+        </trim>
+        group by cc.customkey ) temp
+    </select>
+
+    <select id="selectTransactionListByProxyCount" resultType="int">
+        select count(1) from ( select
+        cc.createTime,
+        cc.companyName as customName,
+        cc3.companyName,
+        cc.customType,
+        cc.customkey,
+        CASE WHEN qu.businessCount IS NULL THEN 0 ELSE qu.businessCount END as businessCount,
+        CASE WHEN qu.businessAmount IS NULL THEN 0.0 ELSE qu.businessAmount END as businessAmount,
+        cc2.companyName as agentName,
+        CASE WHEN h.historyAmount IS NULL THEN 0.0 ELSE h.historyAmount END as historyAmount,
+        cast(COALESCE(SUM(qc.balance/100),0) as decimal(15,2)) as balance
+        from channel_custom cc
+        left join qb_channelrelated qcr on qcr.originalId=cc.customkey
+        left join channel_custom cc3 on qcr.companyId=cc3.customkey
+        left join (select originalId,companyId,count(id) as businessCount,cast(COALESCE(SUM(amount),0) as decimal(15,2))
+        as businessAmount from qb_usercommission where `status` = 1
+        group by originalId,companyId) qu on cc.customkey=qu.originalId and qu.companyId=cc3.customkey
+        left join (select customkey,recCustomkey,cast(COALESCE(SUM(amount),0) as decimal(15,2)) as historyAmount from
+        qb_channelhistory where transfertype=1 and status=1
+        group by customkey,recCustomkey) h on cc.customkey=h.customkey and h.recCustomkey=cc3.customkey
+        left join channel_custom cc2 on cc2.customkey=cc.AgentId
+        left join qb_custombalance qc on qc.customKey=cc.customkey and qc.companyId=cc3.customkey
+        <trim prefix=" where " suffixOverrides="and">
+            (cc.customType=1 or cc.customType=5)
+            <!-- 			and cc.AgentId!='' -->
+            <if test="companyName !=null and companyName !=''">
+                and cc.companyName like concat('%', #{companyName}, '%')
+            </if>
+            <if test="agentName !=null and agentName !=''">
+                and cc2.companyName like concat('%', #{agentName}, '%')
+            </if>
+            <if test="agentId !=null and agentId !=''">
+                and FIND_IN_SET(cc.AgentId,#{agentId})
+            </if>
+            <if test="customKeys !=null and customKeys !=''">
+                and (FIND_IN_SET(cc.customkey,#{customKeys}) or FIND_IN_SET(cc.AgentId,#{customKeys}))
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                and cc3.customKey = #{companyId}
+            </if>
+            <if test="startAmount !=null and startAmount !=''">
+                and qu.businessAmount &gt;= #{startAmount}
+            </if>
+            <if test="endAmount !=null and endAmount !=''">
+                and qu.businessAmount &lt;= #{endAmount}
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                and date(cc.createTime) &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and date(cc.createTime) &lt;= #{endTime}
+            </if>
+        </trim>
+        group by cc.customkey,cc3.customkey ) temp
+    </select>
+
+    <select id="batchResultQueryByCompanyCount" resultType="int">
+        SELECT
+            count(1)
+        FROM
+        qb_channelhistory c
+        LEFT JOIN custom_menu m ON c.menuId = m.id
+        LEFT JOIN channel_custom u ON c.recCustomkey = u.customkey
+        LEFT JOIN channel_custom r ON c.customkey = r.customkey
+        WHERE
+        c.transfertype = 2
+        <if test="customkey != null and customkey != ''">
+            and FIND_IN_SET (c.recCustomkey,#{customkey})
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName like concat('%', #{batchName}, '%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%', #{batchDesc}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            and c.status = #{status}
+        </if>
+        <if test="amount != null and amount != ''">
+            and c.amount = #{amount}
+        </if>
+        <if test="customName != null and customName != ''">
+            and r.companyName = #{customName}
+        </if>
+        <if test="batchAmount != null and batchAmount != ''">
+            and c.batchAmount = #{batchAmount}
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and m.contentName like concat('%',#{contentName},'%')
+        </if>
+        <if test="fileName != null and fileName != ''">
+            and c.fileName like concat('%',#{fileName},'%')
+        </if>
+        <if test="recCustomKey != null and recCustomKey != ''">
+            and c.recCustomKey = #{recCustomKey}
+        </if>
+        <if test="submitTimeStart != null and submitTimeStart != ''">
+            and date(c.createtime) &gt;= #{submitTimeStart}
+        </if>
+        <if test="submitTimeEnd != null and submitTimeEnd != ''">
+            and date(c.createtime) &lt;= #{submitTimeEnd}
+        </if>
+        <if test="completeTimeStart != null and completeTimeStart != ''">
+            and date(c.providetime) &gt;= #{completeTimeStart}
+        </if>
+        <if test="completeTimeEnd != null and completeTimeEnd != ''">
+            and date(c.providetime) &lt;= #{completeTimeEnd}
+        </if>
+    </select>
+
+    <select id="getByOriginalBeachNo" resultType="com.jrmf.domain.ChannelHistory" parameterType="String">
+		SELECT * FROM qb_channelHistory  WHERE  originalBeachNo = #{batchId}
+	</select>
+
+    <update id="updateRechargeStatus" parameterType="com.jrmf.domain.ChannelHistory">
+        update qb_channelHistory
+        <trim prefix="SET" suffixOverrides=",">
+            updatetime = now(),
+            status=#{status}
+        </trim>
+        where id = #{id}
+	</update>
+
+  <select id="geCustomChargeAmount" resultType="java.lang.String">
+    SELECT
+        CAST(sum(qch.amount) as DECIMAL(16,2)) amount
+    FROM
+        qb_channelhistory qch
+    LEFT JOIN channel_custom cc ON qch.customkey = cc.customkey
+    LEFT JOIN qb_company qc ON qch.recCustomkey = qc.userId
+    <trim prefix=" where " suffixOverrides="AND">
+      qch.transfertype = 1 AND
+      <if test="customkey != null and customkey != ''">
+        FIND_IN_SET (qch.customkey,#{customkey}) AND
+      </if>
+      <if test="startTime != null and startTime != ''">
+        date(qch.createtime) &gt;= #{startTime} AND
+      </if>
+      <if test="endTime != null and endTime != ''">
+        date(qch.createtime) &lt;= #{endTime} AND
+      </if>
+      <if test="amount != null and amount != ''">
+        qch.amount = #{amount} AND
+      </if>
+      <if test="status != null and status != ''">
+        qch.status = #{status} AND
+      </if>
+      <if test="payType != null and payType != ''">
+        qch.payType = #{payType} AND
+      </if>
+      <if test="companyId != null and companyId != ''">
+        qch.recCustomkey = #{companyId} AND
+      </if>
+      <if test="customName != null and customName != ''">
+        cc.companyName like CONCAT('%',#{customName},'%') AND
+      </if>
+      <if test="orderNo != null and orderNo != ''">
+        qch.orderNo = #{orderNo} AND
+      </if>
+      <if test="rechargeType != null and rechargeType != ''">
+        qch.rechargeType = #{rechargeType} AND
+      </if>
+      <if test="rechargeConfirmType != null and rechargeConfirmType != ''">
+        qch.rechargeConfirmType = #{rechargeConfirmType} AND
+      </if>
+      <if test="rechargeAmount != null and rechargeAmount != ''">
+        qch.rechargeAmount = #{rechargeAmount} AND
+      </if>
+      <if test="businessPlatform!=null and businessPlatform!=''">
+        cc.businessPlatform like CONCAT('%',#{businessPlatform},'%') AND
+      </if>
+    </trim>
+  </select>
+
+  <select id="getPicListByOrderNo" resultType="java.util.Map">
+    select * from qb_channelhistory_pic where orderNo = #{orderNo}
+  </select>
+
+  <insert id="insertChannelHistoryPic" parameterType="com.jrmf.domain.ChannelHistoryPic">
+    INSERT qb_channelhistory_pic (orderNo, rechargeFile, createTime, updateTime, addUser)
+    VALUES (#{orderNo}, #{rechargeFile}, now(), now(), #{addUser});
+  </insert>
+
+  <delete id="deleteRechargeFileById">
+    DELETE FROM qb_channelhistory_pic WHERE id = #{id}
+  </delete>
+
+  <select id="getChannelHistoryPicById" resultType="com.jrmf.domain.ChannelHistoryPic">
+    select * from qb_channelhistory_pic where id = #{id}
+  </select>
+
+  <update id="updateChannelHistoryFileNumAddByOrderNo" parameterType="java.lang.String">
+    UPDATE qb_channelhistory set rechargeFileNum = rechargeFileNum + 1 where orderno = #{orderNo}
+  </update>
+
+  <update id="updateChannelHistoryFileNumMinusByOrderNo" parameterType="java.lang.String">
+    UPDATE qb_channelhistory set rechargeFileNum = rechargeFileNum - 1 where orderno = #{orderNo}
+  </update>
+
+  <select id="selectCountByLetterStatus" resultType="integer">
+    SELECT COUNT(*) FROM qb_channelhistory WHERE id = #{id} AND rechargeLetterStatus = 1
+  </select>
+  <update id="updateLetterStatusById">
+     UPDATE qb_channelhistory set rechargeLetterUrl = #{url},rechargeLetterStatus = 2,rechargeLetterType =1
+     where id = #{id}
+  </update>
+  <select id="apiGetChannelHistoryList" resultType="com.jrmf.taxsettlement.api.service.recharge.RechargeRecordListServiceAttachment">
+    SELECT
+      h.updateTime accountTime,
+      h.rechargeAmount amount,
+      h.amount balanceAmount,
+      h.invoiceAmount,
+      h.invoiceingAmount,
+      h.unInvoiceAmount,
+      h.invoiceStatus,
+      h.serviceFee,
+      h.remark,
+      h.customOrderNo,
+    case h.`status`
+        when 0 THEN '0001'
+        WHEN 1 THEN '0000'
+        WHEN 2 THEN '0002'
+        ELSE '0001' END as `dealStatus`,
+        case h.`status`
+        when 0 THEN '待确认'
+        WHEN 1 THEN '成功'
+        WHEN 2 THEN '失败'
+        ELSE '待确认' END AS dealStatusMsg,
+      h.orderno as orderNo
+    FROM
+      qb_channelHistory h
+    WHERE
+      h.STATUS != '8' AND h.transfertype = '1'
+    AND customKey = #{customKey}
+    AND date(h.createtime) &gt;= #{startDate}
+    AND date(h.createtime) &lt;= #{endDate}
+    <if test="companyIds != null and companyIds != ''">
+      and FIND_IN_SET(h.recCustomkey, #{companyIds})
+    </if>
+    <if test="sort != '1'.toString()">
+      order by h.updateTime desc
+    </if>
+    <if test="sort == '1'.toString()">
+      order by h.updateTime asc
+    </if>
+  </select>
+
+  <select id="getTotalUninvoicedAmountByCompanyId" resultType="java.lang.String">
+    SELECT
+      cast(sum(unInvoiceAmount) AS DECIMAL ( 16, 2 )) unInvoiceAmount
+    FROM
+      qb_channelhistory
+    WHERE
+      STATUS = '1' AND transfertype = '1'
+      and customkey = #{customKey}
+      and recCustomkey = #{companyId}
+  </select>
+</mapper>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbInvoicePicDao" >
+
+  <sql id="Base_Column_List" >
+    id, invoiceSerialNo, invoicePicUrl, createTime, updateTime, addUser
+  </sql>
+
+  <select id="selectByPrimaryKey" resultType="com.jrmf.domain.QbInvoicePic" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from qb_invoice_pic
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from qb_invoice_pic
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.jrmf.domain.QbInvoicePic" >
+    insert into qb_invoice_pic (id, invoiceSerialNo, invoicePicUrl, 
+      createTime, updateTime, addUser
+      )
+    values (#{id,jdbcType=INTEGER}, #{invoiceSerialNo,jdbcType=VARCHAR}, #{invoicePicUrl,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{addUser,jdbcType=VARCHAR}
+      )
+  </insert>
+  
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.QbInvoicePic" >
+    update qb_invoice_pic
+    <set >
+      <if test="invoiceserialno != null" >
+        invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="invoicepicurl != null" >
+        invoicePicUrl = #{invoicePicUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="adduser != null" >
+        addUser = #{addUser,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbInvoicePic" >
+    update qb_invoice_pic
+    set invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      invoicePicUrl = #{invoicePicUrl,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      addUser = #{addUser,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getPicListBySerialNo" parameterType="String" resultType="com.jrmf.domain.QbInvoicePic">
+  select * from qb_invoice_pic where invoiceSerialNo=#{value}
+  </select>
+  
+</mapper>

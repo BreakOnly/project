@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.ForwardCompanyAccountDao">
+
+
+  <select id="findByCondition" resultType="com.jrmf.domain.ForwardCompanyAccount">
+    SELECT CAST(ROUND(balance/100,2) AS DECIMAL(15,2)) AS balanceTwo,qcb.*,c.companyName AS merchantName,p.companyName,i.companyName AS realCompanyName FROM  forward_company_account qcb
+    LEFT JOIN channel_custom c ON c.customkey = qcb.customKey
+    LEFT JOIN channel_custom p ON p.customkey = qcb.companyId
+    LEFT JOIN channel_custom i ON i.customkey = qcb.realCompanyId
+    <where>
+
+      <if test="id != null and id != ''">
+        qcb.id = #{id}
+      </if>
+
+      <if test="customKey != null and customKey != ''">
+        qcb.customKey = #{customKey}
+      </if>
+      <if test="status != null and status >0 ">
+        qcb.status = #{status}
+      </if>
+      <if test="companyId != null and companyId != ''">
+        and qcb.companyId = #{companyId}
+      </if>
+
+      <if test="realCompanyId != null and realCompanyId != ''">
+        and qcb.realCompanyId = #{realCompanyId}
+      </if>
+      <if test="merchantName != null and merchantName != ''">
+        and <![CDATA[ c.companyName like concat('%',#{merchantName},'%')  ]]>
+      </if>
+
+      <if test="startDate != null and startDate != ''">
+        and <![CDATA[ date_format(qcb.createTime, '%Y-%m-%d')  >= #{startDate} ]]>
+      </if>
+
+      <if test="endDate != null and endDate != ''">
+        and <![CDATA[ date_format(qcb.createTime, '%Y-%m-%d')  <= #{endDate} ]]>
+      </if>
+      <if test=" minBalance != null and minBalance>0 ">
+        and <![CDATA[ qcb.balance  >= #{minBalance}]]>
+      </if>
+      <if test=" maxBalance != null and maxBalance>0 ">
+        and <![CDATA[ qcb.balance  <= #{maxBalance}]]>
+      </if>
+    </where>
+    <choose>
+      <when test="order != null and order != '' and order == 1  ">
+        order by qcb.balance desc
+      </when>
+      <otherwise>
+        order by qcb.updateTime desc
+      </otherwise>
+    </choose>
+
+  </select>
+
+  <insert id="insert" useGeneratedKeys="true" parameterType="com.jrmf.domain.ForwardCompanyAccount"  keyProperty="id" keyColumn="id">
+        INSERT INTO  forward_company_account(customKey,companyId,realCompanyId,balance,status,createTime,updateTime)
+        values (#{customKey},#{companyId},#{realCompanyId},#{balance},#{status},now(),now())
+    </insert>
+
+  <select id="findBalanceByCondition" resultType="com.jrmf.domain.ForwardCompanyAccount">
+    SELECT * FROM  forward_company_account
+    <where>
+      <if test="customKey != null and customKey != ''">
+         customKey = #{customKey}
+      </if>
+
+      <if test="companyId != null and companyId != ''">
+        and  companyId = #{companyId}
+      </if>
+
+      <if test="realCompanyId != null and realCompanyId != ''">
+        and  realCompanyId = #{realCompanyId}
+      </if>
+      <if test="id != null and id != ''">
+        and  id = #{id}
+      </if>
+    </where>
+  </select>
+
+  <select id="findCompanyList" resultType="com.jrmf.domain.ForwardCompanyAccount">
+    SELECT  fca.id,fca.companyId,fca.realCompanyId,cp.companyName,cr.companyName AS realCompanyName,CAST(SUM(ROUND(balance/100,2)) AS DECIMAL(15,2)) AS balanceTwo,COUNT(fca.customKey) AS customCount FROM forward_company_account  fca
+    LEFT JOIN channel_custom cp ON cp.customkey = fca.companyId
+    LEFT JOIN channel_custom cr ON cr.customkey = fca.realCompanyId
+    <where>
+      fca.status = 1
+    <if test="companyId != null and companyId != ''">
+      and fca.companyId = #{companyId}
+    </if>
+
+    <if test="realCompanyId != null and realCompanyId != ''">
+      and fca.realCompanyId = #{realCompanyId}
+    </if>
+    <if test=" minBalance != null and minBalance>0 ">
+      and <![CDATA[ fca.balance  >= #{minBalance} ]]>
+    </if>
+    <if test=" maxBalance != null and maxBalance>0 ">
+      and <![CDATA[ fca.balance  <= #{maxBalance} ]]>
+    </if>
+    </where>
+    GROUP BY fca.companyId,fca.realCompanyId
+    ORDER BY fca.createTime DESC
+  </select>
+  <update id="updateById" parameterType="com.jrmf.domain.ForwardCompanyAccount">
+
+    update forward_company_account
+    <set>
+      <if  test=" balance != null and balance != '' ">
+        balance  = balance+#{balance}
+      </if>
+      <if  test=" status != null and status != '' ">
+        status = #{status}
+      </if>
+    </set>
+    where id = #{id}
+
+  </update>
+
+  <update id="updateAccountBalance" parameterType="com.jrmf.domain.ForwardCompanyAccount">
+    update forward_company_account
+    <set>
+      <if  test=" balance != null and balance != '' ">
+        balance = balance+#{balance}
+      </if>
+    </set>
+    where id = #{id}
+  </update>
+
+  <select id="findByUpdate" resultType="com.jrmf.domain.ForwardCompanyAccount">
+   SELECT qcb.* FROM  forward_company_account qcb
+   WHERE qcb.id = #{id} FOR UPDATE;
+  </select>
+</mapper>

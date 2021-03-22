@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.ChannelInvoiceDao">
+	<insert id="addChannelInvoice" parameterType="com.jrmf.domain.ChannelInvoice">
+		INSERT INTO qb_channelInvoice (
+		createtime, 
+		amount,
+		orderno,
+		customkey,
+        reCustomkey,
+        invoiceNo, 
+        invoiceNum, 
+        status,
+		operatorName, 
+		remark,
+		receiverName, 
+		address,
+		bankMessage,
+		num,
+		invoiceType,
+		taxpayerType,
+		courierCompany,
+		bankNameAndBankNo,
+		mobileNo
+		)
+		VALUES (
+		now(),
+		#{amount},
+		#{orderno},
+		#{customkey},
+		#{reCustomkey},
+		#{invoiceNo},
+		#{invoiceNum},
+		#{status},
+		#{operatorName},
+		#{remark},
+		#{receiverName},
+		#{address},
+		#{bankMessage},
+		#{num},
+		#{invoiceType},
+		#{taxpayerType},
+		#{courierCompany},
+		#{bankNameAndBankNo},
+		#{mobileNo}
+		)
+	</insert>
+	
+	<select id="getChannelInvoiceByParam" resultType="com.jrmf.domain.ChannelInvoice">
+		SELECT
+		c.companyName AS invoiceCompanyName,
+		b.companyName AS openCompany,
+		a.mobileNo invoicePhone,
+		a.*
+		FROM
+		qb_channelInvoice a
+		LEFT JOIN channel_custom c ON a.customkey = c.customkey
+		LEFT JOIN channel_custom b ON a.reCustomkey = b.customkey
+		WHERE
+		1 = 1
+		<if test="reCustomkey !=null and reCustomkey !=''">
+				and  a.reCustomkey = #{reCustomkey}
+		</if>
+		<if test="customkey !=null and customkey !=''">
+				and  a.customkey = #{customkey}
+		</if>
+		<if test="orderno !=null and orderno !=''">
+				and  a.orderno = #{orderno}
+		</if>
+		<if test="openCompany !=null and openCompany !=''">
+				and  b.companyName like concat('%', #{openCompany}, '%')
+		</if>
+		<if test="invoiceCompanyName !=null and invoiceCompanyName !=''">
+				and   c.companyName like concat('%', #{invoiceCompanyName}, '%')
+		</if>
+		<if test="status !=null and status !=''">
+				and  a.status =#{status}
+		</if>
+		<if test="name !=null and name !=''">
+				and  (b.companyName like concat('%', #{name}, '%')
+				 or a.orderno like concat('%', #{name}, '%')
+				)
+		</if>
+		<if test="startTime !=null and startTime !=''">
+				and date(a.createtime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+				and date(a.createtime) &lt;= #{endTime}
+		</if>
+		order by a.createtime desc 
+		<if test="start !=null and limit !=null">
+				 limit #{start},#{limit} 
+		</if>
+	</select>
+	
+	<update id="updateChannelInvoice" >
+		update qb_channelInvoice 
+			<trim prefix="SET" suffixOverrides=",">
+					updatetime = now(),
+				<if test="invoiceNum !=null">
+					invoiceNum = #{invoiceNum},
+				</if>
+				<if test="status !=null">
+					status = #{status},
+				</if>
+				<if test="operatorName !=null">
+					operatorName = #{operatorName},
+				</if>
+				<if test="remark !=null">
+					remark = #{remark},
+				</if>
+				<if test="courierCompany !=null">
+					courierCompany = #{courierCompany},
+				</if>
+				<if test="courierNo !=null">
+					courierNo = #{courierNo},
+				</if>
+				<if test="num !=null">
+					num = #{num},
+				</if>
+			</trim>
+		where id = #{id}
+	</update>
+	
+	<select id="getChannelInvoiceById" resultType="com.jrmf.domain.ChannelInvoice">
+		SELECT * FROM qb_channelInvoice  WHERE  id = #{id}
+	</select>
+	
+	<!--渠道待开发票存量  -->
+	<select id="getInvoiceBalance"  resultType="String">
+	SELECT
+	IFNULL(
+		IFNULL(
+			(
+				SELECT
+					SUM(TRUNCATE(amount, 2))
+				FROM
+					qb_userCommission
+				WHERE
+					`status` = 1
+				AND originalId = #{customkey}
+			),
+			0
+		) - IFNULL(
+			(
+				SELECT
+					SUM(TRUNCATE(amount, 2))
+				FROM
+					qb_channelInvoice
+				WHERE
+					`status` = 1
+				AND customkey = #{customkey}
+			),
+			0
+		),
+		0
+	) AS amount
+	</select>
+	
+	<select id="getCompanys" resultType="String">
+	SELECT companyId FROM qb_userCommission  WHERE `status` = 1 ORDER BY companyId
+	</select>
+	 
+</mapper>

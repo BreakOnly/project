@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.CustomReceiveConfigDao">
+
+    <!-- 查询商户充值收款账户配置集合count分页 -->
+    <select id="queryRechargeAccountListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+        select count(1) from (select cc.companyName merchantName,qc.companyName companyName,crc.* from
+        custom_receive_config crc
+        left join channel_custom cc on crc.customkey=cc.customkey
+        left join qb_company qc on crc.companyId=qc.userId
+        where 1=1
+        <if test="params.merchantName!=null and params.merchantName!=''">
+            and cc.companyName like concat('%',#{params.merchantName},'%')
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.companyName!=null and params.companyName!=''">
+            and qc.companyName like concat('%',#{params.companyName},'%')
+        </if>
+        <if test="params.payType!=null and params.payType!=''">
+            and crc.payType=#{params.payType}
+        </if>
+        <if test="params.rechargeConfirmType!=null and params.rechargeConfirmType!=''">
+            and crc.rechargeConfirmType=#{params.rechargeConfirmType}
+        </if>
+        <if test="params.receiveUser!=null and params.receiveUser!=''">
+            and crc.receiveUser like concat('%',#{params.receiveUser},'%')
+        </if>
+        <if test="params.receiveAccount!=null and params.receiveAccount!=''">
+            and crc.receiveAccount=#{params.receiveAccount}
+        </if>
+        <if test="params.receiveBank!=null and params.receiveBank!=''">
+            and crc.receiveBank like concat('%',#{params.receiveBank},'%')
+        </if>
+        <if test="params.receiveBankNo!=null and params.receiveBankNo!=''">
+            and crc.receiveBankNo=#{params.receiveBankNo}
+        </if>
+        <if test="params.originalId!=null and params.originalId!=''">
+            and crc.customkey=#{params.originalId}
+        </if>
+        <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+            and crc.customkey=#{params.loginCustomer}
+        </if>
+        ORDER BY crc.id desc
+        ) temp
+    </select>
+
+    <!-- 查询商户充值收款账户配置集合分页-->
+    <select id="queryRechargeAccountList" parameterType="com.jrmf.domain.Page" resultType="map">
+        select cc.companyName merchantName,cc.contractCompanyName, qc.companyName companyName,crc.* from custom_receive_config crc
+        left join channel_custom cc on crc.customkey=cc.customkey
+        left join qb_company qc on crc.companyId=qc.userId
+        where 1=1
+        <if test="params.merchantName!=null and params.merchantName!=''">
+            and cc.companyName like concat('%',#{params.merchantName},'%')
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.companyName!=null and params.companyName!=''">
+            and qc.companyName like concat('%',#{params.companyName},'%')
+        </if>
+        <if test="params.payType!=null and params.payType!=''">
+            and crc.payType=#{params.payType}
+        </if>
+        <if test="params.rechargeConfirmType!=null and params.rechargeConfirmType!=''">
+            and crc.rechargeConfirmType=#{params.rechargeConfirmType}
+        </if>
+        <if test="params.receiveUser!=null and params.receiveUser!=''">
+            and crc.receiveUser like concat('%',#{params.receiveUser},'%')
+        </if>
+        <if test="params.receiveAccount!=null and params.receiveAccount!=''">
+            and crc.receiveAccount=#{params.receiveAccount}
+        </if>
+        <if test="params.receiveBank!=null and params.receiveBank!=''">
+            and crc.receiveBank like concat('%',#{params.receiveBank},'%')
+        </if>
+        <if test="params.receiveBankNo!=null and params.receiveBankNo!=''">
+            and crc.receiveBankNo=#{params.receiveBankNo}
+        </if>
+        <if test="params.originalId!=null and params.originalId!=''">
+            and crc.customkey=#{params.originalId}
+        </if>
+        <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+            and crc.customkey=#{params.loginCustomer}
+        </if>
+        ORDER BY crc.id desc
+        <if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+        </if>
+    </select>
+
+    <!-- 查询商户充值账号配置信息无分页 -->
+    <select id="queryRechargeAccountListNoPape" parameterType="map" resultType="com.jrmf.domain.CustomReceiveConfig">
+        select crc.* from custom_receive_config crc where 1=1
+        <if test="customkey!=null and customkey!=''">
+            and crc.customkey=#{customkey}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&gt;=#{startTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&lt;=#{endTime}
+        </if>
+        <if test="companyId!=null and companyId!=''">
+            and crc.companyId =#{companyId}
+        </if>
+        <if test="payType!=null and payType!=''">
+            and crc.payType=#{payType}
+        </if>
+        <if test="rechargeConfirmType!=null and rechargeConfirmType!=''">
+            and crc.rechargeConfirmType=#{rechargeConfirmType}
+        </if>
+        <if test="receiveUser!=null and receiveUser!=''">
+            and crc.receiveUser like concat('%',#{receiveUser},'%')
+        </if>
+        <if test="receiveAccount!=null and receiveAccount!=''">
+            and crc.receiveAccount=#{receiveAccount}
+        </if>
+        <if test="receiveBank!=null and receiveBank!=''">
+            and crc.receiveBank like concat('%',#{receiveBank},'%')
+        </if>
+        <if test="receiveBankNo!=null and receiveBankNo!=''">
+            and crc.receiveBankNo=#{receiveBankNo}
+        </if>
+        <if test="loginCustomer!=null and loginCustomer!=''">
+            and crc.customkey=#{loginCustomer}
+        </if>
+        <if test="status!=null">
+            and crc.status=#{status}
+        </if>
+        ORDER BY crc.id desc
+    </select>
+
+    <!-- 添加商户充值账号配置 -->
+    <insert id="insertMerchantRechargeAccount" parameterType="com.jrmf.domain.CustomReceiveConfig">
+	insert into custom_receive_config(customkey,companyId,payType,rechargeConfirmType,receiveAccount,receiveUser,receiveBank,receiveBankNo,addUser,createTime,updateTime,isSubAccount)
+    values(#{customkey},#{companyId},#{payType},#{rechargeConfirmType},#{receiveAccount},#{receiveUser},#{receiveBank},#{receiveBankNo},#{addUser},#{createTime},#{updateTime},#{isSubAccount});
+	</insert>
+
+    <!-- 修改商户充值账号配置 -->
+    <update id="updateMerchantRechargeAccount" parameterType="com.jrmf.domain.CustomReceiveConfig">
+	update custom_receive_config set companyId=#{companyId},payType=#{payType},rechargeConfirmType=#{rechargeConfirmType},receiveAccount=#{receiveAccount},receiveUser=#{receiveUser},receiveBank=#{receiveBank},receiveBankNo=#{receiveBankNo},updateTime=#{updateTime}
+	where id=#{id}
+	</update>
+
+    <!-- 查询商户充值账户配置信息根据主键 -->
+    <select id="getCustomReceiveConfigById" parameterType="int" resultType="com.jrmf.domain.CustomReceiveConfig">
+	select crc.*,cc.companyName customName,cc.contractCompanyName from custom_receive_config crc left join channel_custom cc on crc.customkey=cc.customkey where crc.id = #{id}
+	</select>
+
+    <!-- 查询商户是否已添加相同账号信息 -->
+    <select id="checkMerchantRechargeAccountIsExists" parameterType="com.jrmf.domain.CustomReceiveConfig"
+            resultType="int">
+	select count(id) from custom_receive_config where customkey=#{customkey} and companyId =#{companyId} and payType=#{payType}
+	</select>
+
+    <!-- 删除商户充值账号信息 -->
+    <delete id="deleteRechargeAccountConfig" parameterType="int">
+	delete from custom_receive_config where id =#{id}
+	</delete>
+
+    <select id="querySubAccountList" parameterType="map" resultType="com.jrmf.domain.CustomReceiveConfig">
+        SELECT
+        cc.companyName,
+        cc.contractCompanyName ,
+        crc.*
+        FROM
+        custom_receive_config crc
+        LEFT JOIN channel_custom cc ON crc.customkey = cc.customkey
+        where crc.isSubAccount=1
+        <if test="customName!=null and customName!=''">
+            and  cc.companyName like concat('%', #{customName}, '%')
+        </if>
+        <if test="companyId!=null and companyId!=''">
+            and crc.companyId =#{companyId}
+        </if>
+        <if test="startTime!=null and startTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&gt;=#{startTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and date_format(crc.createTime,'%Y-%m-%d')&lt;=#{endTime}
+        </if>
+        <if test="receiveAccount!=null and receiveAccount!=''">
+            and crc.receiveAccount=#{receiveAccount}
+        </if>
+        ORDER BY crc.id desc
+    </select>
+
+    <select id="getCustomReceiveConfig"  resultType="com.jrmf.domain.CustomReceiveConfig">
+        SELECT
+            crc.*,
+            cc.companyName customName
+        FROM
+            custom_receive_config crc
+            LEFT JOIN channel_custom cc ON crc.customkey = cc.customkey
+        WHERE
+            crc.customkey = #{customKey} and crc.companyId=#{companyId} and crc.payType = #{payType}  and crc.isSubAccount=1 limit 1
+	</select>
+
+    <select id="checkSubAccountIsExists" parameterType="com.jrmf.domain.CustomReceiveConfig"
+            resultType="int">
+            SELECT
+            COUNT( crc.id )
+            FROM
+            custom_receive_config crc
+            LEFT JOIN channel_custom cc ON crc.customkey = cc.customkey
+            WHERE
+            crc.isSubAccount = 1
+            <if test="subAccount!=null and subAccount!=''">
+                AND crc.receiveAccount = #{subAccount}
+            </if>
+            <if test="subAccountName!=null and subAccountName!=''">
+                AND cc.companyName = #{subAccountName}
+            </if>
+	</select>
+
+    <select id="getCustomReceiveConfigBySubAccount" resultType="com.jrmf.domain.CustomReceiveConfig">
+        select * from custom_receive_config where receiveAccount = #{subAccount}
+    </select>
+
+</mapper>

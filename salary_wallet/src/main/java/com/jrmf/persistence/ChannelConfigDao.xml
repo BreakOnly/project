@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.ChannelConfigDao">
+    <select id="queryChannelConfig" resultType="com.jrmf.domain.ChannelConfig">
+        SELECT cc.*,qc.companyName,qc.`status` FROM channel_config cc
+        LEFT JOIN qb_company qc
+        ON cc.channelId = qc.userId
+        where channelId =  #{channelId}
+        <if test="status !=null">
+           and cc.status =#{status}
+        </if>
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="queryChannelConfigCount" resultType="int">
+        SELECT count(1) FROM channel_config cc
+        LEFT JOIN qb_company qc
+        ON cc.channelId = qc.userId
+        where channelId =  #{channelId}
+    </select>
+
+    <select id="queryChannelConfigById" resultType="com.jrmf.domain.ChannelConfig">
+        SELECT * FROM channel_config WHERE id = #{id}
+    </select>
+
+    <delete id="deleteChannelConfigById">
+        DELETE FROM channel_config WHERE id = #{id}
+    </delete>
+
+    <insert id="insertPaymentAccount" parameterType="com.jrmf.domain.ChannelConfig">
+        insert into channel_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="channelId != null and channelId != ''">
+                channelId,
+            </if>
+            <if test="payType != null and payType != ''">
+                payType,
+            </if>
+            <if test="accountName != null and accountName != ''">
+                accountName,
+            </if>
+            <if test="accountNum != null and accountNum != ''">
+                accountNum,
+            </if>
+            <if test="bankName != null and bankName != ''">
+                bankName,
+            </if>
+            <if test="usefor != null and usefor != ''">
+                usefor,
+            </if>
+            <if test="status != null and status != ''">
+                status,
+            </if>
+            <if test="createTime != null and createTime != ''">
+                createTime,
+            </if>
+            <if test="rechargeConfirmType != null">
+                rechargeConfirmType,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="channelId != null and channelId != ''">
+                #{channelId},
+            </if>
+            <if test="payType != null and payType != ''">
+                #{payType},
+            </if>
+            <if test="accountName != null and accountName != ''">
+                #{accountName},
+            </if>
+            <if test="accountNum != null and accountNum != ''">
+                #{accountNum},
+            </if>
+            <if test="bankName != null and bankName != ''">
+                #{bankName},
+            </if>
+            <if test="usefor != null and usefor != ''">
+                #{usefor},
+            </if>
+            <if test="status != null and status != ''">
+                #{status},
+            </if>
+            <if test="createTime != null and createTime != ''">
+                #{createTime},
+            </if>
+            <if test="rechargeConfirmType != null">
+                #{rechargeConfirmType},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updatePaymentAccount">
+        UPDATE channel_config
+        <trim prefix="set" suffixOverrides=",">
+            <if test="channelId != null and channelId != ''">
+                channelId = #{channelId},
+            </if>
+            <if test="payType != null and payType != ''">
+                payType = #{payType},
+            </if>
+            <if test="accountName != null and accountName != ''">
+                accountName = #{accountName},
+            </if>
+            <if test="accountNum != null and accountNum != ''">
+                accountNum = #{accountNum},
+            </if>
+            <if test="bankName != null and bankName != ''">
+                bankName = #{bankName},
+            </if>
+            <if test="usefor != null and usefor != ''">
+                usefor = #{usefor},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="updateTime != null and updateTime != ''">
+                updateTime = #{updateTime},
+            </if>
+            <if test="rechargeConfirmType != null">
+                rechargeConfirmType = #{rechargeConfirmType},
+            </if>
+        </trim>
+        WHERE
+        id = #{id}
+    </update>
+</mapper>

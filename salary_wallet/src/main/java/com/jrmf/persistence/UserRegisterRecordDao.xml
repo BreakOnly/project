@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.UserRegisterRecordDao">
+
+    <select id="queryRecordList" resultType="com.jrmf.domain.UserRegisterRecord">
+        SELECT * FROM custom_info where 1=1
+        <if test="userName != null and userName !=''">
+            and userName like concat('%', #{userName}, '%')
+        </if>
+        <if test="registerType != null and registerType !=''">
+            and registerType = #{registerType}
+        </if>
+        <if test="phoneNo != null and phoneNo !=''">
+            and phoneNo like concat('%', #{phoneNo}, '%')
+        </if>
+        <if test="companyName != null and companyName !=''">
+            and companyName like concat('%', #{companyName}, '%')
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND DATE(createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND DATE(createTime) &lt;= #{endTime}
+        </if>
+        order by createTime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="queryRecordListCount" resultType="java.lang.Integer">
+        select count(1) from (
+        SELECT * FROM custom_info where 1=1
+        <if test="userName != null and userName !=''">
+            and userName like concat('%', #{userName}, '%')
+        </if>
+        <if test="registerType != null and registerType !=''">
+            and registerType = #{registerType}
+        </if>
+        <if test="phoneNo != null and phoneNo !=''">
+            and phoneNo like concat('%', #{phoneNo}, '%')
+        </if>
+        <if test="companyName != null and companyName !=''">
+            and companyName like concat('%', #{companyName}, '%')
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND DATE(createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND DATE(createTime) &lt;= #{endTime}
+        </if>
+        order by createTime desc ) temp
+    </select>
+
+    <select id="selectUserRegisterRecord" resultType="java.lang.Integer">
+        SELECT count(1) FROM custom_info WHERE userName = #{userName} AND phoneNo = #{phoneNo};
+    </select>
+
+    <insert id="insertUserRegisterRecord" parameterType="com.jrmf.domain.UserRegisterRecord">
+         INSERT INTO custom_info
+         (
+          `channel`,
+          `userIPAddress`,
+          `userAddress`,
+          `phoneNo`,
+          `userName`,
+          `companyName`,
+          `email`,
+          `createTime`,
+           `updateTime`,
+           leaveMessage,
+           position,
+           registerType
+            )
+        VALUES
+	    (
+        #{channel},
+        #{userIPAddress},
+        #{userAddress},
+        #{phoneNo},
+        #{userName},
+        #{companyName},
+        #{email},
+        now(),
+        now(),
+        #{leaveMessage},
+        #{position},
+        2
+	    );
+    </insert>
+
+    <insert id="insertPageVisitAmount" parameterType="com.jrmf.domain.PageVisitRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_page_visit_amount (
+	        name,
+	        type,
+	        pageDate,
+	        visitorAmount
+        )
+        VALUES
+	    (
+		    #{name},
+		    #{type},
+		    #{pageDate},
+		    '1'
+	    ) ON DUPLICATE KEY UPDATE visitorAmount = visitorAmount + 1;
+    </insert>
+
+    <insert id="insertPageVisitRecord" parameterType="com.jrmf.domain.PageVisitRecord">
+        INSERT INTO t_page_visit_record (
+	        name,
+	        pageDate,
+	        visitTime,
+	        userIp,
+	        userIpAddress,
+	        type,
+	        amountId
+        )
+        VALUES
+	    (
+	    	#{name},
+	    	#{pageDate},
+	    	NOW(),
+	    	#{userIp},
+	    	#{userIpAddress},
+	    	#{type},
+	    	#{amountId}
+	    );
+    </insert>
+</mapper>

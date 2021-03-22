@@ -1,0 +1,631 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.CompanyDao">
+	<insert id="creatCompanyInfo" parameterType="com.jrmf.domain.Company">
+		INSERT INTO qb_company (userId, companyName, egalPerson,
+		egalPersonCertNo, contactor, contactorMobile, email, socialCreditCode,
+		expiresEnd, certOrganization, contactorAddress, taxRegisterNo,
+		businessLicenseNo, cardNo, bankNo, bankName, bankCardProvince,
+		bankCardCity,createTime,bankCardPhoneNO,callBackUrl) VALUES (#{userId}, #{companyName}, #{egalPerson},
+		#{egalPersonCertNo}, #{contactor}, #{contactorMobile},
+		#{email}, #{socialCreditCode}, #{expiresEnd}, #{certOrganization},
+		#{contactorAddress}, #{taxRegisterNo}, #{businessLicenseNo},
+		#{cardNo}, #{bankNo}, #{bankName}, #{bankCardProvince}, #{bankCardCity},now(),#{bankCardPhoneNO},#{callBackUrl})
+	</insert>
+
+	<select id="getCompanyByUserId" resultType="com.jrmf.domain.Company">
+            select * from qb_company where userId = #{id} order by createTime desc limit 1
+	</select>
+
+	<select id="getCompanyList" resultType="com.jrmf.domain.Company">
+		SELECT DISTINCT b.*,c.customname,c.moduleNo
+		FROM qb_company b
+		LEFT JOIN qb_users u ON b.userId  = u.companyUserNo
+    LEFT JOIN qb_custom_info c ON c.customkey = u.merchantId
+		where 1=1
+		<if test="companyName !=null and companyName !=''">
+				and  b.companyName like concat('%', #{companyName}, '%')
+		</if>
+		<if test="customName !=null and customName !=''">
+				and  c.customname like concat('%', #{customName}, '%')
+		</if>
+		group by b.id
+		order by b.createTime desc
+		<if test="start !=null and limit !=null">
+				 limit #{start},#{limit}
+		</if>
+	</select>
+
+	<update id="addPicturePath" parameterType="com.jrmf.domain.Company">
+		UPDATE qb_company SET businessLicenceImg=#{businessLicenceImg},
+		 identityImg=#{identityImg}, openingPermitsImg=#{openingPermitsImg} ,
+		 letterOfAuthorizationImg=#{letterOfAuthorizationImg},proxyIdentityImg=#{proxyIdentityImg}
+		 WHERE (userId=#{userId}) LIMIT 1
+	</update>
+	<update id="updateCompanyInfo" parameterType="com.jrmf.domain.Company">
+		UPDATE qb_company
+		<trim prefix="set" suffixOverrides=",">
+			<if test="userId != null and userId != ''">
+				userId = #{userId},
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName = #{companyName},
+			</if>
+			<if test="egalPerson != null and egalPerson != ''">
+				egalPerson = #{egalPerson},
+			</if>
+			<if test="egalPersonCertNo != null and egalPersonCertNo != ''">
+				egalPersonCertNo = #{egalPersonCertNo},
+			</if>
+			<if test="contactor != null and contactor != ''">
+				contactor = #{contactor},
+			</if>
+			<if test="contactorMobile != null and contactorMobile != ''">
+				contactorMobile = #{contactorMobile},
+			</if>
+			<if test="email != null and email != ''">
+				email = #{email},
+			</if>
+			<if test="socialCreditCode != null">
+				socialCreditCode = #{socialCreditCode},
+			</if>
+			<if test="expiresEnd != null">
+				expiresEnd = #{expiresEnd},
+			</if>
+			<if test="certOrganization != null and certOrganization != ''">
+				certOrganization = #{certOrganization},
+			</if>
+			<if test="contactorAddress != null and contactorAddress != ''">
+				contactorAddress = #{contactorAddress},
+			</if>
+			<if test="taxRegisterNo != null">
+				taxRegisterNo = #{taxRegisterNo},
+			</if>
+			<if test="businessLicenseNo != null">
+				businessLicenseNo = #{businessLicenseNo},
+			</if>
+			<if test="cardNo != null and cardNo != ''">
+				cardNo = #{cardNo},
+			</if>
+			<if test="bankNo != null and bankNo != ''">
+				bankNo = #{bankNo},
+			</if>
+			<if test="bankName != null and bankName != ''">
+				bankName = #{bankName},
+			</if>
+			<if test="bankCardProvince != null and bankCardProvince != ''">
+				bankCardProvince = #{bankCardProvince},
+			</if>
+			<if test="bankCardCity != null and bankCardCity != ''">
+				bankCardCity = #{bankCardCity},
+			</if>
+			<if test="businessLicenceImg != null and businessLicenceImg != ''">
+				businessLicenceImg = #{businessLicenceImg},
+			</if>
+			<if test="identityImg != null and identityImg != ''">
+				identityImg = #{identityImg},
+			</if>
+			<if test="openingPermitsImg != null and openingPermitsImg != ''">
+				openingPermitsImg = #{openingPermitsImg},
+			</if>
+			<if test="letterOfAuthorizationImg != null and letterOfAuthorizationImg != ''">
+				letterOfAuthorizationImg = #{letterOfAuthorizationImg},
+			</if>
+			<if test="proxyIdentityImg != null and proxyIdentityImg != ''">
+				proxyIdentityImg = #{proxyIdentityImg},
+			</if>
+			<if test="bankCardPhoneNO != null and bankCardPhoneNO != ''">
+				bankCardPhoneNO = #{bankCardPhoneNO},
+			</if>
+			<if test="callBackUrl != null and callBackUrl != ''">
+				callBackUrl = #{callBackUrl},
+			</if>
+			<if test="serviceCompanyId != null and serviceCompanyId != ''">
+				serviceCompanyId = #{serviceCompanyId},
+			</if>
+			<if test="singleMonthLimit != null">
+				singleMonthLimit = #{singleMonthLimit},
+			</if>
+			<if test="singleQuarterLimit != null">
+				singleQuarterLimit = #{singleQuarterLimit},
+			</if>
+			<if test="calculateType != null and calculateType != ''">
+				calculateType = #{calculateType},
+			</if>
+			<if test="agreementTemplateId != null and agreementTemplateId != ''">
+				agreementTemplateId = #{agreementTemplateId},
+			</if>
+			<if test="minAge != null and minAge != ''">
+				minAge = #{minAge},
+			</if>
+			<if test="maxAge != null and maxAge != ''">
+				maxAge = #{maxAge},
+			</if>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="companyType != null">
+				companyType = #{companyType},
+			</if>
+			<if test="realCompanyId != null and realCompanyId !=''">
+				realCompanyId = #{realCompanyId},
+			</if>
+			<if test="createTime != null and createTime !=''">
+				createTime = #{createTime},
+			</if>
+			<if test="updateTime != null and updateTime !=''">
+				updateTime = #{updateTime},
+			</if>
+			<if test="realCompanyRate != null">
+				realCompanyRate = #{realCompanyRate},
+			</if>
+			<if test="businessPlatform != null">
+                businessPlatform = #{businessPlatform},
+			</if>
+			<if test="invoiceCategory != null">
+				invoice_category = #{invoiceCategory},
+			</if>
+		</trim>
+		WHERE
+			id = #{id}
+	</update>
+
+	<select id="listCompanyInfo" resultType="com.jrmf.domain.Company">
+        SELECT
+            companyName,
+            customkey companyId
+        FROM
+            channel_custom
+        WHERE
+            customkey is not NULL
+            AND customType = 2
+    </select>
+
+	<select id="getCompanyListByProxy" resultType="com.jrmf.domain.Company">
+		select DISTINCT cc3.customkey as userId,cc3.companyName from channel_custom cc
+		left join qb_channelrelated qcr on qcr.originalId=cc.customkey
+		left join channel_custom cc3 on qcr.companyId=cc3.customkey
+		where  FIND_IN_SET(cc.AgentId,#{customKey}) and cc3.customkey!='';
+	</select>
+
+	<select id="getCompanyByUserIds" resultType="com.jrmf.domain.Company">
+            SELECT
+				*
+			FROM
+				qb_company
+			WHERE
+				FIND_IN_SET(userId,#{ids})
+	</select>
+
+	<select id="getCompanyName" resultType="int">
+		SELECT
+			count(1)
+		FROM
+			qb_company
+		WHERE
+			companyName = #{companyName};
+	</select>
+
+	<insert id="addCompany"  parameterType="com.jrmf.domain.Company">
+		INSERT INTO qb_company
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userId != null and userId != ''">
+				userId,
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName,
+			</if>
+			<if test="egalPerson != null and egalPerson != ''">
+				egalPerson,
+			</if>
+			<if test="egalPersonCertNo != null and egalPersonCertNo != ''">
+				egalPersonCertNo,
+			</if>
+			<if test="contactor != null and contactor != ''">
+				contactor,
+			</if>
+			<if test="contactorMobile != null and contactorMobile != ''">
+				contactorMobile,
+			</if>
+			<if test="email != null and email != ''">
+				email,
+			</if>
+			<if test="socialCreditCode != null and socialCreditCode != ''">
+				socialCreditCode,
+			</if>
+			<if test="expiresEnd != null and expiresEnd != ''">
+				expiresEnd,
+			</if>
+			<if test="certOrganization != null and certOrganization != ''">
+				certOrganization,
+			</if>
+			<if test="contactorAddress != null and contactorAddress != ''">
+				contactorAddress,
+			</if>
+			<if test="taxRegisterNo != null and taxRegisterNo != ''">
+				taxRegisterNo,
+			</if>
+			<if test="businessLicenseNo != null and businessLicenseNo != ''">
+				businessLicenseNo,
+			</if>
+			<if test="cardNo != null and cardNo != ''">
+				cardNo,
+			</if>
+			<if test="bankNo != null and bankNo != ''">
+				bankNo,
+			</if>
+			<if test="bankName != null and bankName != ''">
+				bankName,
+			</if>
+			<if test="bankCardProvince != null and bankCardProvince != ''">
+				bankCardProvince,
+			</if>
+			<if test="bankCardCity != null and bankCardCity != ''">
+				bankCardCity,
+			</if>
+			<if test="businessLicenceImg != null and businessLicenceImg != ''">
+				businessLicenceImg,
+			</if>
+			<if test="identityImg != null and identityImg != ''">
+				identityImg,
+			</if>
+			<if test="openingPermitsImg != null and openingPermitsImg != ''">
+				openingPermitsImg,
+			</if>
+			<if test="letterOfAuthorizationImg != null and letterOfAuthorizationImg != ''">
+				letterOfAuthorizationImg,
+			</if>
+			<if test="proxyIdentityImg != null and proxyIdentityImg != ''">
+				proxyIdentityImg,
+			</if>
+			<if test="bankCardPhoneNO != null and bankCardPhoneNO != ''">
+				bankCardPhoneNO,
+			</if>
+			<if test="callBackUrl != null and callBackUrl != ''">
+				callBackUrl,
+			</if>
+			<if test="serviceCompanyId != null and serviceCompanyId != ''">
+				serviceCompanyId,
+			</if>
+			<if test="singleMonthLimit != null and singleMonthLimit != ''">
+				singleMonthLimit,
+			</if>
+			<if test="singleQuarterLimit != null and singleQuarterLimit != ''">
+				singleQuarterLimit,
+			</if>
+			<if test="calculateType != null and calculateType != ''">
+				calculateType,
+			</if>
+			<if test="agreementTemplateId != null and agreementTemplateId != ''">
+				agreementTemplateId,
+			</if>
+			<if test="minAge != null and minAge != ''">
+				minAge,
+			</if>
+			<if test="maxAge != null and maxAge != ''">
+				maxAge,
+			</if>
+			<if test="status != null and status != ''">
+				status,
+			</if>
+			<if test="companyType != null and companyType != ''">
+				companyType,
+			</if>
+            <if test="realCompanyId != null and realCompanyId !=''">
+				realCompanyId,
+			</if>
+			<if test="createTime != null and createTime !=''">
+				createTime,
+			</if>
+			<if test="updateTime != null and updateTime !=''">
+				updateTime,
+			</if>
+			<if test="realCompanyRate != null">
+				realCompanyRate,
+			</if>
+			<if test="businessPlatform != null">
+                businessPlatform,
+			</if>
+			<if test="invoiceCategory != null">
+				invoice_category,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userId != null and userId != ''">
+				#{userId},
+			</if>
+			<if test="companyName != null and companyName != ''">
+				#{companyName},
+			</if>
+			<if test="egalPerson != null and egalPerson != ''">
+				#{egalPerson},
+			</if>
+			<if test="egalPersonCertNo != null and egalPersonCertNo != ''">
+				#{egalPersonCertNo},
+			</if>
+			<if test="contactor != null and contactor != ''">
+				#{contactor},
+			</if>
+			<if test="contactorMobile != null and contactorMobile != ''">
+				#{contactorMobile},
+			</if>
+			<if test="email != null and email != ''">
+				#{email},
+			</if>
+			<if test="socialCreditCode != null and socialCreditCode != ''">
+				#{socialCreditCode},
+			</if>
+			<if test="expiresEnd != null and expiresEnd != ''">
+				#{expiresEnd},
+			</if>
+			<if test="certOrganization != null and certOrganization != ''">
+				#{certOrganization},
+			</if>
+			<if test="contactorAddress != null and contactorAddress != ''">
+				#{contactorAddress},
+			</if>
+			<if test="taxRegisterNo != null and taxRegisterNo != ''">
+				#{taxRegisterNo},
+			</if>
+			<if test="businessLicenseNo != null and businessLicenseNo != ''">
+				#{businessLicenseNo},
+			</if>
+			<if test="cardNo != null and cardNo != ''">
+				#{cardNo},
+			</if>
+			<if test="bankNo != null and bankNo != ''">
+				#{bankNo},
+			</if>
+			<if test="bankName != null and bankName != ''">
+				#{bankName},
+			</if>
+			<if test="bankCardProvince != null and bankCardProvince != ''">
+				#{bankCardProvince},
+			</if>
+			<if test="bankCardCity != null and bankCardCity != ''">
+				#{bankCardCity},
+			</if>
+			<if test="businessLicenceImg != null and businessLicenceImg != ''">
+				#{businessLicenceImg},
+			</if>
+			<if test="identityImg != null and identityImg != ''">
+				#{identityImg},
+			</if>
+			<if test="openingPermitsImg != null and openingPermitsImg != ''">
+				#{openingPermitsImg},
+			</if>
+			<if test="letterOfAuthorizationImg != null and letterOfAuthorizationImg != ''">
+				#{letterOfAuthorizationImg},
+			</if>
+			<if test="proxyIdentityImg != null and proxyIdentityImg != ''">
+				#{proxyIdentityImg},
+			</if>
+			<if test="bankCardPhoneNO != null and bankCardPhoneNO != ''">
+				#{bankCardPhoneNO},
+			</if>
+			<if test="callBackUrl != null and callBackUrl != ''">
+				#{callBackUrl},
+			</if>
+			<if test="serviceCompanyId != null and serviceCompanyId != ''">
+				#{serviceCompanyId},
+			</if>
+			<if test="singleMonthLimit != null and singleMonthLimit != ''">
+				#{singleMonthLimit},
+			</if>
+			<if test="singleQuarterLimit != null and singleQuarterLimit != ''">
+				#{singleQuarterLimit},
+			</if>
+			<if test="calculateType != null and calculateType != ''">
+				#{calculateType},
+			</if>
+			<if test="agreementTemplateId != null and agreementTemplateId != ''">
+				#{agreementTemplateId},
+			</if>
+			<if test="minAge != null and minAge != ''">
+				#{minAge},
+			</if>
+			<if test="maxAge != null and maxAge != ''">
+				#{maxAge},
+			</if>
+			<if test="status != null and status != ''">
+				#{status},
+			</if>
+			<if test="companyType != null and companyType != ''">
+				#{companyType},
+			</if>
+			<if test="realCompanyId != null and realCompanyId !=''">
+				#{realCompanyId},
+			</if>
+			<if test="createTime != null and createTime !=''">
+				#{createTime},
+			</if>
+			<if test="updateTime != null and updateTime !=''">
+				#{updateTime},
+			</if>
+			<if test="realCompanyRate != null">
+				#{realCompanyRate},
+			</if>
+			<if test="businessPlatform != null">
+				#{businessPlatform},
+			</if>
+			<if test="invoiceCategory != null">
+			  #{invoiceCategory}
+			</if>
+		</trim>
+	</insert>
+	<select id="getCompanyEmail" resultType="com.jrmf.domain.Company">
+		SELECT
+			*
+		FROM
+			qb_company
+		WHERE
+			email = #{email};
+	</select>
+
+	<select id="getCompanyListByParam" resultType="com.jrmf.domain.Company">
+		SELECT
+		qc.userId userId,
+		qc.id,
+		qc.businessPlatform,
+		qi.customname customname,
+		qbu.merchantId,
+		qc.companyName companyName,
+		qc.companyType companyType,
+		qc.`status` status,
+		qc.minAge minAge,
+		qc.maxAge maxAge,
+		qc.singleMonthLimit singleMonthLimit,
+		qc.singleQuarterLimit singleQuarterLimit,
+		qc.email email,
+		ifnull(qc.realCompanyId,qc.userId) realCompanyId,
+		rqc.companyName realCompanyName,
+		qc.invoice_category invoiceCategory,
+		qc.createTime createTime,
+		qc.updateTime endTime,
+		qc.businessLicenseNo businessLicenseNo,
+		qc.expiresEnd expiresEnd,
+		qc.contactorMobile contactorMobile,
+		qc.serviceCompanyId,
+		IF(qc.realCompanyRate is NOT NULL AND qc.realCompanyRate != '', cast(qc.realCompanyRate*100 as decimal(11,2)),qc.realCompanyRate) as realCompanyRate
+		FROM qb_company qc
+		left join qb_company rqc on ifnull(qc.realCompanyId,qc.userId) = rqc.userId
+		LEFT JOIN qb_users qbu
+		ON qc.userId = qbu.id
+		LEFT JOIN qb_custom_info qi
+		ON qbu.merchantId = qi.customkey
+		where 1=1
+		<if test="companyName != null and companyName != ''">
+			and qc.companyName like concat('%',#{companyName},'%')
+		</if>
+		<if test="status !=null and status != ''">
+			and qc.status = #{status}
+		</if>
+		<if test="submitTimeStart !=null and submitTimeStart !=''">
+			and date(qc.createTime) &gt;= #{submitTimeStart}
+		</if>
+		<if test="submitTimeEnd !=null and submitTimeEnd !=''">
+			and date(qc.createTime) &lt;= #{submitTimeEnd}
+		</if>
+		<if test="realCompanyName !=null and realCompanyName !=''">
+			and rqc.companyName like concat('%',#{realCompanyName},'%')
+		</if>
+		<if test="customname !=null and customname !=''">
+			and qi.customname like concat('%',#{customname},'%')
+		</if>
+		<if test="companyType !=null and companyType !=''">
+			and qc.companyType = #{companyType}
+		</if>
+		<if test="email !=null and email !=''">
+			and qc.email = #{email}
+		</if>
+		<if test="invoiceCategory !=null and email !=''">
+			and qc.invoice_category = #{invoiceCategory}
+		</if>
+		order by qc.createTime desc
+		<if test="start !=null and limit !=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="getCompanyListByParamCount" resultType="int">
+		SELECT count(1)
+        FROM qb_company qc
+        left join qb_company rqc on ifnull(qc.realCompanyId,qc.userId) = rqc.userId
+        LEFT JOIN qb_users qbu
+        ON qc.userId = qbu.id
+        LEFT JOIN qb_custom_info qi
+        ON qbu.merchantId = qi.customkey
+        where 1=1
+		<if test="companyName != null and companyName != ''">
+			and qc.companyName like concat('%',#{companyName},'%')
+		</if>
+		<if test="status !=null and status != ''">
+			and qc.status = #{status}
+		</if>
+		<if test="submitTimeStart !=null and submitTimeStart !=''">
+			and date(qc.createTime) &gt;= #{submitTimeStart}
+		</if>
+		<if test="submitTimeEnd !=null and submitTimeEnd !=''">
+			and date(qc.createTime) &lt;= #{submitTimeEnd}
+		</if>
+		<if test="realCompanyName !=null and realCompanyName !=''">
+			and rqc.companyName like concat('%',#{realCompanyName},'%')
+		</if>
+		<if test="customname !=null and customname !=''">
+			and qi.customname like concat('%',#{customname},'%')
+		</if>
+		<if test="companyType !=null and companyType !=''">
+			and qc.companyType = #{companyType}
+		</if>
+		<if test="email !=null and email !=''">
+			and qc.email = #{email}
+		</if>
+	</select>
+
+	<select id="getCompanyByCompanyName" resultType="com.jrmf.domain.Company">
+		SELECT * FROM qb_company WHERE companyName = #{companyName}
+	</select>
+
+	<select id="getMerchantIdByUserId" resultType="java.lang.String">
+		SELECT merchantId FROM qb_users qbu
+	LEFT JOIN qb_custom_info qi
+	ON qbu.merchantId = qi.customkey
+	WHERE qbu.id = #{companyId}
+	</select>
+
+	<!-- 校验下发公司+下发通道只允许配置一个 -->
+	<select id="checkIsExist" parameterType="com.jrmf.domain.ChannelConfig" resultType="int">
+		select count(1) from channel_config where channelId=#{channelId} and status=1 and payType=#{payType}
+	</select>
+
+    <!-- 获取启用短信通道配置 -->
+	<select id="getSmsConfig" resultType="com.jrmf.domain.SMSChannelConfig">
+		select * from qb_smschannle_config where status=1 LIMIT 1;
+	</select>
+
+	<select id="getAllCompanyList" resultType="com.jrmf.domain.Company">
+		SELECT b.*
+		FROM qb_company b
+		where 1=1
+		<if test="companyType !=null and companyType !=''">
+			and b.companyType = #{companyType}
+		</if>
+		order by b.id desc
+	</select>
+
+	<select id="getCompanyById" resultType="com.jrmf.domain.Company">
+		SELECT b.*
+		FROM qb_company b where id = #{id}
+	</select>
+
+	<select id="getCompanyCountByIdAndCompanyType" resultType="java.lang.Integer">
+		SELECT COUNT(1) FROM qb_company WHERE userId = #{companyId} AND companyType = #{companyType}
+	</select>
+
+	<select id="listRealityCompany" resultType="com.jrmf.domain.Company">
+		SELECT * FROM qb_company WHERE companyType = '0'
+	</select>
+	<select id="selectCompanyByPlatform" resultType="com.jrmf.domain.Company">
+		SELECT * FROM qb_company WHERE id IN ( SELECT associated_Id FROM platform_associated_info
+		WHERE  associated_type = 2
+	  AND custom_Id = #{customId} )
+	</select>
+	<select id="getLikeCompanyByCompanyName" resultType="com.jrmf.domain.Company">
+		SELECT * FROM qb_company WHERE companyName like concat('%', #{companyName},'%')
+	</select>
+
+	<select id="getCompanyPayChannelRelation" resultType="java.util.Map">
+		select id,companyId,pathNo,corporationAccount,corporationAccountName,corpToBankStandardCode,corporationName
+		from company_paychannel_relation
+		where companyId = #{companyId} and pathNo = #{pathNo}
+	</select>
+	<select id="getIndividualCompanys" resultType="com.jrmf.domain.Company">
+		select * from qb_company where individualBusiness = 1
+		<if test="userId != null and userId != ''">
+			and userId = #{userId}
+		</if>
+		order by id desc
+	</select>
+</mapper>

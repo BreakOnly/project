@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CompanyRateConfDao">
+
+    <insert id="insertCompanyRateConf" useGeneratedKeys="true" keyProperty="id"  parameterType="com.jrmf.domain.CompanyRateConf">
+        insert into company_rate_conf
+        (
+        merchantId,
+        companyId,
+        businessType,
+        gearPosition,
+        amountStart,
+        amountEnd,
+        operator,
+        gearPositionShorthand,
+        gearPositionDesc,
+        costRate,
+        mfkjCostRate,
+        createTime,
+        updateTime,
+        reserved1,
+        reserved2
+        )
+        values
+        (
+        #{merchantId},
+        #{companyId},
+        #{businessType},
+        #{gearPosition},
+        #{amountStart},
+        #{amountEnd},
+        #{operator},
+        #{gearPositionShorthand},
+        #{gearPositionDesc},
+        #{costRate},
+        #{mfkjCostRate},
+        now(),
+        now(),
+        #{reserved1},
+        #{reserved2}
+        )
+    </insert>
+    <select id="listGearPosition" resultType="com.jrmf.domain.CompanyRateConf">
+        select * from company_rate_conf where companyId = #{companyId}
+    </select>
+    <select id="getCompanyRateConfByParam" resultType="com.jrmf.domain.CompanyRateConf">
+        select * from company_rate_conf where 1=1
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="gearPosition != null and gearPosition != ''">
+            and gearPosition = #{gearPosition}
+        </if>
+
+    </select>
+    <select id="getById" resultType="com.jrmf.domain.CompanyRateConf">
+        select * from company_rate_conf where id = #{id}
+    </select>
+    <select id="queryCompanyRateConf" resultType="com.jrmf.domain.CompanyRateConf">
+        SELECT qc.companyName,
+         rc.id,
+	        rc.merchantId,
+	        rc.companyId,
+	        rc.businessType,
+	        rc.gearPosition,
+	        rc.amountStart,
+	        rc.amountEnd,
+	        rc.operator,
+	        rc.gearPositionShorthand,
+	        rc.gearPositionDesc,
+	        rc.mfkjCostRate,
+	        rc.createTime,
+	        rc.updateTime,
+	        rc.gearLabel,
+	        rc.costRate costRate
+        FROM company_rate_conf rc
+        LEFT JOIN qb_company qc
+        ON rc.companyId = qc.userId
+        WHERE rc.companyId = #{companyId}
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <update id="updateGear" parameterType="com.jrmf.domain.CompanyRateConf">
+        UPDATE company_rate_conf
+        <trim prefix="set" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                merchantId =  #{merchantId},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId},
+            </if>
+            <if test="businessType != null and businessType != ''">
+                businessType = #{businessType},
+            </if>
+                <if test="gearPosition != null and gearPosition != ''">
+                    gearPosition = #{gearPosition},
+                </if>
+                <if test="amountStart != null and amountStart != ''">
+                    amountStart = #{amountStart},
+                </if>
+                <if test="amountEnd != null and amountEnd != ''">
+                    amountEnd = #{amountEnd},
+                </if>
+                <if test="operator != null and operator != ''">
+                    operator = #{operator},
+                </if>
+                <if test="gearPositionShorthand != null and gearPositionShorthand != ''">
+                    gearPositionShorthand = #{gearPositionShorthand},
+                </if>
+                <if test="gearPositionDesc != null and gearPositionDesc != ''">
+                    gearPositionDesc = #{gearPositionDesc},
+                </if>
+                <if test="costRate != null and costRate != ''">
+                    costRate = #{costRate},
+                </if>
+                <if test="mfkjCostRate != null and mfkjCostRate != ''">
+                    mfkjCostRate = #{mfkjCostRate},
+                </if>
+                <if test="updateTime != null and updateTime != ''">
+                    updateTime = #{updateTime},
+                </if>
+            <if test="gearLabel != null and gearLabel != ''">
+                gearLabel = #{gearLabel},
+            </if>
+            <if test="netfileId != null and netfileId != ''">
+                netfileId = #{netfileId},
+            </if>
+            </trim>
+        WHERE
+	        id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateCompanyRateConfByCompanyId">
+            UPDATE company_rate_conf SET merchantId =  #{merchantId} WHERE companyId = #{userId}
+    </update>
+
+    <delete id="removeGeraByGearId">
+        DELETE
+        FROM
+	        company_rate_conf
+        WHERE
+            id = #{gearId,jdbcType=INTEGER}
+    </delete>
+    <select id="queryGearInfoByGearId" resultType="int">
+        SELECT
+	        COUNT(1)
+        FROM
+	        company_rate_conf
+        WHERE
+	        id = #{gearId,jdbcType=INTEGER}
+    </select>
+    <select id="queryGearById" resultType="int">
+        SELECT
+	        COUNT(1)
+        FROM
+	        company_rate_conf
+        WHERE
+             gearPosition = #{gearPosition}
+            AND gearGroup = #{gearGroup}
+            AND companyId = #{companyId}
+    </select>
+    <insert id="addCompanyRateConf" useGeneratedKeys="true" keyProperty="id"  parameterType="com.jrmf.domain.CompanyRateConf">
+         insert into company_rate_conf
+         <trim prefix="(" suffix=")" suffixOverrides=",">
+             <if test="merchantId != null and merchantId != ''">
+                 merchantId,
+             </if>
+             <if test="companyId != null and companyId != ''">
+                 companyId,
+            </if>
+         <if test="businessType != null and businessType != ''">
+                 businessType,
+         </if>
+        <if test="gearPosition != null and gearPosition != ''">
+            gearPosition,
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            amountStart,
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            amountEnd,
+        </if>
+        <if test="operator != null and operator != ''">
+            operator,
+        </if>
+        <if test="gearPositionShorthand != null and gearPositionShorthand != ''">
+            gearPositionShorthand,
+        </if>
+        <if test="gearPositionDesc != null and gearPositionDesc != ''">
+            gearPositionDesc,
+        </if>
+        <if test="costRate != null and costRate != ''">
+            costRate,
+        </if>
+        <if test="mfkjCostRate != null and mfkjCostRate != ''">
+            mfkjCostRate,
+        </if>
+         <if test="gearLabel != null and gearLabel != ''">
+                 gearLabel,
+         </if>
+             <if test="netfileId != null and netfileId != ''">
+                 netfileId,
+             </if>
+        createTime,
+        updateTime,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                #{merchantId},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="businessType != null and businessType != ''">
+                1,
+            </if>
+            <if test="gearPosition != null and gearPosition != ''">
+                #{gearPosition},
+            </if>
+            <if test="amountStart != null and amountStart != ''">
+                #{amountStart},
+            </if>
+            <if test="amountEnd != null and amountEnd != ''">
+                #{amountEnd},
+            </if>
+            <if test="operator != null and operator != ''">
+                #{operator},
+            </if>
+            <if test="gearPositionShorthand != null and gearPositionShorthand != ''">
+                #{gearPositionShorthand},
+            </if>
+            <if test="gearPositionDesc != null and gearPositionDesc != ''">
+                #{gearPositionDesc},
+            </if>
+            <if test="costRate != null and costRate != ''">
+                #{costRate},
+            </if>
+            <if test="mfkjCostRate != null and mfkjCostRate != ''">
+                #{mfkjCostRate},
+            </if>
+            <if test="gearLabel != null and gearLabel != ''">
+                #{gearLabel},
+            </if>
+            <if test="netfileId != null and netfileId != ''">
+                #{netfileId},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <select id="queryCustomCompanyConfig" resultType="int">
+        SELECT COUNT(1) FROM (SELECT cc.username,cc.companyName,cc.businessPlatform,cc.customType,crc.id,crc.gearPosition,crc.amountStart,crc.amountEnd,qbc.companyName serviceName FROM channel_custom cc
+        LEFT JOIN custom_company_rate_conf ccrc
+        ON cc.customkey = ccrc.customkey
+        LEFT JOIN company_rate_conf crc
+        ON ccrc.rateConfId = crc.id
+        LEFT JOIN qb_company qbc
+        ON qbc.userId = crc.companyId
+        WHERE crc.id = #{id}) temp
+    </select>
+
+    <select id="getCompanyRateConfById" resultType="com.jrmf.domain.CompanyRateConf">
+        SELECT * FROM company_rate_conf cc
+        LEFT JOIN qb_company qc
+        ON cc.companyId = qc.userId
+        WHERE cc.id = #{id}
+    </select>
+
+    <select id="getCompanyRateConfByCompanyId" resultType="com.jrmf.domain.CompanyRateConf">
+        SELECT * FROM company_rate_conf WHERE companyId = #{userId}
+    </select>
+
+    <select id="queryCompanyRateConfByNetfileId" resultType="int">
+        SELECT count(1) FROM company_rate_conf WHERE netfileId = #{netfileId}
+    </select>
+
+    <select id="getCompanyRateConfByNoIdAndCompanyId" resultType="com.jrmf.domain.CompanyRateConf">
+        SELECT * FROM company_rate_conf WHERE id != #{id} AND companyId = #{companyId}
+    </select>
+
+    <select id="queryCustomCompanyRateConfById" resultType="int">
+        SELECT COUNT(1) FROM company_rate_conf cc
+        LEFT JOIN custom_company_rate_conf ccrc
+        ON cc.id = ccrc.rateConfId
+        WHERE ccrc.rateConfId  = #{id}
+    </select>
+
+    <select id="queryCompanyRateConfCount" resultType="int">
+        SELECT count(1)
+        FROM company_rate_conf rc
+        LEFT JOIN qb_company qc
+        ON rc.companyId = qc.userId
+        WHERE rc.companyId = #{companyId}
+    </select>
+</mapper>

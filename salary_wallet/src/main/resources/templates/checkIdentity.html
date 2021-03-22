@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1.0, user-scalable=0" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="email=no" />
+    <meta name="msapplication-tap-highlight" content="no">
+    <link rel="stylesheet" type="text/css" href="https://stat.jrmf360.com/public/pocketXinshui/css/style.css">
+    <title>实名认证</title>
+    <style>
+      .tip {
+        padding: 20px 0;
+        text-align: center;
+        font-size: 16px;
+      }
+
+      .cell_group {
+        margin-top: 0;
+      }
+
+      .tel_tip {
+        margin: 30px 0;
+        text-align: center;
+        font-size: 12px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="tip">签约前，请先完成实名认证</p>
+    <section class="cell_group">
+      <div class="weui_cell">
+        <label>证件类型</label>
+        <input type="text" value="身份证" readonly>
+      </div>
+      <div class="weui_cell">
+        <label>真实姓名</label>
+        <input type="text" placeholder="请输入姓名" class="username">
+      </div>
+      <div class="weui_cell">
+        <label>证件号码</label>
+        <input type="tel" placeholder="请输入证件号码" class="certID">
+      </div>
+    </section>
+
+    <div class="btn">下一步</div>
+
+    <p class="tel_tip">客服电话：400-000-000</p>
+
+    <div class="toast_panel">
+      <div class="weui_mask_transparent"></div>
+      <div class="weui_toast"></div>
+    </div>
+
+    <div class="loading_panel">
+      <div class="weui_mask_transparent"></div>
+      <div class="loading">
+        <b class="load"></b>
+      </div>
+    </div>
+
+
+    <script type="text/javascript" src="http://stat.jrmf360.com/public/vendor/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="http://stat.jrmf360.com/public/vendor/fastclick.js"></script>
+
+    <script type="text/javascript">
+    
+    
+    var Base = Base || {};
+    Base.domain = "${applicationScope['server.name.url']}";
+      // 提示框
+      function toast(str) {
+
+        var $toast = $('.toast_panel');
+        if ( $toast.css('display')!='none' ) {
+          return false;
+        }
+
+        $toast.children('.weui_toast').html(str);
+        $toast.show().addClass('toast_show');
+
+        setTimeout(function() {
+          $toast.removeClass('toast_show').hide();
+        },2000)
+      }
+
+      function loadingShow() {
+        var $loading = $('.loading_panel');
+        $loading.show().find('.load').addClass('loading_rotate');
+      }
+
+      function loadingHide() {
+        var $loading = $('.loading_panel');
+        $loading.hide().find('.load').removeClass('loading_rotate');
+      }
+
+      // 检验姓名
+      function checkUserName(val) {
+        var val = $.trim(val);
+        var $reg = /^[\u4e00-\u9fa5]+$/;
+        if( $reg.test(val) ) {
+            return true;
+        }else {
+            return false;
+        }
+      }
+
+      // 检验身份证号
+      function checkUserno(val) {
+        var val = $.trim(val);
+        var $reg = /(^\d{15}$)|(^\d{17}([0-9]|[xX])$)/;
+        if( $reg.test(val) ) {
+            return true;
+        }else {
+            return false;
+        }
+      }
+
+
+      $(document).ready(function() {
+        FastClick.attach(document.body);
+
+        $('.btn').click(function() {
+          var username = $.trim($('.username').val());
+          var certId = $.trim($('.certID').val());
+
+          if ( !checkUserName(username) ) {
+            toast('请输入正确的中文姓名');
+            return;
+          }
+
+          if ( !checkUserno(certId) ) {
+            toast('请输入正确的身份证号');
+            return;
+          }
+
+          loadingShow();
+
+          $.ajax({
+            url: "checkIdentity.do?r=" + Math.random(),
+            type: "post",
+            data:{
+              "username": username,
+              "certId": certId
+            },
+            success: function(data) {   
+              loadingHide();
+              if (data.respstat == '1') {
+            	//成功跳转签约页面
+                window.location.href = "gotoagreement.do?r=" + Math.random();
+              }else if (data.respstat == '133'){
+            	//跳转已签约页面
+                window.location.href = "signSuccess.do?r=" + Math.random();
+              }else if(data.respstat == '105'){//有问题
+                window.location.href = "signFail.do?r=" + Math.random();
+              }
+            },
+            error: function() {
+              loadingHide();
+              window.location.href =  "signFail.do?r=" + Math.random();
+            }
+          });
+        });
+
+      });
+
+    </script>
+  </body>
+</html>

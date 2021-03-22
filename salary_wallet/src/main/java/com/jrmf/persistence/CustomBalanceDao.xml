@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomBalanceDao">
+
+	<update id="updateBalance">
+		update qb_custombalance 
+		set 
+			balance = balance + #{amount}
+		where 
+			customkey = #{customkey} and 
+			companyId = #{companyId} and 
+			payType = #{payType}
+	</update>
+
+	<select id="queryBalance" resultType="java.lang.Integer">
+		select sum(balance) from qb_custombalance
+		<trim prefix=" where " suffixOverrides="and">
+			<if test="customkey != null and customkey != ''">
+				customkey = #{customkey} and
+			</if>
+			<if test="companyId != null and companyId != ''">
+				companyId = #{companyId} and
+			</if>
+			<if test="payType != null and payType != ''">
+				payType = #{payType} and
+			</if>
+		</trim>
+	</select>
+
+	<insert id="initCustomBalance" parameterType="Map">
+		INSERT INTO qb_custombalance (
+		`customkey`,
+		`companyId`,
+		`payType`,
+		`balance`
+		)
+		VALUES
+			(
+				#{customkey},
+				#{companyId},
+				#{payType},
+				0
+			);
+	</insert>
+
+
+	<select id="queryCompanyAccount" resultType="com.jrmf.domain.CompanyAccount">
+		select c.companyName as 'customName',qc.companyName as 'companyName',r.customkey,r.companyId,
+		(select cast(COALESCE(SUM(h.amount),0) as decimal(15,2)) from qb_channelhistory h where h.transfertype=1 and h.status=0 and h.customkey=r.customKey and h.recCustomkey=r.companyId) as 'waitConfirmedBalance',
+		cast(SUM(case r.payType
+		when 2 then r.balance/100 ELSE 0 END) as decimal(15,2)) as 'alipayBlance',
+		cast(SUM(case r.payType
+		when 3 then r.balance/100 ELSE 0 END) as decimal(15,2)) as 'wechatBalance',
+		cast(SUM(case r.payType
+		when 4 then r.balance/100 ELSE 0 END) as decimal(15,2)) as 'bankCardBalance',
+		cast(COALESCE(SUM(r.balance/100),0) as decimal(15,2)) as 'balanceSum'
+		from channel_custom c
+		left join qb_custombalance r on c.customKey=r.customKey
+		left join qb_company qc on qc.userId= r.companyId
+		<trim prefix=" where " suffixOverrides="and">
+			c.customType!=4 and
+			<if test="customKey != null and customKey != ''">
+				c.customkey = #{customKey} and
+			</if>
+			<if test="customName != null and customName != ''">
+				c.companyName like concat('%', #{customName}, '%') and
+			</if>
+			<if test="companyId != null and companyId != ''">
+				r.companyId = #{companyId} and
+			</if>
+		</trim>
+		group by r.customkey,r.companyId
+		ORDER BY
+		bankCardBalance DESC,
+		waitConfirmedBalance DESC
+		<if test="start !=null and limit !=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+
+	<select id="queryCustomBalance" resultType="java.lang.String">
+		SELECT
+		CAST( balance / 100 AS DECIMAL ( 15, 2 ) )
+		FROM
+		qb_custombalance
+		WHERE
+		customkey =  #{customKey}
+		AND companyId = #{companyId}
+		AND payType = #{payType};
+	</select>
+	<select id="queryCustomBalanceForUpdate" resultType="java.lang.String">
+			SELECT
+				CAST( balance / 100 AS DECIMAL ( 15, 2 ) )
+			FROM
+				qb_custombalance
+			WHERE
+				customkey =  #{customKey}
+				AND companyId = #{companyId}
+				AND payType = #{payType} FOR UPDATE;
+	</select>
+</mapper>

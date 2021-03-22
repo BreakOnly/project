@@ -1,0 +1,429 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SignShareDao">
+    <select id="getSignShareByParam" resultType="com.jrmf.domain.SignShare">
+        SELECT
+        ts.id,
+        ts.type,
+        CASE ts.type WHEN 1 THEN '按服务公司共享'
+        WHEN 2 THEN '按商户共享'
+        WHEN 3 THEN '商户间一对多共享' END AS typeName,
+        cc.companyName,
+        ts.customkey,
+        ts.`status`,
+        CASE ts.`status` WHEN 0 THEN '失效'
+        WHEN 1 THEN '正常' END AS statusName,
+        ts.limitGroupId,
+        ts.limitName,
+        ts.createTime,
+        ts.updateTime
+        FROM
+        t_sign_share_scope ts
+        LEFT JOIN t_sign_share_limit tl ON ts.limitGroupId = tl.limitGroupId
+        LEFT JOIN channel_custom cc ON ts.customkey = cc.customkey
+        WHERE 1 = 1
+        <if test="companyName != null and companyName != ''">
+            AND cc.companyName LIKE concat('%',#{companyName},'%')
+        </if>
+        <if test="limitName != null and limitName != ''">
+            AND ts.limitName LIKE concat('%',#{limitName},'%')
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND date(ts.createTime) &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND date(ts.createTime) &lt;= #{endDate}
+        </if>
+        <if test="status != null and status != ''">
+            AND ts.status = #{status}
+        </if>
+        <if test="type != null and type != ''">
+            AND ts.type = #{type}
+        </if>
+        GROUP BY ts.id
+        ORDER BY ts.createTime DESC
+    </select>
+
+    <insert id="insertSignShare" parameterType="com.jrmf.domain.SignShare" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_sign_share_scope
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="type != null and type != ''">
+                type,
+            </if>
+            <if test="customkey != null and customkey != ''">
+                customkey,
+            </if>
+            <if test="limitGroupId != null and limitGroupId != ''">
+                limitGroupId,
+            </if>
+            <if test="limitName != null and limitName != ''">
+                limitName,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="type != null and type != ''">
+                #{type},
+            </if>
+            <if test="customkey != null and customkey != ''">
+                #{customkey},
+            </if>
+            <if test="limitGroupId != null and limitGroupId != ''">
+                #{limitGroupId},
+            </if>
+            <if test="limitName != null and limitName != ''">
+                #{limitName},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <insert id="insertSignShareLimitInfo" parameterType="com.jrmf.domain.SignShare">
+        INSERT INTO t_sign_share_limit
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="limitGroupId != null and limitGroupId != ''">
+                limitGroupId,
+            </if>
+            <if test="customkey != null and customkey != ''">
+                customkey,
+            </if>
+            <if test="shareCustomkey != null and shareCustomkey != ''">
+                shareCustomkey,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="limitGroupId != null and limitGroupId != ''">
+                #{limitGroupId},
+            </if>
+            <if test="customkey != null and customkey != ''">
+                #{customkey},
+            </if>
+            <if test="shareCustomkey != null and shareCustomkey != ''">
+                #{shareCustomkey},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <update id="updateSignShare" parameterType="com.jrmf.domain.SignShare">
+        UPDATE t_sign_share_scope
+        <trim prefix="set" suffixOverrides=",">
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if>
+            <if test="customkey != null and customkey != ''">
+                customkey = #{customkey},
+            </if>
+            <if test="limitGroupId != null">
+                limitGroupId = #{limitGroupId},
+            </if>
+            <if test="limitName != null">
+                limitName = #{limitName},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            updateTime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSignShare">
+        DELETE FROM t_sign_share_scope WHERE id = #{id}
+    </delete>
+
+    <select id="getSignShareLimitByLimitGroupId" resultType="com.jrmf.domain.SignShare">
+        SELECT
+            tsl.id,
+            tsl.limitGroupId,
+            tss.limitName,
+            tss.type,
+            tsl. STATUS,
+            tsl.shareCustomkey,
+            cc.companyName,
+            tsl.createTime,
+            tsl.updateTime
+        FROM
+            t_sign_share_limit tsl
+        LEFT JOIN channel_custom cc ON tsl.shareCustomkey = cc.customkey
+        LEFT JOIN t_sign_share_scope tss ON tsl.limitGroupId = tss.limitGroupId
+        WHERE tsl.limitGroupId = #{limitGroupId}
+    </select>
+
+    <select id="getSignShareByLimitName" resultType="com.jrmf.domain.SignShare">
+        SELECT * FROM t_sign_share_scope WHERE limitName = #{limitName}
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+
+    <update id="updateSignShareLimitStatus">
+        UPDATE t_sign_share_limit SET `status` = #{status} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteSignShareLimit">
+        DELETE FROM t_sign_share_limit WHERE id = #{id}
+    </delete>
+
+    <select id="getSignShareLimitByShareCustomkey" resultType="com.jrmf.domain.SignShare">
+        SELECT * FROM t_sign_share_limit WHERE shareCustomkey = #{shareCustomkey} AND limitGroupId = #{limitGroupId}
+    </select>
+
+    <select id="getSignElementRule" resultType="com.jrmf.domain.SignElementRule">
+        SELECT
+        tse.id,
+        tse.merchantId,
+        qci.customname as merchantName,
+        tse.companyId,
+        qc.companyName,
+        tse.remark,
+        tse.createTime,
+        tse.updateTime,
+        tse.signLevel,
+        CASE tse.signLevel
+        WHEN 'L2' THEN
+        '二要素签约'
+        WHEN 'L3' THEN
+        '三要素签约'
+        WHEN 'L4' THEN
+        '四要素签约'
+        END AS signLevelName,
+        tse.papersRequire,
+        CASE tse.papersRequire
+        WHEN 0 THEN '无'
+        WHEN 1 THEN '身份证正反面' END AS papersRequireName,
+        tse.signRule,
+        CASE tse.signRule
+        WHEN 0 THEN '无限制'
+        WHEN 1 THEN '先签约后支付' END AS signRuleName,
+        tse.`status`,
+        CASE tse.`status`
+        WHEN 0 THEN
+        '失效'
+        WHEN 1 THEN
+        '正常'
+        END AS statusName
+        FROM
+        t_sign_element_rule tse
+        LEFT JOIN qb_company qc ON tse.companyId = qc.userId
+        LEFT JOIN qb_custom_info qci ON qci.customkey = tse.merchantId
+        WHERE
+        1 = 1
+        <if test="companyId != null and companyId != ''">
+            AND qc.userId = #{companyId}
+        </if>
+        <if test="merchantId != null and merchantId != ''">
+            AND tse.merchantId = #{merchantId}
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND date(tse.createTime) &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND date(tse.createTime) &lt;= #{endDate}
+        </if>
+        <if test="status != null and status != ''">
+            AND tse.status = #{status}
+        </if>
+        <if test="signRule != null and signRule != ''">
+            AND tse.signRule = #{signRule}
+        </if>
+        <if test="signLevel != null and signLevel != ''">
+            AND FIND_IN_SET(tse.signLevel,#{signLevel})
+        </if>
+        ORDER BY tse.createTime DESC
+    </select>
+
+    <delete id="deleteSignElementRule">
+        DELETE FROM t_sign_element_rule WHERE id = #{id}
+    </delete>
+
+    <insert id="insertSignElementRule" parameterType="com.jrmf.domain.SignElementRule">
+        INSERT INTO t_sign_element_rule
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                merchantId,
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId,
+            </if>
+            <if test="signLevel != null and signLevel != ''">
+                signLevel,
+            </if>
+            <if test="signRule != null">
+                signRule,
+            </if>
+            <if test="papersRequire != null">
+                papersRequire,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                #{merchantId},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="signLevel != null and signLevel != ''">
+                #{signLevel},
+            </if>
+            <if test="signRule != null">
+                #{signRule},
+            </if>
+            <if test="papersRequire != null">
+                #{papersRequire},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="remark != null">
+                #{remark},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <select id="getSignShareById" resultType="com.jrmf.domain.SignShare">
+        select * from t_sign_share_scope where id = #{id}
+    </select>
+
+    <delete id="deleteSignShareLimitByGroupId">
+        DELETE FROM t_sign_share_limit WHERE limitGroupId = #{groupId}
+    </delete>
+
+    <update id="updateSignElementRule" parameterType="com.jrmf.domain.SignElementRule">
+        UPDATE t_sign_element_rule
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="merchantId != null">
+                merchantId = #{merchantId},
+            </if>
+            <if test="companyId != null">
+                companyId = #{companyId},
+            </if>
+            <if test="signLevel != null">
+                signLevel = #{signLevel},
+            </if>
+            <if test="signRule != null">
+                signRule = #{signRule},
+            </if>
+            <if test="papersRequire != null">
+                papersRequire = #{papersRequire},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            updateTime = now(),
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+    <select id="getSignShareByCustomKey" resultType="com.jrmf.domain.SignShare">
+        SELECT * FROM t_sign_share_scope WHERE status=1 and type =#{type} and customkey = #{customKey} limit 1
+    </select>
+
+    <select id="getSignShareByCustomKey2" resultType="com.jrmf.domain.SignShare">
+        SELECT * FROM t_sign_share_scope WHERE customkey = #{customkey}
+        <if test="id != null and id != ''">
+            and id != #{id}
+        </if>
+    </select>
+
+    <select id="getSignElementRuleByCompanyId" resultType="com.jrmf.domain.SignElementRule">
+        select * from t_sign_element_rule where companyId = #{companyId} limit 1
+    </select>
+
+    <select id="getSignElementRuleByCompanyIdAndId" resultType="com.jrmf.domain.SignElementRule">
+        select * from t_sign_element_rule where companyId = #{companyId}
+        <if test="id != null and id != ''">
+            and id != #{id}
+        </if>
+    </select>
+
+    <select id="getSignShareLimitCustomKeysByLimitGroupId" resultType="java.lang.String">
+        select GROUP_CONCAT(shareCustomkey) from t_sign_share_limit where limitGroupId = #{limitGroupId}
+    </select>
+
+    <select id="getSignShareLimitByLimitName" resultType="com.jrmf.domain.SignShare">
+        select * from t_sign_share_limit where limitName = #{limitName}
+    </select>
+
+    <update id="updateSignShareLimitByGroupId" parameterType="com.jrmf.domain.SignShare">
+        UPDATE t_sign_share_limit
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="limitGroupId != null and limitGroupId != ''">
+                limitGroupId = #{limitGroupId},
+            </if>
+            <if test="customkey != null and customkey != ''">
+                customkey = #{customkey},
+            </if>
+            <if test="shareCustomkey != null and shareCustomkey != ''">
+                shareCustomkey = #{shareCustomkey},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            updateTime = now(),
+        </trim>
+        WHERE limitGroupId = #{oldLimitGroupId}
+    </update>
+
+    <update id="updateSignShareLimit" parameterType="com.jrmf.domain.SignShare">
+        UPDATE t_sign_share_limit
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="limitGroupId != null and limitGroupId != ''">
+                limitGroupId = #{limitGroupId},
+            </if>
+            <if test="customkey != null and customkey != ''">
+                customkey = #{customkey},
+            </if>
+            <if test="shareCustomkey != null and shareCustomkey != ''">
+                shareCustomkey = #{shareCustomkey},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+                updateTime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="getSignShareByType" resultType="com.jrmf.domain.SignShare">
+        SELECT
+            tsc.*, cc.companyName
+        FROM
+            t_sign_share_scope tsc
+        LEFT JOIN channel_custom cc ON tsc.customkey = cc.customkey
+        WHERE
+            tsc.type = #{type}
+        AND `status` = 1
+    </select>
+</mapper>

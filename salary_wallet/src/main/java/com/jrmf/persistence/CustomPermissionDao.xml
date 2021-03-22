@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomPermissionDao">
+	<select id="getCustomContentByCustomId" resultType="com.jrmf.domain.ChannelCustomCatalog">
+		select cp.id id,cp.contentName content,cp.link link,cp.contentLevel contentLevel,cp.imgUrl imgUrl,cp.parentId parentId
+		from custom_permission_relation cr left join custom_permission cp on cp.id = cr.permission_id
+		where cp.isShow=1
+		<if test="id!=null and id!='' ">
+	  		and cr.custom_id=#{id}
+	  	</if>
+		<if test="level!=null and level!='' ">
+	  		and cp.contentLevel=#{level}
+	  	</if>
+	  	order by showLevel asc
+	</select>
+
+	<select id="getAllPermission" resultType="com.jrmf.domain.ChannelPermission">
+		select * from custom_permission
+		order by showLevel asc
+	</select>
+
+	<select id="getCustomPermission" resultType="com.jrmf.domain.ChannelPermission">
+		select p.*
+		from custom_permission_relation r, custom_permission p
+		where p.id = r.permission_id
+		and p.isShow=1
+		and r.custom_id=#{id}
+		order by showLevel asc
+	</select>
+	<select id="getCustomPermissionReal" resultType="com.jrmf.domain.ChannelPermission">
+		select p.*
+		from custom_permission_relation r, custom_permission p
+		where p.id = r.permission_id
+		and r.custom_id=#{id}
+		order by showLevel asc
+	</select>
+
+	<delete id="deleteCustomPermission" >
+		delete from custom_permission_relation
+		where custom_id=#{cutomId}
+	</delete>
+
+	<insert id="saveCustomPermission" >
+		<selectKey keyProperty="id" resultType="long">
+            select LAST_INSERT_ID()
+        </selectKey>
+		insert into custom_permission_relation(
+		custom_id,
+		permission_id
+		)values
+		<foreach collection="ids" item="item" index="index" separator=",">
+			(#{customId},
+			#{item})
+		</foreach>
+	</insert>
+
+	<select id="getPermissionUrlByCustomId" resultType="string">
+		select p.link
+		from custom_permission_relation r left join custom_permission p
+		on p.id = r.permission_id
+		where r.custom_id=#{id}
+		order by showLevel asc
+	</select>
+
+
+	<insert id="savePermission" keyProperty="id"
+		useGeneratedKeys="true" parameterType="com.jrmf.domain.ChannelPermission">
+		insert into custom_permission
+		(contentName,
+		contentLevel,
+		parentId,
+		link,
+		isShow,
+		showLevel,
+		createTime,
+		imgUrl,
+		description
+		)values(
+		#{contentName},
+		#{contentLevel},
+		#{parentId},
+		#{link},
+		#{isShow},
+		#{showLevel},
+		now(),
+		#{imgUrl},
+		#{description}
+		)
+	</insert>
+
+	<update id="updatePermission" parameterType="com.jrmf.domain.ChannelPermission">
+		<trim prefix="UPDATE custom_permission SET " suffixOverrides=",">
+			<if test="contentName != null and contentName != ''">
+				contentName = #{contentName},
+			</if>
+			<if test="link != null and link != ''">
+				link =#{link},
+			</if>
+			<if test="isShow != null">
+				isShow =#{isShow},
+			</if>
+			<if test="imgUrl != null and imgUrl != ''">
+				imgUrl =#{imgUrl},
+			</if>
+			<if test="showLevel != null">
+				showLevel = #{showLevel},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+		</trim>
+		WHERE
+		id=#{id}
+	</update>
+
+	<select id="getPermissionDetailById" resultType="com.jrmf.domain.ChannelPermission">
+		select *  from custom_permission p
+		where p.id = #{id}
+	</select>
+
+		<!-- 保存用户权限分配根据模板id -->
+	<insert id="saveCustomPermissionByTempId">
+		insert into custom_permission_relation(custom_id,permission_id,type)values(#{customId},#{tempId},2)
+	</insert>
+
+	<!-- 根据渠道id查询使用权限类型 -->
+	<select id="getTempTypeByCustomId" parameterType="int" resultType="map">
+		select ifnull(type,1)type ,count(1)count from custom_permission_relation where custom_id=#{id} GROUP BY type
+	</select>
+
+	<!-- 根据渠道id获取模板id -->
+	<select id="getCustomPermissionTemp" parameterType="int" resultType="String">
+		select permission_id from custom_permission_relation where custom_id=#{id}
+	</select>
+
+	<!-- 根据模板列表id获取菜单集合 -->
+	<select id="getCustomPermissionByIds" parameterType="String" resultType="com.jrmf.domain.ChannelPermission">
+	    select * from custom_permission where find_in_set(id,#{menuIds})
+	</select>
+
+	<!-- 获取商户已分配模板映射 -->
+	<select id="getPermissionTempMapping" parameterType="com.jrmf.domain.Page" resultType="map">
+		select
+			cpr.id,
+			cb.companyName,
+			cpt.temp_name tempName,
+			cpt.type,
+			date_format(cpr.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+			date_format(cpr.update_time,'%Y-%m-%d %H:%i:%s') updateTime,
+			cc.customkey,
+			cpr.add_user addUser,
+			cpr.permission_id tempId
+		from custom_permission_relation cpr
+		left join custom_permission_template cpt on cpr.permission_id=cpt.id
+		left join channel_custom cc on cpr.custom_id=cc.id
+		left join channel_custom cb on cb.customkey=ifnull(cc.masterCustom,cc.customkey)
+		where cpr.type=#{params.type} and cpr.custom_id=#{params.customId}
+		ORDER BY cpr.id desc
+	    <if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+        </if>
+	</select>
+
+	<!-- 获取商户已分配模板映射 -->
+	<select id="getPermissionTempMappingCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		select count(id) from
+		(select
+			cpr.id,
+			cc.companyName,
+			cpt.temp_name tempName,
+			cpt.type,
+			date_format(cpr.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+			date_format(cpr.update_time,'%Y-%m-%d %H:%i:%s') updateTime,
+			cc.customkey,
+			cpr.add_user addUser,
+			cpr.permission_id tempId
+		from custom_permission_relation cpr
+		left join channel_custom cc on cpr.custom_id=cc.id
+		left join custom_permission_template cpt on cpr.permission_id=cpt.id
+		where cpr.type=#{params.type} and cpr.custom_id=#{params.customId}
+		ORDER BY cpr.id desc)temp
+	</select>
+
+	<!-- 根据条件查询商户关联菜单权限 -->
+	<select id="getCustomMenuIdsByLevel" parameterType="map" resultType="map">
+	  	select cp.id,cp.parentId pId,cp.contentName name,cp.link url,cp.imgUrl,cp.description from custom_permission_relation cpr
+	  	left join custom_permission cp on cpr.permission_id = cp.id
+	  	where 1=1
+	  	<if test="type!=null and type!=''">
+	  		<if test="type=='1'">
+	  		and cpr.type is null
+	  		</if>
+	  		<if test="type=='2'">
+	  		and cpr.type = 2
+	  		</if>
+	  	</if>
+	  	<if test="contentLevel!=null and contentLevel!=''">
+	  	and contentLevel = #{contentLevel}
+	  	</if>
+		<if test="parentId!=null and parentId!=''">
+		 and parentId = #{parentId}
+		</if>
+		<if test="customId!=null and customId!=''">
+		and cpr.custom_id=#{customId}
+		</if>
+		order by cp.showLevel asc
+	</select>
+
+	<!-- 获取商户的权限模板 -->
+	<select id="getCustomPerissionMapping" parameterType="map" resultType="String">
+        select permission_id from custom_permission_relation where 1=1
+        <if test="type!=null and type!=''">
+        and type = #{type}
+        </if>
+        <if test="customId!=null and customId!=''">
+        and custom_id = #{customId}
+        </if>
+	</select>
+
+	<!-- 根据菜单字符集获取菜单信息 -->
+	<select id="getCustomMenuIdsTempByLevel" parameterType="map" resultType="map">
+		select id,parentId pId,contentName name,link url,imgUrl,description from custom_permission where isShow=1 and FIND_IN_SET(id,#{menuIds})
+		<if test="contentLevel!=null and contentLevel!=''">
+		 and contentLevel = #{contentLevel}
+		</if>
+		<if test="parentId!=null and parentId!=''">
+		 and parentId = #{parentId}
+		</if>
+		order by showLevel asc
+	</select>
+
+	<!-- 获取指定菜单下子菜单数量 -->
+	<select id="checkIsHaveChild" parameterType="int" resultType="int">
+		select count(id) from custom_permission where parentId=#{value}
+	</select>
+
+</mapper>

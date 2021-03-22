@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.TaskBaseConfigDao" >
+
+  <select id="getConfigByOsId" resultType="com.jrmf.domain.TaskBaseConfig">
+    SELECT
+        tbc.id,
+        tbc.taskType,
+        tbc.osId,
+        GROUP_CONCAT( tcc.customKey ) customKeys
+    FROM
+        task_custom_config tcc
+        LEFT JOIN task_base_config tbc ON tcc.baseConfigId = tbc.id
+    WHERE
+        tcc.configStatus = 0
+        AND tbc.configStatus = 0
+        AND tbc.osId = #{osId}
+    GROUP BY
+        tbc.id
+        LIMIT 1
+  </select>
+
+</mapper>

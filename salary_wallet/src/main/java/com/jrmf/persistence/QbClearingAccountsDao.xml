@@ -1,0 +1,470 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbClearingAccountsDao" >
+
+  <insert id="insert" parameterType="com.jrmf.domain.QbClearingAccounts" >
+    insert into qb_clearing_accounts (id, customkey, merchantName, 
+      transMonth, agentId, agentName, 
+      businessManager, companyId, companyName, 
+      gearLaber, smallAmountOne, smallAmountTwo, 
+      bigAmount, totalAmount, merchantRateRule, 
+      smallAmountOneRate, smallAmountTwoRate, 
+      bigAmountRate, companySmallAmount, companyBigAmount, 
+      agentSmallRate, agentBigRate, agentSmallAmount, 
+      agentBigAmount, agentTotalAmount, agentCommission, 
+      createTime,smallAmountOneRateUpdate,smallAmountTwoRateUpdate,
+      bigAmountRateUpdate,agentSmallRateUpdate,agentBigRateUpdate,
+      repairCommission,agentFinalCommission,differSmallOneMerAmountDesc,differSmallTwoMerAmountDesc,differBigMerAmountDesc,differAgentSmallAmountDesc,differAgentBigAmountDesc)
+    values (#{id,jdbcType=INTEGER}, #{customkey,jdbcType=VARCHAR}, #{merchantName,jdbcType=VARCHAR}, 
+      #{transMonth,jdbcType=VARCHAR}, #{agentId,jdbcType=VARCHAR}, #{agentName,jdbcType=VARCHAR}, 
+      #{businessManager,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR}, 
+      #{gearLaber,jdbcType=VARCHAR}, #{smallAmountOne,jdbcType=VARCHAR}, #{smallAmountTwo,jdbcType=VARCHAR}, 
+      #{bigAmount,jdbcType=VARCHAR}, #{totalAmount,jdbcType=VARCHAR}, #{merchantRateRule,jdbcType=VARCHAR}, 
+      #{smallAmountOneRate,jdbcType=VARCHAR}, #{smallAmountTwoRate,jdbcType=VARCHAR}, 
+      #{bigAmountRate,jdbcType=VARCHAR}, #{companySmallAmount,jdbcType=VARCHAR}, #{companyBigAmount,jdbcType=VARCHAR}, 
+      #{agentSmallRate,jdbcType=VARCHAR}, #{agentBigRate,jdbcType=VARCHAR}, #{agentSmallAmount,jdbcType=VARCHAR}, 
+      #{agentBigAmount,jdbcType=VARCHAR}, #{agentTotalAmount,jdbcType=VARCHAR}, #{agentCommission,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR},#{smallAmountOneRateUpdate,jdbcType=VARCHAR},#{smallAmountTwoRateUpdate,jdbcType=VARCHAR},
+      #{bigAmountRateUpdate,jdbcType=VARCHAR},#{agentSmallRateUpdate,jdbcType=VARCHAR},#{agentBigRateUpdate,jdbcType=VARCHAR},
+      #{repairCommission,jdbcType=VARCHAR},#{agentFinalCommission,jdbcType=VARCHAR},#{differSmallOneMerAmountDesc,jdbcType=VARCHAR},
+      #{differSmallTwoMerAmountDesc,jdbcType=VARCHAR},#{differBigMerAmountDesc,jdbcType=VARCHAR},
+      #{differAgentSmallAmountDesc,jdbcType=VARCHAR},#{differAgentBigAmountDesc,jdbcType=VARCHAR})
+  </insert>
+ 
+ <!-- 分组查询清结算条件数据 -->
+ <select id="groupClearTerm" resultType="map" parameterType="String">
+	   select qu.*,crc.id rateConfId,cnrc.gearLabel,crc.gearPosition,pcm.proxyFeeRate,pcm.netfileId from 
+		(
+			select 
+			    rateInterval,
+				originalId, 
+				companyId, 
+				if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey) businessChannelKey,
+				calculationRates 
+			from qb_usercommission 
+	        where status=1 and rateInterval is not null 
+	        and DATE_FORMAT(createtime,'%Y-%m')=#{month}
+	        GROUP BY rateInterval, originalId, companyId, calculationRates, if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey)
+			 ) qu   
+       left join company_rate_conf crc on qu.rateInterval=concat(crc.amountStart,crc.operator, crc.amountEnd) and qu.companyId=crc.companyId   
+       left join company_netfile_rate_conf cnrc on crc.netfileId=cnrc.id   
+       left join proxy_cost_maintain pcm on qu.businessChannelKey=pcm.customkey and qu.companyId=pcm.companyId and cnrc.id=pcm.netfileId
+	   where pcm.proxyFeeRate is not null
+ </select>
+ 
+ <!-- 根据清结算分组条件查询汇总金额数据 -->
+ <select id="getSumAmountByTerm" parameterType="map" resultType="map">
+ 	select cc.companyName merchantName,cg.companyName agentName,qc.companyName,cc.businessManager,CAST(sum(amount) AS DECIMAL(16,2)) totalAmount,
+ 	CAST(sum(if(qu.feeRuleType=1,amount,0)) as DECIMAL(16,2)) oneAmount,
+    CAST(sum(if(qu.feeRuleType=2,amount,0)) as DECIMAL(16,2)) twoAmount,
+ 	companyId,originalId,DATE_FORMAT(qu.createtime,'%Y-%m') transMonth 
+	from qb_usercommission qu
+		left join channel_custom cc on qu.originalId=cc.customkey
+		left join qb_company qc on qc.userId=qu.companyId
+		left join channel_custom cg on cg.customkey=qu.businessChannelKey
+	where DATE_FORMAT(qu.createtime,'%Y-%m')=#{month}
+	and qu.status=1 
+	and qu.rateInterval=#{rateInterval}
+	and qu.calculationRates =#{calculationRates}
+	and qu.businessChannelKey =#{businessChannelKey}
+	and qu.companyId=#{companyId}
+	and qu.originalId=#{originalId}
+ </select>
+ 
+  <!-- 根据清结算分组条件查询汇总金额数据 -->
+ <select id="getSumAmountByUpdateTime" parameterType="map" resultType="map">
+	select CAST(sum(amount) AS DECIMAL(16,2)) totalAmount,
+	 	CAST(sum(if(feeRuleType=1,amount,0)) as DECIMAL(16,2)) oneAmount,
+        CAST(sum(if(feeRuleType=2,amount,0)) as DECIMAL(16,2)) twoAmount
+	 from 
+		 (select * from qb_usercommission qu 
+		    where DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{modifyEffectStartTime}
+		    and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{modifyEffectEndTime}
+			and qu.status=1 
+			and qu.rateInterval=#{rateInterval}
+			and qu.calculationRates =#{merchantRateRule}
+			and qu.businessChannelKey =#{agentId}
+			and qu.companyId=#{companyId}
+			and qu.originalId=#{customkey}
+			)temp  
+	where DATE_FORMAT(temp.createtime,'%Y-%m')=#{month}
+ </select>
+ 
+   <!-- 根据清结算分组条件查询汇总金额数据 -->
+ <select id="getSumAmountByAgentUpdateTime" parameterType="map" resultType="String">
+	select CAST(sum(amount) AS DECIMAL(16,2)) totalAmount from 
+		 (select * from qb_usercommission qu 
+		    where DATE_FORMAT(qu.createtime,'%Y-%m-%d')&gt;=#{updateAgentRateStartTime}
+		    and DATE_FORMAT(qu.createtime,'%Y-%m-%d')&lt;=#{updateAgentRateEndTime}
+			and qu.status=1 
+			and qu.rateInterval=#{rateInterval}
+			and qu.calculationRates =#{merchantRateRule}
+			and qu.businessChannelKey =#{agentId}
+			and qu.companyId=#{companyId}
+			and qu.originalId=#{customkey}
+			)temp  
+	where DATE_FORMAT(temp.createtime,'%Y-%m')=#{month}
+ </select>
+ 
+ <!-- 分页查询清结算报表分页 -->
+ <select id="getClearAccountsByPage" parameterType="com.jrmf.domain.Page" resultType="com.jrmf.domain.QbClearingAccounts">
+ 	select ca.* from qb_clearing_accounts ca
+ 	    left join channel_custom cc on ca.customkey = cc.customkey
+ 	where 1=1
+ 	<if test="params.merchantName!=null and params.merchantName!=''">
+ 		and ca.merchantName like concat ('%',#{params.merchantName},'%')
+ 	</if>
+ 	<if test="params.companyId!=null and params.companyId!=''">
+		and ca.companyId = #{params.companyId}
+ 	</if>
+	 <if test="params.businessPlatformId!=null and params.businessPlatformId!=''">
+		 and cc.businessPlatformId = #{params.businessPlatformId}
+	 </if>
+ 	<if test="params.startTime!=null and params.startTime!=''">
+ 		and ca.transMonth &gt;= #{params.startTime}
+ 	</if>
+ 	<if test="params.endTime!=null and params.endTime!=''">
+ 		and ca.transMonth &lt;= #{params.endTime}
+ 	</if>
+ 	<if test="params.agentName!=null and params.agentName!=''">
+		and ca.agentName like concat('%',#{params.agentName},'%')
+ 	</if>
+ 	<if test="params.businessManager!=null and params.businessManager!=''">
+ 		and ca.businessManager like concat('%',#{params.businessManager},'%')
+ 	</if>
+ 	<if test="params.startCommission!=null and params.startCommission!=''">
+ 		and ca.agentCommission &gt;=CAST(#{params.startCommission} AS DECIMAL(9,2))
+ 	</if>
+ 	<if test="params.endCommission!=null and params.endCommission!=''">
+ 		and ca.agentCommission &lt;=CAST(#{params.endCommission} AS DECIMAL(9,2))
+ 	</if>
+ 	ORDER BY ca.id desc
+ </select>
+ 
+ <!-- 查询清结算报表条数 -->
+ <select id="getClearAccountsCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  	select count(1) from qb_clearing_accounts where 1=1
+  	 <if test="params.merchantName!=null and params.merchantName!=''">
+ 		and merchantName like concat ('%',#{params.merchantName},'%')
+ 	</if>
+ 	<if test="params.companyId!=null and params.companyId!=''">
+		and companyId = #{params.companyId}
+ 	</if>
+ 	<if test="params.startTime!=null and params.startTime!=''">
+ 		and transMonth &gt;= #{params.startTime}
+ 	</if>
+ 	<if test="params.endTime!=null and params.endTime!=''">
+ 		and transMonth &lt;= #{params.endTime}
+ 	</if>
+ 	<if test="params.agentName!=null and params.agentName!=''">
+		and agentName like concat('%',#{params.agentName},'%')
+ 	</if>
+ 	<if test="params.businessManager!=null and params.businessManager!=''">
+ 		and businessManager like concat('%',#{params.businessManager},'%')
+ 	</if>
+ 	<if test="params.startCommission!=null and params.startCommission!=''">
+ 		and agentCommission &gt;=CAST(#{params.startCommission} AS DECIMAL(9,2))
+ 	</if>
+ 	<if test="params.endCommission!=null and params.endCommission!=''">
+ 		and agentCommission &lt;=CAST(#{params.endCommission} AS DECIMAL(9,2))
+ 	</if>
+ </select>
+
+ <!-- 查询清结算报表不分页 -->
+ <select id="getClearAccountsNoPage" parameterType="com.jrmf.domain.Page" resultType="com.jrmf.domain.QbClearingAccounts">
+	select ca.* from qb_clearing_accounts ca
+		left join channel_custom cc on ca.customkey = cc.customkey
+  	where 1=1
+ 	<if test="params.merchantName!=null and params.merchantName!=''">
+ 		and ca.merchantName like concat ('%',#{params.merchantName},'%')
+ 	</if>
+ 	<if test="params.companyId!=null and params.companyId!=''">
+		and ca.companyId = #{params.companyId}
+ 	</if>
+ 	<if test="params.startTime!=null and params.startTime!=''">
+ 		and ca.transMonth &gt;= #{params.startTime}
+ 	</if>
+ 	<if test="params.endTime!=null and params.endTime!=''">
+ 		and ca.transMonth &lt;= #{params.endTime}
+ 	</if>
+ 	<if test="params.agentName!=null and params.agentName!=''">
+		and ca.agentName like concat('%',#{params.agentName},'%')
+ 	</if>
+ 	<if test="params.businessManager!=null and params.businessManager!=''">
+ 		and ca.businessManager like concat('%',#{params.businessManager},'%')
+ 	</if>
+ 	<if test="params.startCommission!=null and params.startCommission!=''">
+ 		and ca.agentCommission &gt;=CAST(#{params.startCommission} AS DECIMAL(9,2))
+ 	</if>
+ 	<if test="params.endCommission!=null and params.endCommission!=''">
+ 		and ca.agentCommission &lt;=CAST(#{params.endCommission} AS DECIMAL(9,2))
+ 	</if>
+	 <if test="params.businessPlatformId!=null and params.businessPlatformId!=''">
+		and cc.businessPlatformId = #{params.businessPlatformId}
+	 </if>
+ 	ORDER BY ca.id desc
+ </select>
+ 
+ <!-- 删除清结算数据 -->
+ <delete id="deleteClearAccountAllByMonth" parameterType="map">
+ 	delete from qb_clearing_accounts
+ 	where transMonth=#{month}
+	 <if test="customKeys != null and customKeys != ''">
+		 and FIND_IN_SET(customkey,#{customKeys})
+	 </if>
+ </delete>
+ 
+ <!-- 根据服务商加时间删除清结算数据 -->
+ <delete id="deleteClearAccountAllByCompany" parameterType="map">
+ 	delete from qb_clearing_accounts
+ 	where transMonth=#{month} and companyId=#{companyId}
+	<if test="customKeys != null and customKeys != ''">
+		and FIND_IN_SET(customkey,#{customKeys})
+	</if>
+ </delete>
+ 
+ <!-- 根据代理商加时间删除清结算数据 -->
+ <delete id="deleteClearAccountAllByAgent" parameterType="map">
+ 	delete from qb_clearing_accounts
+ 	where transMonth=#{month} and agentId=#{agentId}
+	 <if test="customKeys != null and customKeys != ''">
+		 and FIND_IN_SET(customkey,#{customKeys})
+	 </if>
+ </delete>
+ 
+ <!-- 根据商户加时间删除清结算数据 -->
+ <delete id="deleteClearAccountAllByMerchant" parameterType="map">
+ 	delete from qb_clearing_accounts
+ 	where transMonth=#{month} and customkey=#{merchantId}
+	 <if test="customKeys != null and customKeys != ''">
+		 and FIND_IN_SET(customkey,#{customKeys})
+	 </if>
+ </delete>
+
+  <select id="selectClearAccountAllByMonthCount" parameterType="map" resultType="int">
+    select count(1) from qb_clearing_accounts
+    where transMonth=#{month}
+      <if test="customKeys != null and customKeys != ''">
+		  and FIND_IN_SET(customkey,#{customKeys})
+	  </if>
+  </select>
+  
+  <select id="selectClearAccountAllByCompanyCount" parameterType="map" resultType="int">
+    select count(1) from qb_clearing_accounts
+    where transMonth=#{month} and companyId=#{companyId}
+	  <if test="customKeys != null and customKeys != ''">
+		  and FIND_IN_SET(customkey,#{customKeys})
+	  </if>
+  </select>
+  
+  <select id="selectClearAccountAllByAgentCount" parameterType="map" resultType="int">
+  	select count(1) from qb_clearing_accounts
+  	where transMonth=#{month} and agentId=#{agentId}
+	  <if test="customKeys != null and customKeys != ''">
+		  and FIND_IN_SET(customkey,#{customKeys})
+	  </if>
+  </select>
+  
+  <select id="selectClearAccountAllByMerchantCount" parameterType="map" resultType="int">
+  	select count(1) from qb_clearing_accounts
+  	where transMonth=#{month} and customkey=#{merchantId}
+	  <if test="customKeys != null and customKeys != ''">
+		  and FIND_IN_SET(customkey,#{customKeys})
+	  </if>
+  </select>
+
+ <!-- 分组查询清结算条件数据 -->
+ <select id="groupClearTermByCompany" resultType="map" parameterType="map">
+	   select qu.*,crc.id rateConfId,cnrc.gearLabel,crc.gearPosition,pcm.proxyFeeRate,pcm.netfileId from 
+		(
+			select 
+			    rateInterval,
+				originalId, 
+				companyId, 
+				if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey) businessChannelKey,
+				calculationRates 
+			from qb_usercommission 
+	        where status=1 and rateInterval is not null 
+	        and DATE_FORMAT(createtime,'%Y-%m')=#{month} and companyId=#{companyId}
+	        GROUP BY rateInterval, originalId, companyId, calculationRates, if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey)
+			 ) qu   
+       left join company_rate_conf crc on qu.rateInterval=concat(crc.amountStart,crc.operator, crc.amountEnd) and qu.companyId=crc.companyId   
+       left join company_netfile_rate_conf cnrc on crc.netfileId=cnrc.id   
+       left join proxy_cost_maintain pcm on qu.businessChannelKey=pcm.customkey and qu.companyId=pcm.companyId and cnrc.id=pcm.netfileId
+	   where pcm.proxyFeeRate is not null
+ </select>
+ 
+  <!-- 分组查询清结算条件数据 -->
+ <select id="groupClearTermByAgent" resultType="map" parameterType="map">
+	   select qu.*,crc.id rateConfId,cnrc.gearLabel,crc.gearPosition,pcm.proxyFeeRate,pcm.netfileId from 
+		(
+			select 
+			    rateInterval,
+				originalId, 
+				companyId, 
+				if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey) businessChannelKey,
+				calculationRates 
+			from qb_usercommission 
+	        where status=1 and rateInterval is not null 
+	        and DATE_FORMAT(createtime,'%Y-%m')=#{month} and if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey)=#{agentId}
+	        GROUP BY rateInterval, originalId, companyId, calculationRates, if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey)
+			 ) qu   
+       left join company_rate_conf crc on qu.rateInterval=concat(crc.amountStart,crc.operator, crc.amountEnd) and qu.companyId=crc.companyId   
+       left join company_netfile_rate_conf cnrc on crc.netfileId=cnrc.id   
+       left join proxy_cost_maintain pcm on qu.businessChannelKey=pcm.customkey and qu.companyId=pcm.companyId and cnrc.id=pcm.netfileId
+	   where pcm.proxyFeeRate is not null
+ </select>
+ 
+   <!-- 分组查询清结算条件数据 -->
+  <select id="groupClearTermByMerchat" resultType="map" parameterType="map">
+	   select qu.*,crc.id rateConfId,cnrc.gearLabel,crc.gearPosition,pcm.proxyFeeRate,pcm.netfileId from 
+		(
+			select 
+			    rateInterval,
+				originalId, 
+				companyId, 
+				if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey) businessChannelKey,
+				calculationRates 
+			from qb_usercommission 
+	        where status=1 and rateInterval is not null 
+	        and DATE_FORMAT(createtime,'%Y-%m')=#{month} and originalId=#{merchantId}
+	        GROUP BY rateInterval, originalId, companyId, calculationRates, if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey)
+			 ) qu   
+       left join company_rate_conf crc on qu.rateInterval=concat(crc.amountStart,crc.operator, crc.amountEnd) and qu.companyId=crc.companyId   
+       left join company_netfile_rate_conf cnrc on crc.netfileId=cnrc.id   
+       left join proxy_cost_maintain pcm on qu.businessChannelKey=pcm.customkey and qu.companyId=pcm.companyId and cnrc.id=pcm.netfileId
+	   where pcm.proxyFeeRate is not null
+ </select>
+ 
+     <!-- 获取商户挡位费率变更信息 -->
+	 <select id="getMerRateUpdate" parameterType="map" resultType="map">
+	 select * from custom_settle_with_rate
+		where customkey=#{customkey}
+		and companyId=#{companyId}
+		and netfileId=#{rateConfId}
+		and if(customType=5,1,customType)=1
+		order by id desc
+	 </select>
+	 
+	 <!-- 获取代理挡位费率变更信息 -->
+	 <select id="getAgentRateUpdate" parameterType="map" resultType="map">
+	 select * from custom_settle_with_rate
+		where customkey=#{agentId}
+		and companyId=#{companyId}
+		and netfileId=#{netfileId}
+		and customType=3
+		order by id desc
+	 </select>
+	 
+	 <!-- 根据清结算分组条件查询汇总金额数据 -->
+   <select id="getSumAmountByTermNew" parameterType="map" resultType="map">
+ 	select cc.companyName merchantName,cg.companyName agentName,qc.companyName,cc.businessManager,CAST(sum(amount) AS DECIMAL(16,2)) totalAmount,companyId,originalId,DATE_FORMAT(qu.createtime,'%Y-%m') transMonth 
+	from qb_usercommission qu
+		left join channel_custom cc on qu.originalId=cc.customkey
+		left join qb_company qc on qc.userId=qu.companyId
+		left join channel_custom cg on cg.customkey=qu.businessChannelKey
+	where DATE_FORMAT(qu.createtime,'%Y-%m')=#{month}
+	and qu.status=1 
+	and qu.rateInterval=#{rateInterval}
+	and qu.calculationRates =#{calculationRates}
+	and qu.companyId=#{companyId}
+	and qu.originalId=#{originalId}
+	<if test="businessChannelKey!=null and businessChannelKey!=''">
+		and qu.businessChannelKey =#{businessChannelKey}
+	</if>
+	<if test="businessChannelKey==null or businessChannelKey==''">
+		and (qu.businessChannelKey is null or qu.businessChannelKey='')
+	</if>
+ </select>
+ 
+ <select id="groupClearTermMonth" resultType="map" parameterType="map">
+ 
+    select qu.*,crc.id rateConfId, cnrc.gearLabel, crc.gearPosition, pcm.proxyFeeRate,pcm.netfileId, cc.companyName merchantName from 
+	(
+		select 
+			DATE_FORMAT(createtime,'%Y-%m') month, 
+			rateInterval, originalId, companyId, 
+			if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey) businessChannelKey,
+			calculationRates 
+		from qb_usercommission 
+		where status=1 and businessPlatform='金融魔方' and rateInterval is not null 
+		<if test="startMonth!=null and startMonth!=''">
+			and DATE_FORMAT(createtime,'%Y-%m') &gt;= #{startMonth}
+		</if>
+		<if test="endMonth!=null and endMonth!=''">
+			and DATE_FORMAT(createtime,'%Y-%m') &lt;= #{endMonth}
+		</if>
+		<if test="companyId!=null and companyId!=''">
+		and companyId = #{companyId}
+		</if>
+		<if test="businessManager!=null and businessManager!=''">
+		and businessManager like concat('%',#{businessManager},'%')
+		</if>
+		GROUP BY rateInterval, originalId, companyId, calculationRates, if(businessChannelKey is null or businessChannelKey='',null,businessChannelKey), DATE_FORMAT(createtime,'%Y-%m')
+	) qu
+	left join channel_custom cc on qu.originalId = cc.customkey
+	left join company_rate_conf crc on qu.rateInterval=concat(crc.amountStart,crc.operator,crc.amountEnd) and qu.companyId=crc.companyId
+	left join company_netfile_rate_conf cnrc on crc.netfileId=cnrc.id 
+	left join proxy_cost_maintain pcm on qu.businessChannelKey=pcm.customkey and qu.companyId=pcm.companyId and cnrc.id=pcm.netfileId 
+ 	where 1=1
+ 	<if test="merchantName!=null and merchantName!=''">
+		and cc.companyName like concat('%',#{merchantName},'%')
+	</if>
+ </select>
+ 
+ <select id="groupClearTermMonthNew" resultType="map" parameterType="map">
+	select temap.*,cc.companyName merchantName,cg.companyName agentName,pcm.proxyFeeRate,cc.businessManager,cc.businessChannel,qc.companyName from (
+	select  month,originalId,companyId,gear,gearLabel,cast(sum(amount) as DECIMAL(16,2)) amount,customRate,netfileId,rateConfId from (
+		select qu.*,circ.gearLabel,concat(circ.amountStart,circ.operator,circ.amountEnd) gear,circ.customRate,circ.netfileId,circ.rateConfId
+		 from (
+			 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount 
+			 from qb_usercommission  
+			 where `status`=1
+			 <if test="businessPlatform!=null and businessPlatform!=''">
+				 and businessPlatform=#{businessPlatform}
+			 </if>
+			 <if test="startMonth!=null and startMonth!=''">
+				and DATE_FORMAT(createtime,'%Y-%m') &gt;= #{startMonth}
+			 </if>
+			 <if test="endMonth!=null and endMonth!=''">
+				and DATE_FORMAT(createtime,'%Y-%m') &lt;= #{endMonth}
+			 </if>
+			 <if test="companyId!=null and companyId!=''">
+				and companyId = #{companyId}
+		     </if>
+		     <if test="agentId!=null and agentId!=''">
+				and businessChannelKey = #{agentId}
+		     </if>
+		     <if test="merchantId!=null and merchantId!=''">
+				and originalId = #{merchantId}
+		     </if>
+			 <if test="customKey !=null and customKey !=''">
+				 and originalId = #{customKey}
+			 </if>
+			 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+		 ) qu
+		left join ( 
+		select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel,crc.netfileId,ccrc.rateConfId
+		from custom_company_rate_conf ccrc
+		left join company_rate_conf crc on ccrc.rateConfId = crc.id
+		left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+		) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) temp group by month,originalId,companyId,gear,gearLabel
+		) temap 
+		left join channel_custom cc on cc.customkey=temap.originalId
+		left join channel_custom cg on cc.businessChannel = cg.customkey
+		left join qb_company qc on qc.userId = temap.companyId
+		left join proxy_cost_maintain pcm on pcm.customkey = cg.customkey and temap.companyId=pcm.companyId and temap.netfileId=pcm.netfileId
+		where 1=1
+		<if test="merchantName!=null and merchantName!=''">
+		and cc.companyName like concat('%',#{merchantName},'%')
+	    </if>
+	    <if test="businessManager!=null and businessManager!=''">
+		and cc.businessManager like concat('%',#{businessManager},'%')
+	    </if>
+	    <if test="fenrun!=null and fenrun==1">
+	    and proxyFeeRate is not null
+	    </if>
+	    order by month,amount desc
+ </select> 
+</mapper>

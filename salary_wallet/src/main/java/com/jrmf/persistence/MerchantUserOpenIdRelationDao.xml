@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.taxsettlement.api.service.contract.MerchantUserOpenIdRelationDao">
+
+	<resultMap type="com.jrmf.taxsettlement.api.service.contract.MerchantUserOpenIdRelationDO" id="OPENID_RELATION">
+		<result column="MERCHANT_ID" property="merchantId" jdbcType="VARCHAR" />
+		<result column="USER_OPEN_ID" property="userOpenId" jdbcType="VARCHAR" />
+		<result column="RELATED_CORP_ID" property="relatedCorpId" jdbcType="VARCHAR" />
+		<result column="RELATED_OPEN_ID" property="relatedOpenId" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<insert id="addRelation" parameterType="map">
+		INSERT INTO t_merchant_user_openid_relation (
+			MERCHANT_ID,
+			USER_OPEN_ID,
+			RELATED_CORP_ID,
+			CREATE_TIME
+		) VALUES (
+			#{merchantId, jdbcType=VARCHAR},
+			#{userOpenId, jdbcType=VARCHAR},
+			#{relatedCorpId, jdbcType=VARCHAR},
+			now()
+		)
+	</insert>
+	
+	<select id="listRelation" parameterType="string" resultMap="OPENID_RELATION">
+		SELECT * FROM t_merchant_user_openid_relation
+		WHERE
+			MERCHANT_ID = #{merchantId, jdbcType=VARCHAR} AND
+			USER_OPEN_ID = #{userOpenId, jdbcType=VARCHAR}
+	</select>
+	
+</mapper>

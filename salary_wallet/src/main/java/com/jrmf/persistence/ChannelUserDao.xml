@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ChannelUserDao">
+
+    <select id="selectByPhoneNo" resultType="com.jrmf.domain.ChannelUser">
+        select *
+        from channel_user
+        where phoneNo = #{phoneNo}
+    </select>
+
+
+    <insert id="insert" parameterType="com.jrmf.domain.ChannelUser" >
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into channel_user (userName, password, tranPassword,
+        email, phoneNo, customKey, companyId,
+        website,createTime,lastUpdateTime,remark,type,operatorName)
+        values (#{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{tranPassword,jdbcType=VARCHAR},
+        #{email,jdbcType=VARCHAR}, #{phoneNo,jdbcType=VARCHAR}, #{customKey,jdbcType=VARCHAR},
+        #{companyId,jdbcType=VARCHAR},
+        #{website,jdbcType=VARCHAR},now(),now(),#{remark,jdbcType=VARCHAR},#{type,jdbcType=INTEGER},#{operatorName,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.ChannelUser">
+    update channel_user
+    set userName = #{userName,jdbcType=VARCHAR},
+      phoneNo = #{phoneNo,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      customKey = #{customKey,jdbcType=VARCHAR},
+      password = #{password,jdbcType=INTEGER},
+      lastUpdateTime = now(),
+      operatorName = #{operatorName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <select id="selectCustomList" resultType="String">
+    select distinct cc.companyName from qb_userrelated qu left join qb_users u on qu.userId=u.id left join channel_custom cc on qu.originalId=cc.customkey
+    where FIND_IN_SET(u.certId,#{certIds})
+  </select>
+
+    <select id="selectCompanyList" resultType="java.util.Map">
+    select distinct cc.companyName,qc.agreementTemplateId from qb_userrelated qu left join qb_users u on qu.userId=u.id left join channel_custom cc on qu.companyId=cc.customkey  left join qb_company qc on qc.userId=cc.customkey
+    where FIND_IN_SET(u.certId,#{certIds})
+  </select>
+
+    <select id="selectUserCommissionList" resultType="com.jrmf.domain.UserCommission">
+        select qu.* from qb_usercommission qu
+        <trim prefix=" where " suffixOverrides="and">
+            qu.status = 1 and
+            <if test="certIds !=null and certIds !=''">
+                FIND_IN_SET(qu.certId,#{certIds}) and
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                date(qu.createtime) &gt;= #{startTime} and
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                date(qu.createtime) &lt;= #{endTime} and
+            </if>
+        </trim>
+    </select>
+
+    <select id="selectUserCommissionCount" resultType="java.util.Map">
+        select cast(COALESCE(SUM(qu.amount),0) as decimal(15,2)) as totalAmount,COUNT(qu.id) as totalNumber from
+        qb_usercommission qu
+        <trim prefix=" where " suffixOverrides="and">
+            qu.status = 1 and
+            <if test="certIds !=null and certIds !=''">
+                FIND_IN_SET(qu.certId,#{certIds}) and
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                date(qu.createtime) &gt;= #{startTime} and
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                date(qu.createtime) &lt;= #{endTime} and
+            </if>
+        </trim>
+    </select>
+
+    <update id="updatePassword">
+        update channel_user
+        set
+            password = #{password}
+        where
+            id = #{id}
+    </update>
+
+    <select id="selectByCertId" resultType="com.jrmf.domain.ChannelUser">
+        SELECT
+            cu.*
+        FROM
+            channel_user cu
+            LEFT JOIN channel_user_real_name curn ON cu.id = curn.userId
+        WHERE
+            curn.certType = 1
+            AND curn.certId = #{certId}
+            LIMIT 1
+    </select>
+
+    <select id="getAllList" resultType="java.util.Map">
+      SELECT
+        cu.id userId,
+        curn.`name` userName,
+        curn.certId,
+        curn.certType,
+        curn.state,
+        cc.companyName customName,
+        cu.phoneNo,
+        cu.type,
+        cu.remark,
+        cu.createTime,
+        cu.level,
+        cu.lastUpdateTime,
+        cu.operatorName,
+        cu.customKey
+      FROM
+        channel_user cu
+        LEFT JOIN channel_user_real_name curn ON cu.id = curn.userId
+        LEFT JOIN channel_custom cc ON cc.customkey=cu.customKey
+        <trim prefix=" where " suffixOverrides="and">
+            <if test="level !=null">
+                cu.level = #{level} and
+            </if>
+            <if test="type !=null">
+                cu.type = #{type} and
+            </if>
+            <if test="state !=null and state == 1">
+                (curn.state = #{state} or curn.state is null) and
+            </if>
+            <if test="state !=null and state == 0">
+                curn.state = 0 and
+            </if>
+            <if test="customKey !=null and customKey !=''">
+              FIND_IN_SET(cu.customKey,#{customKey}) and
+            </if>
+            <if test="userName !=null and userName !=''">
+                curn.`name` like concat('%', #{userName}, '%') and
+            </if>
+            <if test="certId !=null and certId !=''">
+                curn.certId like concat('%', #{certId}, '%') and
+            </if>
+            <if test="startTime !=null and startTime !=''">
+                date(cu.createTime) &gt;= #{startTime} and
+            </if>
+            <if test="endTime !=null and endTime !=''">
+                date(cu.createTime) &lt;= #{endTime} and
+            </if>
+            <if test="phoneNo !=null and phoneNo !=''">
+                cu.phoneNo like concat('%', #{phoneNo}, '%') and
+            </if>
+        </trim>
+      GROUP BY
+        cu.id
+    </select>
+
+    <select id="selectByUserId" resultType="com.jrmf.domain.ChannelUser">
+        select *
+        from channel_user
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByUserId" >
+		DELETE FROM channel_user WHERE id = #{userId}
+	</delete>
+</mapper>

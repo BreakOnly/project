@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.ParameterDao">
+	<sql id="paramColumn">
+		p.id,
+		p.paramName,
+		p.paramValue,
+		p.paramFlag,
+		p.paramDate,
+		p.paramStatus,
+		p.fromip,
+		p.firstfrom,
+		p.firstad,
+		p.vailCount,
+		p.firstad,
+		p.serialId,
+		p.isVoice
+	</sql>
+	<update id="deleteParameter" parameterType="String">
+		UPDATE qb_parameter p
+		SET
+		p.paramStatus= -1
+		where p.paramName = #{paramName} and p.paramFlag =
+		#{paramFlag}
+	</update>
+	<!-- 当需要限制有效期时加上时间即可 -->
+	<select id="getParameterByValue" parameterType="String"
+		resultType="com.jrmf.domain.Parameter">
+		select
+		<include refid="paramColumn" />
+		from qb_parameter p
+		where
+		p.paramName=#{paramName} and
+		p.paramValue=#{paramValue} and p.paramFlag=#{paramFlag}
+		and
+		p.paramStatus =1
+	</select>
+	<select id="getParameterByValueDate" parameterType="String"
+		resultType="com.jrmf.domain.Parameter">
+		select
+		<include refid="paramColumn" />
+		from qb_parameter p
+		where
+		p.paramName=#{paramName} and
+		p.paramFlag
+		=#{paramFlag} and
+		p.paramDate >#{paramDate} and
+		p.paramValue=#{paramValue} and
+		p.paramStatus =1 and
+		p.vailCount &lt; 11
+		order by p.id desc
+		limit 1;
+	</select>
+
+	<insert id="saveParameter" parameterType="com.jrmf.domain.Parameter"
+		keyProperty="id" useGeneratedKeys="true">
+		insert into qb_parameter
+		( paramName,
+		paramValue, paramFlag, paramDate, paramStatus,
+		fromip,firstfrom,deviceUUID,firstad, serialId, isVoice,bankcardno)
+		values
+		(
+		#{paramName}, #{paramValue}, #{paramFlag}, NOW(),
+		#{paramStatus},
+		#{fromip},#{firstfrom},#{deviceUUID},#{firstad},#{serialId},
+		#{isVoice},#{bankcardno})
+	</insert>
+	<select id="findParamValueByParamName" parameterType="String"
+		resultType="String">
+		select
+		p.paramValue
+		from qb_parameter p
+		where
+		p.paramName=#{paramName} and
+		p.paramFlag =#{paramFlag} and
+		p.paramStatus =1
+	</select>
+	<select id="findParamCount" parameterType="String" resultType="int">
+		select
+		count(p.id)
+		from qb_parameter p
+		where
+		p.paramName=#{paramName} and
+		p.paramFlag =#{paramFlag} and
+		p.paramDate >#{paramDate}
+	</select>
+
+	<select id="findParamCountByCondition" parameterType="String"
+		resultType="int">
+		select
+		count(p.id)
+		from qb_parameter p
+		where
+		p.paramName=#{paramName} and
+		<if test="paramFlag != null">
+			p.paramFlag =#{paramFlag} and
+		</if>
+		<choose>
+			<when test="fromip != null ">
+				p.fromip=#{fromip} and
+			</when>
+			<otherwise>
+				fromip is null and
+			</otherwise>
+		</choose>
+		p.deviceUUID = #{deviceUUID} and
+		p.paramDate >#{paramDate}
+	</select>
+
+	<select id="findParamCountByFromip" parameterType="String"
+		resultType="int">
+		select
+		count(p.id)
+		from qb_parameter p
+		where
+		p.fromip=#{fromip}
+		and
+		p.paramDate >#{paramDate}
+	</select>
+
+	<select id="updateVailCount" parameterType="String">
+		UPDATE qb_parameter p
+		SET
+		p.vailCount= p.vailCount+1
+		where
+		p.paramName=#{paramName} and
+		p.paramFlag
+		=#{paramFlag} and
+		p.paramDate
+		>#{paramDate}
+	</select>
+
+	<select id="getParameBySerialID" resultType="com.jrmf.domain.Parameter">
+		select * from
+		qb_parameter p
+		where serialId = #{serialID} and
+		p.paramDate > #{paramDate}
+		and
+		paramStatus &lt;&gt; -2
+	</select>
+
+	<update id="deleteParamBySerialID">
+		UPDATE qb_parameter
+		SET
+		paramStatus= -2
+		where serialId =
+		#{serialID}
+		and paramName =
+		#{paramName}
+	</update>
+	<update id="deleteParamBySerialID2">
+		UPDATE qb_parameter
+		SET
+		paramStatus= -1
+		where serialId =
+		#{serialID}
+	</update>
+	<select id="getParamByNameFlagAndDate" resultType="com.jrmf.domain.Parameter">
+		select * from qb_parameter p
+		where p.paramName=#{paramName}
+		and p.paramFlag
+		=#{paramFlag} and
+		p.paramDate >#{paramDate}
+		<if test="isVoice == 1">
+			and p.isVoice = 1
+		</if>
+		order by paramDate desc limit 1
+	</select>
+	<select id="getParamByCondition" parameterType="java.util.Map" resultType="com.jrmf.domain.Parameter">
+		select * from qb_parameter
+		<where>
+		<if test="paramName != null">paramName = #{paramName}</if>
+		<if test="paramValue != null"> and paramValue = #{paramValue}</if>
+		<if test="paramFlag != null">and paramFlag = #{paramFlag}</if>
+		<if test="paramStatus != null">and paramStatus = #{paramStatus}</if>
+		<if test="fromip != null">and fromip = #{fromip}</if>
+		<if test="deviceUUID != null">and deviceUUID = #{deviceUUID}</if>
+		<if test="serialId != null">and serialId = #{serialId}</if>
+		<if test="isVoice != null">and isVoice = #{isVoice}</if>
+		</where>
+	</select>
+	<select id="valiCodeBySerialId" resultType="com.jrmf.domain.Parameter"
+		parameterType="String">
+		select * from
+		qb_parameter p
+		where 
+		<if test="serialID!=null">
+		serialId = #{serialID} and
+		</if>
+		paramFlag = #{paramFlag}
+		and paramValue =#{paramValue}
+		<if test="paramDate != null">
+		and paramDate >#{paramDate}
+		</if>
+		and paramStatus=1
+		order by id desc
+		limit 1
+	</select>
+	<!-- 一分钟内发送次数 -->
+	<select id="countOneMinute" parameterType="java.util.Map" resultType="int">
+		SELECT 
+		  COUNT(0) 
+		FROM
+		  qb_parameter p 
+		WHERE p.paramFlag = #{paramFlag}
+		  AND p.paramName = #{paramName}
+		  AND p.paramDate > DATE_ADD(NOW(), INTERVAL - 1 MINUTE)	
+	</select>
+    <select id="getLastByLimit" resultType="com.jrmf.domain.Parameter">
+
+        SELECT * FROM `qb_parameter` ORDER BY id desc limit #{limit}
+    </select>
+</mapper>

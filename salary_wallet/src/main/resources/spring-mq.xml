@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation=" http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd ">
+
+    <!-- 配置JMS连接工厂 -->
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${mq.broker_url}" />
+        <property name="useAsyncSend" value="true" />
+        <property name="trustAllPackages" value="true"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryExtend"
+		class="org.springframework.jms.connection.CachingConnectionFactory">
+		<constructor-arg ref="connectionFactory" />
+		<property name="sessionCacheSize" value="100" />
+	</bean>
+
+    <!-- 定义消息Destination -->
+    <bean id="transferDealStatusNoticeDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="TRANSFER_DEAL_STATUS_NOTICE"/>
+    </bean>
+
+    <bean id="transferDealRequestDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="TRANSFER_DEAL_REQUEST"/>
+    </bean>
+    <!--API充值-->
+    <bean id="rechargeRequestDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="RECHARGE_REQUEST"/>
+    </bean>
+    <!-- API充值监听 -->
+    <bean id="rechargeNoticeMessageListener" class="com.jrmf.taxsettlement.api.service.recharge.RechargeStatusNoticeSender">
+        <constructor-arg value="${mq.notice_sender_count}" type="int"/>
+        <constructor-arg ref="providerJmsTemplate"/>
+        <constructor-arg ref="rechargeRequestDestination"/>
+        <constructor-arg>
+            <map>
+                <entry key="1" value="30"/>
+                <entry key="2" value="90"/>
+                <entry key="3" value="120"/>
+                <entry key="4" value="360"/>
+                <entry key="5" value="1200"/>
+                <entry key="6" value="5400"/>
+                <entry key="7" value="7200"/>
+                <entry key="8" value="14400"/>
+                <entry key="9" value="28800"/>
+                <entry key="10" value="28800"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <!-- API充值通知消息订阅客户端 -->
+    <bean id="rechargeNoticeConsumerListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="rechargeRequestDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="rechargeNoticeMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+
+    <!-- 消息发送者客户端 -->
+    <bean id="providerJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="receiveTimeout" value="${mq.receive_timeout}" />
+        <property name="explicitQosEnabled" value="true"/>
+        <property name="deliveryMode" value="2"/>
+    </bean>
+
+    <!-- 配置警告订单Destination-->
+    <bean id="warningOrderDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="WARNING_ORDER"/>
+    </bean>
+    <!-- 配置警告订单消息消费监听者 -->
+    <bean id="warningOrderListener" class="com.jrmf.service.mq.WarningOrderListener">
+        <constructor-arg value="${mq.notice_sender_count}" type="int"/>
+        <constructor-arg>
+            <ref bean="warningOrderDestination"/>
+        </constructor-arg>
+    </bean>
+
+    <!-- 警告订单通知消息订阅客户端 -->
+    <bean id="warningOrderListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="warningOrderListener" />
+        <property name="destination" ref="warningOrderDestination"  />
+        <!-- 开启订阅模式 -->
+        <!--<property name="pubSubDomain" value="true"/>
+        <property name="subscriptionDurable" value="true"/>
+        &lt;!&ndash; 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        &ndash;&gt;
+        <property name="sessionAcknowledgeMode" value="1"/>-->
+    </bean>
+
+    <!-- 配置消息消费监听者 -->
+    <bean id="noticeConsumerMessageListener" class="com.jrmf.taxsettlement.api.service.transfer.TransferDealStatusNoticeSender">
+    	<constructor-arg value="${mq.notice_sender_count}" type="int"/>
+    	<constructor-arg>
+    		<ref bean="providerJmsTemplate"/>
+    	</constructor-arg>
+    	<constructor-arg>
+    		<ref bean="transferDealStatusNoticeDestination"/>
+    	</constructor-arg>
+    	<constructor-arg>
+    		<map>
+    			<entry key="1">
+    				<value>30</value>
+    			</entry>
+    			<entry key="2">
+    				<value>90</value>
+    			</entry>
+				<entry key="3">
+    				<value>120</value>
+    			</entry>
+    			<entry key="4">
+    				<value>360</value>
+    			</entry>
+				<entry key="5">
+    				<value>1200</value>
+    			</entry>
+				<entry key="6">
+    				<value>5400</value>
+    			</entry>
+				<entry key="7">
+    				<value>7200</value>
+    			</entry>
+				<entry key="8">
+    				<value>14400</value>
+    			</entry>
+    			<entry key="9">
+    				<value>28800</value>
+    			</entry>
+    			<entry key="10">
+    				<value>28800</value>
+    			</entry>
+    		</map>
+    	</constructor-arg>
+    </bean>
+
+    <bean id="transferRequestConsumerMessageListener" class="com.jrmf.api.ExecutePaymentApi"/>
+
+    <!-- 通知消息订阅客户端1 -->
+    <bean id="noticeConsumerListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="transferDealStatusNoticeDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="noticeConsumerMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+    <!-- 下发请求消息订阅客户端1 -->
+    <bean id="requestConsumerListenerClient1" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="transferDealRequestDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="transferRequestConsumerMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+    <!-- 下发请求消息订阅客户端2 -->
+    <bean id="requestConsumerListenerClient2" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="transferDealRequestDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="transferRequestConsumerMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+    <!-- 下发请求消息订阅客户端3 -->
+    <bean id="requestConsumerListenerClient3" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="transferDealRequestDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="transferRequestConsumerMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+    <!-- 下发请求消息订阅客户端4 -->
+    <bean id="requestConsumerListenerClient4" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="transferDealRequestDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="transferRequestConsumerMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+    <!-- 下发请求消息订阅客户端5 -->
+    <bean id="requestConsumerListenerClient5" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!-- 开启订阅模式 -->
+        <property name="pubSubDomain" value="true"/>
+        <property name="destination" ref="transferDealRequestDestination" />
+        <property name="subscriptionDurable" value="true"/>
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="transferRequestConsumerMessageListener" />
+        <!-- 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        -->
+        <property name="sessionAcknowledgeMode" value="1"/>
+    </bean>
+
+    <!-- 批次导入签约共享Destination-->
+    <bean id="signShareDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="SIGN_SHARE"/>
+    </bean>
+    <!-- 批次导入签约共享消息消费监听者 -->
+    <bean id="signShareListener" class="com.jrmf.service.mq.SignShareListener">
+    </bean>
+    <!-- 批次导入签约共享消息订阅客户端 -->
+    <bean id="signShareListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="signShareListener" />
+        <property name="destination" ref="signShareDestination"  />
+        <!-- 开启订阅模式 -->
+        <!--<property name="pubSubDomain" value="true"/>
+        <property name="subscriptionDurable" value="true"/>
+        &lt;!&ndash; 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        &ndash;&gt;
+        <property name="sessionAcknowledgeMode" value="1"/>-->
+    </bean>
+
+    <!-- 批次导入签约共享批次状态落地Destination-->
+    <bean id="inputBatchCheckSignDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="INPUT_BATCH_CHECK_SIGN"/>
+    </bean>
+    <!-- 批次导入签约共享批次状态落地消息消费监听者 -->
+    <bean id="inputBatchCheckSignListener" class="com.jrmf.service.mq.InputBatchCheckSignListener">
+    </bean>
+    <!-- 批次导入签约共享批次状态落地消息订阅客户端 -->
+    <bean id="inputBatchCheckSignListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="inputBatchCheckSignListener" />
+        <property name="destination" ref="inputBatchCheckSignDestination"  />
+        <!-- 开启订阅模式 -->
+        <!--<property name="pubSubDomain" value="true"/>
+        <property name="subscriptionDurable" value="true"/>
+        &lt;!&ndash; 消息应答方式
+             Session.AUTO_ACKNOWLEDGE  消息自动签收
+             Session.CLIENT_ACKNOWLEDGE  客户端调用acknowledge方法手动签收
+             Session.DUPS_OK_ACKNOWLEDGE 不必必须签收，消息可能会重复发送
+        &ndash;&gt;
+        <property name="sessionAcknowledgeMode" value="1"/>-->
+    </bean>
+
+
+    <!-- 自动导入回单Destination-->
+    <bean id="autoImportReceiptDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="AUTO_IMPORT_RECEIPT"/>
+    </bean>
+    <!-- 自动导入回单消费监听者 -->
+    <bean id="autoImportReceiptListener" class="com.jrmf.service.mq.AutoImportReceiptListener">
+    </bean>
+    <!-- 自动导入回单订阅客户端 -->
+    <bean id="autoImportReceiptListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+        <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+        <property name="messageListener" ref="autoImportReceiptListener" />
+        <property name="destination" ref="autoImportReceiptDestination"  />
+    </bean>
+
+  <!-- 批次导入转包服务公司签约Destination-->
+  <bean id="inputBatchCompanySignDestination"  class="org.apache.activemq.command.ActiveMQQueue">
+    <constructor-arg value="INPUT_BATCH_COMPANY_SIGN"/>
+  </bean>
+  <!-- 批次导入转包服务公司签约消费监听者 -->
+  <bean id="inputBatchCompanySignListener" class="com.jrmf.service.mq.InputBatchCompanySignListener">
+  </bean>
+  <!-- 批次导入转包服务公司签约订阅客户端 -->
+  <bean id="inputBatchCompanySignListenerClient" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+    <property name="connectionFactory" ref="jmsConnectionFactoryExtend" />
+    <!---这里是设置接收客户端的ID，在持久化时，但这个客户端不在线时，消息就存在数据库里，直到被这个ID的客户端消费掉-->
+    <property name="messageListener" ref="inputBatchCompanySignListener" />
+    <property name="destination" ref="inputBatchCompanySignDestination"  />
+  </bean>
+</beans>

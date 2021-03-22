@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomerFirmDao">
+
+<!--	<cache/>-->
+
+  <sql id="Base_Column_List">
+    id, custom_key, firm_id, credit_code, legal_person, sex, identity_card, category_id,
+    province_id, city_id, area_id, address, contacts_name, add_user, create_time, update_time,
+    status, status_desc, platsrl
+  </sql>
+
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.CustomerFirm">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="custom_key" property="customKey" jdbcType="VARCHAR"/>
+    <result column="firm_id" property="firmId" jdbcType="VARCHAR"/>
+    <result column="credit_code" property="creditCode" jdbcType="VARCHAR"/>
+    <result column="legal_person" property="legalPerson" jdbcType="VARCHAR"/>
+    <result column="sex" property="sex" jdbcType="INTEGER"/>
+    <result column="identity_card" property="identityCard" jdbcType="VARCHAR"/>
+    <result column="category_id" property="categoryId" jdbcType="INTEGER"/>
+    <result column="province_id" property="provinceId" jdbcType="INTEGER"/>
+    <result column="city_id" property="cityId" jdbcType="INTEGER"/>
+    <result column="area_id" property="areaId" jdbcType="INTEGER"/>
+    <result column="address" property="address" jdbcType="VARCHAR"/>
+    <result column="contacts_name" property="contactsName" jdbcType="VARCHAR"/>
+    <result column="add_user" property="addUser" jdbcType="VARCHAR"/>
+    <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    <result column="update_time" property="updateTime" jdbcType="VARCHAR"/>
+    <result column="status" property="status" jdbcType="INTEGER"/>
+    <result column="status_desc" property="statusDesc" jdbcType="VARCHAR"/>
+    <result column="platsrl" property="platsrl" jdbcType="VARCHAR"/>
+  </resultMap>
+
+  <select id="listCustomerFirm" resultType="com.jrmf.domain.CustomerFirm">
+    SELECT
+		cf.company_name customName,
+		cc.id customId,
+		cf.id,
+		cf.custom_key customKey,
+		cf.firm_id firmId,
+		cf.credit_code creditCode,
+		cf.legal_person legalPerson,
+		cf.sex,
+		cf.identity_card identityCard,
+		cf.category_id categoryId,
+		ec.label,
+		cf.province_id provinceId,
+		p.province_name provinceName,
+		cf.city_id cityId,
+		c.city_name cityName,
+		cf.area_id areaId,
+		a.area_name areaName,
+		cf.address,
+		cf.contacts_name contactsName,
+		cf.add_user addUser,
+		cf.create_time createTime,
+		cf.update_time updateTime,
+		cf.status,
+		cf.status_desc statusDesc,
+		cf.platsrl,
+		cf.legal_person_phone legalPersonPhone,
+		cf.legal_person_email legalPersonEmail,
+		cf.contacts_phone contactsPhone,
+		cf.contacts_email contactsEmail
+    FROM
+    	customer_firm_info cf
+    LEFT JOIN channel_custom cc
+    ON cf.custom_key = cc.customkey
+		LEFT JOIN economic_category ec
+		ON cf.category_id = ec.`value`
+		LEFT JOIN province_info p
+		ON cf.province_id = p.province_id
+		LEFT JOIN city_info c
+		ON cf.city_id = c.city_id
+		LEFT JOIN area_info a
+		ON cf.area_id = a.area_id
+    where 1 = 1
+    <if test="customName != null and customName != ''">
+      and cf.company_name like concat('%',#{customName},'%')
+    </if>
+    <if test="legalPersonName != null and legalPersonName != ''">
+      and cf.legal_person like concat('%',#{legalPersonName},'%')
+    </if>
+    <if test="status != null and status != ''">
+      and cf.`status` = #{status}
+    </if>
+    <if test="startTime != null and startTime != ''">
+      and date(cf.create_time) &gt;= #{startTime}
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and date(cf.create_time) &lt;= #{endTime}
+    </if>
+    order by cf.create_time desc
+  </select>
+
+  <select id="getCustomerFirmById" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+    customer_firm_info
+    WHERE
+    id = #{id}
+  </select>
+
+  <update id="updateCustomerFirm">
+		UPDATE customer_firm_info
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="customName != null and customName != ''">
+				company_name = #{customName},
+			</if>
+			<if test="customKey != null and customKey != ''">
+				custom_key = #{customKey},
+			</if>
+			<if test="firmId != null and firmId != ''">
+				firm_id = #{firmId},
+			</if>
+			<if test="creditCode != null and creditCode != ''">
+				credit_code = #{creditCode},
+			</if>
+			<if test="legalPerson != null and legalPerson != ''">
+				legal_person = #{legalPerson},
+			</if>
+			<if test="legalPersonPhone != null and legalPersonPhone != ''">
+				legal_person_phone = #{legalPersonPhone},
+			</if>
+			<if test="legalPersonEmail != null and legalPersonEmail != ''">
+				legal_person_email = #{legalPersonEmail},
+			</if>
+			<if test="sex != null">
+				sex = #{sex},
+			</if>
+			<if test="identityCard != null and identityCard != ''">
+				identity_card = #{identityCard},
+			</if>
+			<if test="categoryId != null and categoryId != ''">
+				category_id = #{categoryId},
+			</if>
+			<if test="provinceId != null and provinceId != ''">
+				province_id = #{provinceId},
+			</if>
+			<if test="cityId != null and cityId != ''">
+				city_id = #{cityId},
+			</if>
+			<if test="areaId != null and areaId != ''">
+				area_id = #{areaId},
+			</if>
+			<if test="address != null and address != ''">
+				address = #{address},
+			</if>
+			<if test="contactsName != null and contactsName != ''">
+				contacts_name = #{contactsName},
+			</if>
+			<if test="contactsPhone != null and contactsPhone != ''">
+				contacts_phone = #{contactsPhone},
+			</if>
+			<if test="contactsEmail != null and contactsEmail != ''">
+				contacts_email = #{contactsEmail},
+			</if>
+			<if test="addUser != null and addUser != ''">
+				add_user = #{addUser},
+			</if>
+			<if test="status != null and status != ''">
+				status = #{status},
+			</if>
+			<if test="statusDesc != null and statusDesc != ''">
+				status_desc = #{statusDesc},
+			</if>
+			<if test="platsrl != null and platsrl != ''">
+				platsrl = #{platsrl},
+			</if>
+			update_time = now()
+		</trim>
+		WHERE id = #{id}
+  </update>
+
+  <select id="getCustomerFirmByCreditCode" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+    customer_firm_info
+    WHERE
+    credit_code = #{creditCode}
+  </select>
+
+	<insert id="insertCustomerFirm" parameterType="com.jrmf.domain.CustomerFirm"
+    useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO customer_firm_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+    	<if test="customName != null and customName != ''">
+				company_name,
+			</if>
+      <if test="customKey != null and customKey != ''">
+        custom_key,
+      </if>
+			<if test="firmId != null and firmId != ''">
+				firm_id,
+			</if>
+			<if test="creditCode != null and creditCode != ''">
+				credit_code,
+			</if>
+			<if test="legalPerson != null and legalPerson != ''">
+				legal_person,
+			</if>
+			<if test="legalPersonPhone != null and legalPersonPhone != ''">
+				legal_person_phone,
+			</if>
+			<if test="legalPersonEmail != null and legalPersonEmail != ''">
+				legal_person_email,
+			</if>
+			<if test="sex != null">
+				sex,
+			</if>
+			<if test="identityCard != null and identityCard != ''">
+				identity_card,
+			</if>
+			<if test="categoryId != null and categoryId != ''">
+				category_id,
+			</if>
+			<if test="provinceId != null and provinceId != ''">
+				province_id,
+			</if>
+			<if test="cityId != null and cityId != ''">
+				city_id,
+			</if>
+			<if test="areaId != null and areaId != ''">
+				area_id,
+			</if>
+			<if test="address != null and address != ''">
+				address,
+			</if>
+			<if test="contactsName != null and contactsName != ''">
+				contacts_name,
+			</if>
+			<if test="contactsPhone != null and contactsPhone != ''">
+				contacts_phone,
+			</if>
+			<if test="contactsEmail != null and contactsEmail != ''">
+				contacts_email,
+			</if>
+			<if test="addUser != null and addUser != ''">
+				add_user,
+			</if>
+			<if test="status != null and status != ''">
+				status,
+			</if>
+			<if test="statusDesc != null and statusDesc != ''">
+				status_desc,
+			</if>
+			<if test="platsrl != null and platsrl != ''">
+				platsrl,
+			</if>
+			create_time,
+    </trim>
+    <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+			<if test="customName != null and customName != ''">
+				#{customName},
+			</if>
+			<if test="customKey != null and customKey != ''">
+				#{customKey},
+			</if>
+			<if test="firmId != null and firmId != ''">
+				#{firmId},
+			</if>
+			<if test="creditCode != null and creditCode != ''">
+				#{creditCode},
+			</if>
+			<if test="legalPerson != null and legalPerson != ''">
+				#{legalPerson},
+			</if>
+			<if test="legalPersonPhone != null and legalPersonPhone != ''">
+				#{legalPersonPhone},
+			</if>
+			<if test="legalPersonEmail != null and legalPersonEmail != ''">
+				#{legalPersonEmail},
+			</if>
+			<if test="sex != null">
+				#{sex},
+			</if>
+			<if test="identityCard != null and identityCard != ''">
+				#{identityCard},
+			</if>
+			<if test="categoryId != null and categoryId != ''">
+				#{categoryId},
+			</if>
+			<if test="provinceId != null and provinceId != ''">
+				#{provinceId},
+			</if>
+			<if test="cityId != null and cityId != ''">
+				#{cityId},
+			</if>
+			<if test="areaId != null and areaId != ''">
+				#{areaId},
+			</if>
+			<if test="address != null and address != ''">
+				#{address},
+			</if>
+			<if test="contactsName != null and contactsName != ''">
+				#{contactsName},
+			</if>
+			<if test="contactsPhone != null and contactsPhone != ''">
+				#{contactsPhone},
+			</if>
+			<if test="contactsEmail != null and contactsEmail != ''">
+				#{contactsEmail},
+			</if>
+			<if test="addUser != null and addUser != ''">
+				#{addUser},
+			</if>
+			<if test="status != null and status != ''">
+				#{status},
+			</if>
+			<if test="statusDesc != null and statusDesc != ''">
+				#{statusDesc},
+			</if>
+			<if test="platsrl != null and platsrl != ''">
+				#{platsrl},
+			</if>
+			now(),
+		</trim>
+  </insert>
+
+  <update id="updateCustomerFirmStatus">
+		UPDATE customer_firm_info SET status = #{status}, status_desc = #{statusDesc} WHERE id = #{id}
+	</update>
+
+  <delete id="removeCustomerFirm">
+		DELETE FROM customer_firm_info WHERE id = #{id}
+	</delete>
+
+	<select id="listEconomicCategory" resultType="com.jrmf.domain.EconomicCategory">
+		SELECT
+			id,
+			`LEVEL`,
+			level_code levelCode,
+			`VALUE`,
+			label labelName
+		FROM
+			economic_category
+	</select>
+
+	<select id="listProvince" resultType="com.jrmf.domain.ProvinceCityArea">
+		SELECT
+			p.province_id provinceId,
+			p.province_name provinceName
+		FROM
+			province_info p
+	</select>
+
+	<select id="getCustomerFirmByCustomkey" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"/>
+		FROM
+			customer_firm_info
+		WHERE custom_key = #{customKey}
+	</select>
+
+	<select id="listCityByProvinceId" resultType="com.jrmf.domain.ProvinceCityArea">
+		SELECT
+			province_id provinceId,
+			city_id cityId,
+			city_name cityName
+		FROM
+			city_info  WHERE province_id = #{provinceId}
+	</select>
+
+	<select id="listAreaByCityId" resultType="com.jrmf.domain.ProvinceCityArea">
+		SELECT
+			province_id provinceId,
+			city_id cityId,
+			area_id areaId,
+			area_name areaName
+		FROM
+			area_info  WHERE city_id = #{cityId}
+	</select>
+
+	<select id="listEconomicCategoryByLevelAndValue" resultType="java.util.Map">
+		SELECT
+		`LEVEL` level,
+		`VALUE` value,
+		label name
+		FROM economic_category WHERE level = #{level}
+		<if test="value != null and value != ''">
+			AND level_code like CONCAT('%',#{value},'%')
+		</if>
+	</select>
+</mapper>

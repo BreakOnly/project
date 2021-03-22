@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.WebCusotmInfoDao">
+    <insert id="addWebCustomInfo" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.jrmf.domain.WebCusotmInfo">
+        INSERT INTO custom_info
+         (
+          `channel`,
+          `userIPAddress`,
+          `userAddress`,
+          `phoneNo`,
+          `userName`,
+          `companyName`,
+          `email`,
+          `createTime`,
+           `updateTime`
+            )
+        VALUES
+	    (
+        #{channel},
+        #{userIPAddress},
+        #{userAddress},
+        #{phoneNo},
+        #{userName},
+        #{companyName},
+        #{email},
+        now(),
+        now()
+	    );
+    </insert>
+    <select id="listCustomInfo" resultType="com.jrmf.domain.WebCusotmInfo">
+        select
+        id,
+        channel,
+        userIPAddress,
+        userAddress,
+        phoneNo,
+        userName,
+        companyName,
+        email,
+        createTime,
+        updateTime
+        from
+        custom_info
+        order by createTime desc
+        where 1=1
+        <if test="userName != null and userName != ''">
+            and userName like CONCAT('%',#{userName},'%')
+        </if>
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+</mapper>

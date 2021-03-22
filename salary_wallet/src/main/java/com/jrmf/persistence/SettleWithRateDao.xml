@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SettleWithRateDao">
+
+    <select id="queryMerchantInfo" resultType="java.util.Map">
+		SELECT
+			ccrc.id,
+			ccrc.customkey,
+			ccrc.customRate,
+			ccrc.rateConfId,
+			cc.companyId,
+			qc.companyName,
+			cc.gearPositionShorthand,
+			cc.costRate
+		FROM
+			custom_company_rate_conf ccrc
+		LEFT JOIN company_rate_conf cc ON ccrc.rateConfId = cc.id
+		LEFT JOIN qb_company qc ON cc.companyId = qc.userId
+		WHERE customkey = #{customkey}
+		GROUP BY cc.companyId
+    </select>
+
+	<select id="queryProxyInfo" resultType="java.util.Map">
+		SELECT
+			pcm.id,
+			pcm.customkey,
+			pcm.proxyName,
+			pcm.companyId,
+			pcm.companyName,
+			pcm.proxyFeeRate,
+			pcm.netfileId,
+			cnr.gearPositionShorthand
+		FROM
+			proxy_cost_maintain pcm
+		LEFT JOIN company_netfile_rate_conf cnr ON pcm.netfileId = cnr.id
+		WHERE pcm.customkey = #{customkey}
+		GROUP BY pcm.companyId
+	</select>
+
+    <select id="querySettleWithRate" resultType="com.jrmf.domain.SettleWithRate">
+		SELECT
+			cswr.id,
+			cswr.customkey,
+			cswr.customType,
+			CASE cswr.customType WHEN 3 THEN (CONCAT(cast(cswr.modifyRate*100 as decimal(11,4)),'%')) ELSE CONCAT(cast(cswr.modifyRate*100 as decimal(11,2)),'%') END as modifyRate,
+			cswr.modifyEffectStartTime,
+			cswr.modifyEffectEndTime,
+			cswr.companyId,
+			cswr.netfileId,
+			cswr.createTime,
+			cswr.modifyAddUser,
+			cc.companyName customName,
+			cc.username,
+			qc.companyName,
+			CASE cswr.customType WHEN 3 THEN (SELECT CONCAT(cast(proxyFeeRate*100 as decimal(11,4)),'%') FROM proxy_cost_maintain pcm where FIND_IN_SET(pcm.customkey,cswr.customkey) AND FIND_IN_SET(pcm.netfileId,cswr.netfileId))
+			ELSE (SELECT CONCAT(cast(customRate*100 as decimal(11,2)),'%') FROM company_rate_conf cc LEFT JOIN custom_company_rate_conf ccrc ON ccrc.rateConfId = cc.id WHERE FIND_IN_SET(cc.id,cswr.netfileId) AND FIND_IN_SET(ccrc.customkey,cswr.customkey))
+			END AS rate,
+			case cswr.customType WHEN 3 THEN (SELECT gearPositionShorthand FROM company_netfile_rate_conf cnrrc WHERE FIND_IN_SET(cnrrc.id,cswr.netfileId))
+			ELSE (SELECT gearPositionShorthand FROM company_rate_conf crcr WHERE FIND_IN_SET(crcr.id,cswr.netfileId))
+			END AS gearPositionShorthand
+		FROM
+			custom_settle_with_rate cswr
+		LEFT JOIN channel_custom cc ON cswr.customkey = cc.customkey
+		LEFT JOIN qb_company qc ON cswr.companyId = qc.userId
+		LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = cswr.netfileId
+		LEFT JOIN company_rate_conf ccr ON ccr.id = cswr.netfileId
+		where 1=1
+		<if test="companyName != null and companyName != ''">
+			and (cc.companyName like concat('%', #{companyName}, '%') OR cc.username like concat('%', #{companyName}, '%'))
+		</if>
+		<if test="customType != null and customType != ''">
+			and cswr.customType = #{customType}
+		</if>
+		<if test="startTime != null and startTime != ''">
+            and STR_TO_DATE(cswr.modifyEffectStartTime,'%Y-%m-%d') &gt;= STR_TO_DATE(#{startTime},'%Y-%m-%d')
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and STR_TO_DATE(cswr.modifyEffectEndTime,'%Y-%m-%d') &lt;= STR_TO_DATE(#{endTime},'%Y-%m-%d')
+		</if>
+		ORDER BY cswr.createTime DESC
+		<if test="start !=null and limit !=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<select id="querySettleWithRateCount" resultType="java.lang.Integer">
+		select count(1) from (
+		SELECT
+		cswr.id,
+		cswr.customkey,
+		cswr.customType,
+		CONCAT(cast(cswr.modifyRate*100 as decimal(11,2)),'%') as modifyRate,
+		cswr.modifyEffectStartTime,
+		cswr.modifyEffectEndTime,
+		cswr.companyId,
+		cswr.netfileId,
+		cswr.createTime,
+		cswr.modifyAddUser,
+		cc.companyName customName,
+		cc.username,
+		qc.companyName,
+		CASE cswr.customType WHEN 3 THEN (SELECT proxyFeeRate FROM proxy_cost_maintain pcm where FIND_IN_SET(pcm.customkey,cswr.customkey) AND FIND_IN_SET(pcm.netfileId,cswr.netfileId))
+		ELSE (SELECT customRate FROM company_rate_conf cc LEFT JOIN custom_company_rate_conf ccrc ON ccrc.rateConfId = cc.id WHERE FIND_IN_SET(cc.id,cswr.netfileId) AND FIND_IN_SET(ccrc.customkey,cswr.customkey))
+		END AS rate,
+		case cswr.customType WHEN 3 THEN (SELECT gearPositionShorthand FROM company_netfile_rate_conf cnrrc WHERE FIND_IN_SET(cnrrc.id,cswr.netfileId))
+		ELSE (SELECT gearPositionShorthand FROM company_rate_conf crcr WHERE FIND_IN_SET(crcr.id,cswr.netfileId))
+		END AS gearPositionShorthand
+		FROM
+		custom_settle_with_rate cswr
+		LEFT JOIN channel_custom cc ON cswr.customkey = cc.customkey
+		LEFT JOIN qb_company qc ON cswr.companyId = qc.userId
+		LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = cswr.netfileId
+		LEFT JOIN company_rate_conf ccr ON ccr.id = cswr.netfileId
+		where 1=1
+		<if test="companyName != null and companyName != ''">
+			and (cc.companyName like concat('%', #{companyName}, '%') OR cc.username like concat('%', #{companyName}, '%'))
+		</if>
+		<if test="customType != null and customType != ''">
+			and cswr.customType = #{customType}
+		</if>
+		<if test="startTime != null and startTime != ''">
+			and STR_TO_DATE(cswr.modifyEffectStartTime,'%Y-%m-%d') &gt;= STR_TO_DATE(#{startTime},'%Y-%m-%d')
+		</if>
+		<if test="endTime != null and endTime != ''">
+			and STR_TO_DATE(cswr.modifyEffectEndTime,'%Y-%m-%d') &lt;= STR_TO_DATE(#{endTime},'%Y-%m-%d')
+		</if>
+		ORDER BY cswr.createTime DESC
+		) temp
+	</select>
+	<select id="queryProxyInfoAndCompanyId" resultType="java.util.Map">
+		SELECT
+			pcm.netfileId id,
+			cnr.gearPositionShorthand,
+			cast(pcm.proxyFeeRate*100 as decimal(11,2)) as customRate
+		FROM
+			proxy_cost_maintain pcm
+		LEFT JOIN company_netfile_rate_conf cnr ON pcm.netfileId = cnr.id
+		WHERE pcm.customkey = #{customkey}
+		AND pcm.companyId = #{companyId}
+	</select>
+	<select id="queryMerchantInfoAndCompanyId" resultType="java.util.Map">
+SELECT
+			ccrc.rateConfId id,
+			cc.gearPositionShorthand,
+			cast(ccrc.customRate*100 as decimal(11,2)) as customRate
+		FROM
+			custom_company_rate_conf ccrc
+		LEFT JOIN company_rate_conf cc ON ccrc.rateConfId = cc.id
+		LEFT JOIN qb_company qc ON cc.companyId = qc.userId
+		WHERE ccrc.customkey = #{customkey}
+		AND cc.companyId = #{companyId}
+	</select>
+
+	<select id="querySettleWithRateByParamCount" resultType="java.lang.Integer">
+		SELECT
+		COUNT(1)
+		FROM
+		custom_settle_with_rate
+		WHERE
+		customkey = #{customkey}
+		AND companyId = #{companyId}
+		AND customType = #{customType}
+		AND netfileId = #{netfileId}
+		AND (
+		(date(modifyEffectStartTime) &gt;= #{startTime} AND date(modifyEffectStartTime) &lt;= #{endTime})
+		OR (date(modifyEffectStartTime) &lt;= #{startTime} AND date(modifyEffectEndTime) &gt;= #{endTime})
+		OR (date(modifyEffectEndTime) &gt;= #{startTime} AND date(modifyEffectEndTime) &lt;= #{endTime})
+		)
+	</select>
+
+    <select id="queryMerchantRateByParam" resultType="java.util.Map">
+		SELECT
+		c.customkey,
+		c.companyName customName,
+		qc.userId,
+		qc.companyName companyName,
+		CONCAT(CAST(ccrc.customRate*100 AS DECIMAL(15,2)),'%') AS rate,
+		cc.id rateConfId,
+		cc.amountStart,
+		cc.amountEnd,
+		ccrc.id customId
+		FROM custom_company_rate_conf ccrc
+		LEFT JOIN  company_rate_conf cc
+		ON cc.id = ccrc.rateConfId
+		LEFT JOIN channel_custom c
+		ON ccrc.customkey = c.customkey
+		LEFT JOIN qb_company qc
+		ON cc.companyId = qc.userId
+		where 1 = 1
+        <if test="customName != null and customName != ''">
+            AND c.companyName like concat('%',#{customName},'%')
+        </if>
+        <if test="companyName != null and companyName != ''">
+            AND qc.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="startRate != null and startRate != ''">
+            and cast(ccrc.customRate*100 as decimal(15,2)) &gt;= #{startRate}
+        </if>
+        <if test="endRate != null and endRate != ''">
+            and cast(ccrc.customRate*100 as decimal(15,2)) &lt;= #{endRate}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            AND cc.companyId = #{companyId}
+        </if>
+        <if test="customkey != null and customkey != ''">
+            AND FIND_IN_SET (c.customkey,#{customkey})
+        </if>
+		ORDER BY ccrc.createTime DESC
+		<if test="start !=null and limit !=null">
+			limit #{start},#{limit}
+		</if>
+    </select>
+
+    <insert id="insertSettleWithRate" parameterType="com.jrmf.domain.SettleWithRate">
+        INSERT INTO custom_settle_with_rate(customkey,customType,modifyRate,modifyEffectStartTime,modifyEffectEndTime,companyId,netfileId,createTime,updateTime,modifyAddUser)
+        VALUES(#{customkey},#{customType},#{modifyRate},#{modifyEffectStartTime},#{modifyEffectEndTime},#{companyId},#{netfileId},now(),now(),#{modifyAddUser})
+    </insert>
+</mapper>

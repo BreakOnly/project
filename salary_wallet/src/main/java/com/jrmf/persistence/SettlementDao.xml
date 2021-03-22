@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SettlementDao">
+
+
+    <select id="statisticByCompany" resultType="com.jrmf.domain.settlement.StatisticCompany">
+        SELECT a.companyName,a.companyId,cast(sum(amount) as DECIMAL(16,2)) amount,a.merchantId, b.businessPlatform plantForm
+        ,#{startTime} startTime,#{endTime} endTime FROM qb_usercommission a
+        LEFT JOIN qb_company b on a.companyId = b.userId
+        where a.status = 1 and a.businessPlatform = #{businessPlatform} and a.createtime &gt;= #{startTime} and a.createtime &lt;=
+        #{endTime}
+        <if test="type == 1">
+            GROUP BY a.companyId
+        </if>
+        <if test="type != 1">
+            GROUP BY b.businessPlatform
+        </if>
+    </select>
+
+    <select id="statisticByCompanyDetail" resultType="com.jrmf.domain.settlement.StatisticCompanyDetail">
+        SELECT a.companyName,a.companyId,cast(sum(amount) as DECIMAL(16,2))
+        amount,a.merchantId,a.originalId,a.customName ,#{startTime} startTime,#{endTime} endTime,b.businessPlatform plantForm
+        FROM
+        qb_usercommission a LEFT JOIN qb_company b on a.companyId = b.userId
+        where a.status = 1 and a.businessPlatform = #{businessPlatform} and a.createtime &gt;= #{startTime} and a.createtime &lt;=
+        #{endTime}
+        <if test="type != 1">
+            and b.businessPlatform = #{key}
+        </if>
+        <if test="type == 1">
+            and a.companyId = #{key}
+        </if>
+        <if test="type == 1">
+            GROUP BY a.originalId
+        </if>
+        <if test="type != 1">
+            GROUP BY a.companyId
+        </if>
+    </select>
+    <select id="statisticByBusinessManager" resultType="com.jrmf.domain.settlement.StatisticBusinessManager">
+        SELECT businessManager,count(DISTINCT originalId) count,cast(sum(amount) as DECIMAL(16,2)) amount ,#{startTime}
+        startTime,#{endTime} endTime FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        <if test="businessManager != '' and businessManager != null">
+            and businessManager = #{businessManager}
+        </if>
+        GROUP BY businessManager HAVING businessManager &lt;&gt; '无' and LENGTH(businessManager)>0
+    </select>
+    <select id="statisticByBusinessManagerDetail"
+            resultType="com.jrmf.domain.settlement.StatisticBusinessManagerDetail">
+        SELECT businessManager,businessChannel,customName,cast(sum(amount) as DECIMAL(16,2)) amount ,#{startTime} startTime,#{endTime} endTime FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        and businessManager = #{businessManager}
+        GROUP BY originalId
+    </select>
+
+    <select id="statisticByOperationsManager" resultType="com.jrmf.domain.settlement.StatisticOperationsManager">
+        SELECT operationsManager,count(DISTINCT originalId) count,cast(sum(amount) as DECIMAL(16,2)) amount ,#{startTime}
+        startTime,#{endTime} endTime FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        <if test="operationsManager != '' and operationsManager != null">
+            and operationsManager = #{operationsManager}
+        </if>
+        GROUP BY operationsManager HAVING operationsManager &lt;&gt; '无' and LENGTH(operationsManager)>0
+
+
+    </select>
+    <select id="statisticByOperationsManagerDetail"
+      resultType="com.jrmf.domain.settlement.StatisticOperationsManagerDetail">
+        SELECT operationsManager,businessChannel,customName,cast(sum(amount) as DECIMAL(16,2)) amount ,#{startTime} startTime,#{endTime} endTime FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime}
+        and createtime &lt;= #{endTime} and operationsManager = #{operationsManager}
+        GROUP BY originalId
+    </select>
+
+    <select id="statisticSumAmountByCompany" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM qb_usercommission where status =
+        1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+    </select>
+
+    <select id="statisticSumAmountByCompanyDetail" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM
+        qb_usercommission a
+        LEFT JOIN qb_custom_info b
+        on a.merchantId = b.customkey
+        <if test="type != 1">
+            where b.customname = #{key}
+        </if>
+        <if test="type == 1">
+            where a.companyId = #{key}
+        </if>
+        and a.status = 1 and a.businessPlatform = #{businessPlatform} and a.createtime &gt;= #{startTime} and a.createtime &lt;=
+        #{endTime}
+    </select>
+
+    <select id="statisticSumAmountByBusinessManager" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        and businessManager &lt;&gt; '无' and LENGTH(businessManager)>0
+        <if test="businessManager != '' and businessManager != null">
+            and businessManager = #{businessManager}
+        </if>
+    </select>
+
+    <select id="statisticSumAmountByOperationsManager" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        and operationsManager &lt;&gt; '无' and LENGTH(operationsManager)>0
+        <if test="operationsManager != '' and operationsManager != null">
+            and operationsManager = #{operationsManager}
+        </if>
+    </select>
+
+    <select id="statisticSumAmountByBusinessManagerDetail" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        and businessManager = #{businessManager}
+    </select>
+
+    <select id="statisticSumAmountByOperationsManagerDetail" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM qb_usercommission
+        where status = 1 and businessPlatform = #{businessPlatform} and createtime &gt;= #{startTime} and createtime &lt;= #{endTime}
+        and operationsManager = #{operationsManager}
+    </select>
+    <select id="monthStatisticByOperationsManager" resultType="com.jrmf.domain.settlement.MonthStatisticOperationsManager">
+
+        SELECT
+        qu.MONTH,
+        qu.operationsManager,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 1, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) smallAmount,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 2, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) bigAmount,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount,
+        count( DISTINCT qu.originalId ) count
+        FROM
+        (
+        SELECT
+        DATE_FORMAT( createtime, '%Y-%m' ) MONTH,
+        originalId,
+        companyId,
+        certId,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount,
+        operationsManager
+        FROM
+        qb_usercommission
+        WHERE
+        `status` = 1
+        AND businessPlatform = #{businessPlatform}
+        AND operationsManager &lt;&gt; '无'
+        AND LENGTH( operationsManager )> 0
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &gt;= #{startTime}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &lt;= #{endTime}
+        GROUP BY
+        originalId,
+        operationsManager,
+        MONTH
+        ) qu
+        LEFT JOIN (
+        SELECT
+        ccrc.customkey,
+        crc.companyId,
+        ccrc.customRate,
+        crc.amountStart,
+        crc.operator,
+        crc.amountEnd,
+        cnrc.gearLabel
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+        ) circ ON qu.originalId = circ.customkey
+        AND qu.companyId = circ.companyId
+        AND qu.amount &gt; circ.amountStart
+        AND qu.amount &lt;= circ.amountEnd
+        GROUP BY
+        qu.operationsManager,
+        qu.MONTH
+        <if test="operationsManager != '' and operationsManager != null">
+            HAVING qu.operationsManager = #{operationsManager}
+        </if>
+    </select>
+
+    <select id="monthStatisticByBusinessManager" resultType="com.jrmf.domain.settlement.MonthStatisticBusinessManager">
+
+        SELECT
+        qu.MONTH,
+        qu.businessManager,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 1, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) smallAmount,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 2, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) bigAmount,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount,
+        count( DISTINCT qu.originalId ) count
+        FROM
+        (
+        SELECT
+        DATE_FORMAT( createtime, '%Y-%m' ) MONTH,
+        originalId,
+        companyId,
+        certId,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount,
+        businessManager
+        FROM
+        qb_usercommission
+        WHERE
+        `status` = 1
+        AND businessPlatform = #{businessPlatform}
+        AND businessManager &lt;&gt; '无'
+        AND LENGTH( businessManager )> 0
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &gt;= #{startTime}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &lt;= #{endTime}
+        GROUP BY
+        originalId,
+        businessManager,
+        MONTH
+        ) qu
+        LEFT JOIN (
+        SELECT
+        ccrc.customkey,
+        crc.companyId,
+        ccrc.customRate,
+        crc.amountStart,
+        crc.operator,
+        crc.amountEnd,
+        cnrc.gearLabel
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+        ) circ ON qu.originalId = circ.customkey
+        AND qu.companyId = circ.companyId
+        AND qu.amount &gt; circ.amountStart
+        AND qu.amount &lt;= circ.amountEnd
+        GROUP BY
+        qu.businessManager,
+        qu.MONTH
+        <if test="businessManager != '' and businessManager != null">
+            HAVING qu.businessManager = #{businessManager}
+        </if>
+    </select>
+
+    <select id="monthStatisticSumAmountByBusinessManager" resultType="java.lang.String">
+        SELECT
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount
+        FROM
+        qb_usercommission
+        WHERE
+        STATUS = 1
+        AND businessPlatform = #{businessPlatform}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &gt;= #{startTime}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &lt;= #{endTime}
+        AND businessManager &lt;&gt; '无'
+        AND LENGTH( businessManager )> 0
+        <if test="businessManager != '' and businessManager != null">
+            and businessManager = #{businessManager}
+        </if>
+    </select>
+
+    <select id="monthStatisticSumAmountByOperationsManager" resultType="java.lang.String">
+        SELECT
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount
+        FROM
+        qb_usercommission
+        WHERE
+        STATUS = 1
+        AND businessPlatform = #{businessPlatform}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &gt;= #{startTime}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &lt;= #{endTime}
+        AND operationsManager &lt;&gt; '无'
+        AND LENGTH( operationsManager )> 0
+        <if test="operationsManager != '' and operationsManager != null">
+            and operationsManager = #{operationsManager}
+        </if>
+    </select>
+
+    <select id="monthStatisticByBusinessManagerDetail"
+            resultType="com.jrmf.domain.settlement.MonthStatisticBusinessManagerDetail">
+        SELECT
+        qu.MONTH,
+        qu.businessManager,
+        qu.businessChannel,
+        qu.customName,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 1, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) smallAmount,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 2, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) bigAmount,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount
+        FROM
+        (
+        SELECT
+        DATE_FORMAT( createtime, '%Y-%m' ) MONTH,
+        originalId,
+        companyId,
+        certId,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount,
+        businessManager,
+        businessChannel,
+        customName
+        FROM
+        qb_usercommission
+        WHERE
+        `status` = 1
+        AND businessPlatform = #{businessPlatform}
+        AND businessManager = #{businessManager}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) = #{month}
+        GROUP BY
+        originalId,
+        businessManager
+        ) qu
+        LEFT JOIN (
+        SELECT
+        ccrc.customkey,
+        crc.companyId,
+        ccrc.customRate,
+        crc.amountStart,
+        crc.operator,
+        crc.amountEnd,
+        cnrc.gearLabel
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+        ) circ ON qu.originalId = circ.customkey
+        AND qu.companyId = circ.companyId
+        AND qu.amount &gt; circ.amountStart
+        AND qu.amount &lt;= circ.amountEnd
+        GROUP BY
+        qu.originalId
+    </select>
+
+    <select id="monthStatisticByOperationsManagerDetail"
+      resultType="com.jrmf.domain.settlement.MonthStatisticOperationsManagerDetail">
+        SELECT
+        qu.MONTH,
+        qu.operationsManager,
+        qu.businessChannel,
+        qu.customName,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 1, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) smallAmount,
+        cast(
+        sum(
+        IF
+        ( circ.gearLabel = 2, qu.amount, 0 )) AS DECIMAL ( 16, 2 )) bigAmount,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount
+        FROM
+        (
+        SELECT
+        DATE_FORMAT( createtime, '%Y-%m' ) MONTH,
+        originalId,
+        companyId,
+        certId,
+        cast(
+        sum( amount ) AS DECIMAL ( 16, 2 )) amount,
+        operationsManager,
+        businessChannel,
+        customName
+        FROM
+        qb_usercommission
+        WHERE
+        `status` = 1
+        AND businessPlatform = #{businessPlatform}
+        AND operationsManager = #{operationsManager}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) = #{month}
+        GROUP BY
+        originalId,
+        operationsManager
+        ) qu
+        LEFT JOIN (
+        SELECT
+        ccrc.customkey,
+        crc.companyId,
+        ccrc.customRate,
+        crc.amountStart,
+        crc.operator,
+        crc.amountEnd,
+        cnrc.gearLabel
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+        ) circ ON qu.originalId = circ.customkey
+        AND qu.companyId = circ.companyId
+        AND qu.amount &gt; circ.amountStart
+        AND qu.amount &lt;= circ.amountEnd
+        GROUP BY
+        qu.originalId
+    </select>
+
+    <select id="monthStatisticSumAmountByBusinessManagerDetail" resultType="java.lang.String">
+        SELECT
+            cast(
+            sum( amount ) AS DECIMAL ( 16, 2 )) amount
+        FROM
+            qb_usercommission
+        WHERE
+            STATUS = 1
+            AND businessPlatform = #{businessPlatform}
+            AND DATE_FORMAT( createtime, '%Y-%m' ) = #{month}
+            AND businessManager = #{businessManager}
+    </select>
+
+    <select id="monthStatisticSumAmountByOperationsManagerDetail" resultType="java.lang.String">
+        SELECT
+            cast(
+            sum( amount ) AS DECIMAL ( 16, 2 )) amount
+        FROM
+            qb_usercommission
+        WHERE
+            STATUS = 1
+            AND businessPlatform = #{businessPlatform}
+            AND DATE_FORMAT( createtime, '%Y-%m' ) = #{month}
+            AND operationsManager = #{operationsManager}
+    </select>
+
+    <select id="statisticByCompanyGroupByMonth" resultType="com.jrmf.domain.settlement.StatisticCompanyGroupByMonth">
+        SELECT
+        qu. MONTH,
+        qc.businessPlatform AS plantForm,
+        qu.companyId,
+        qc.companyName,
+        cast(
+        sum(
+        IF (
+        circ.gearLabel = 1,
+        qu.amount,
+        0
+        )
+        ) AS DECIMAL (16, 2)
+        ) smallAmount,
+        cast(
+        sum(
+        IF (
+        circ.gearLabel = 2,
+        qu.amount,
+        0
+        )
+        ) AS DECIMAL (16, 2)
+        ) bigAmount,
+        cast(sum(amount) AS DECIMAL(16, 2)) amount
+        FROM
+        (
+        SELECT
+        DATE_FORMAT(createtime, '%Y-%m') MONTH,
+        companyId,
+        originalId,
+        certId,
+        cast(sum(amount) AS DECIMAL(16, 2)) amount
+        FROM
+        qb_usercommission
+
+        WHERE
+        `status` = 1
+        AND businessPlatform = #{businessPlatform}
+        <if test="startTime!=null and startTime!=''">
+            and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{startTime}
+        </if>
+        <if test="endTime!=null and endTime!=''">
+            and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{endTime}
+        </if>
+        GROUP BY
+        certId,
+        originalId,
+        companyId,
+        MONTH
+        ) qu
+        LEFT JOIN (
+        SELECT
+        ccrc.customkey,
+        crc.companyId,
+        ccrc.customRate,
+        crc.amountStart,
+        crc.operator,
+        crc.amountEnd,
+        cnrc.gearLabel
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+        ) circ ON qu.originalId = circ.customkey AND qu.companyId = circ.companyId
+        AND qu.amount &gt;= circ.amountStart
+        AND qu.amount &lt;= circ.amountEnd
+        LEFT JOIN qb_company qc ON qu.companyId = qc.userId
+        LEFT JOIN qb_users u ON u.id = qu.companyId
+        <if test="type == 1">
+            GROUP BY qu.companyId,
+        </if>
+        <if test="type != 1">
+            GROUP BY qc.businessPlatform,
+        </if>
+        qu.MONTH
+        order by amount desc
+    </select>
+
+    <select id="statisticByCompanyDetailGroupByMonth"
+            resultType="com.jrmf.domain.settlement.StatisticCompanyGroupByMonthDetail">
+        SELECT
+        qu. MONTH,
+        qc.businessPlatform AS plantForm,
+        qu.companyId,
+        qc.companyName,
+        qu.originalId,
+        cc.companyName customName,
+        cast(
+        sum(
+        IF (
+        circ.gearLabel = 1,
+        qu.amount,
+        0
+        )
+        ) AS DECIMAL (16, 2)
+        ) smallAmount,
+        cast(
+        sum(
+        IF (
+        circ.gearLabel = 2,
+        qu.amount,
+        0
+        )
+        ) AS DECIMAL (16, 2)
+        ) bigAmount,
+        cast(sum(amount) AS DECIMAL(16, 2)) amount
+        FROM
+        (
+        SELECT
+        DATE_FORMAT(createtime, '%Y-%m') MONTH,
+        companyId,
+        originalId,
+        certId,
+        cast(sum(amount) AS DECIMAL(16, 2)) amount
+        FROM
+        qb_usercommission
+        WHERE
+        `status` = 1
+        AND businessPlatform = #{businessPlatform}
+        and DATE_FORMAT(createTime,'%Y-%m')  &gt;= #{startTime}
+        and DATE_FORMAT(createTime,'%Y-%m')  &lt;= #{endTime}
+        GROUP BY
+        certId,
+        originalId,
+        companyId,
+        MONTH
+        ) qu
+        LEFT JOIN (
+        SELECT
+        ccrc.customkey,
+        crc.companyId,
+        ccrc.customRate,
+        crc.amountStart,
+        crc.operator,
+        crc.amountEnd,
+        cnrc.gearLabel
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+        ) circ ON qu.originalId = circ.customkey AND qu.companyId = circ.companyId
+        AND qu.amount &gt;= circ.amountStart
+        AND qu.amount &lt;= circ.amountEnd
+        LEFT JOIN qb_company qc ON qu.companyId = qc.userId
+        LEFT JOIN qb_users u ON u.id = qu.companyId
+        LEFT JOIN channel_custom cc ON qu.originalId = cc.customkey
+        WHERE 1 = 1
+        <if test="type != 1">
+            AND qc.businessPlatform = #{key}
+        </if>
+        <if test="type == 1">
+            AND qu.companyId = #{key}
+        </if>
+        <if test="type != 1">
+            GROUP BY qc.businessPlatform, qu.companyId,
+        </if>
+        <if test="type == 1">
+            GROUP BY qu.companyId, qu.originalId,
+        </if>
+        qu.MONTH
+        order by amount desc
+    </select>
+    <select id="statisticSumAmountByCompanyMonth" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM qb_usercommission where status =
+        1 and businessPlatform = #{businessPlatform} and DATE_FORMAT( createtime, '%Y-%m' ) &gt;= #{startTime}
+        AND DATE_FORMAT( createtime, '%Y-%m' ) &lt;= #{endTime}
+    </select>
+    <select id="statisticSumAmountByCompanyMonthDetail" resultType="java.lang.String">
+        SELECT cast(sum(amount) as DECIMAL(16,2)) amount FROM
+        qb_usercommission a
+        LEFT JOIN qb_company qc ON a.companyId = qc.userId
+        LEFT JOIN qb_users u ON u.id = qc.userId
+        <if test="type != 1">
+            where qc.businessPlatform = #{key}
+        </if>
+        <if test="type == 1">
+            where a.companyId = #{key}
+        </if>
+        and a.status = 1 and a.businessPlatform = #{businessPlatform} and DATE_FORMAT( a.createtime, '%Y-%m' ) &gt;= #{startTime}
+        AND DATE_FORMAT( a.createtime, '%Y-%m' ) &lt;= #{endTime}
+    </select>
+</mapper>

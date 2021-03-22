@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.UserRelatedDao">
+    <insert id="createUserRelated" parameterType="com.jrmf.domain.UserRelated">
+		INSERT INTO qb_userRelated (
+		userId,
+		companyId,
+		originalId,
+		userNo,
+		status,
+		createTime,
+		updateTime,
+		mobileNo
+		)
+		VALUES (
+		#{userId},
+		#{companyId},
+		#{originalId},
+		#{userNo},
+		#{status},
+		#{createTime},
+		#{updateTime},
+		#{mobileNo}
+		)
+	</insert>
+
+    <update id="updateUserRelated" parameterType="com.jrmf.domain.UserRelated">
+        UPDATE qb_userRelated
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status !=null">
+                status = #{status} ,
+            </if>
+            <if test="agreementUrl !=null">
+                agreementUrl = #{agreementUrl} ,
+            </if>
+            <if test="userNo !=null">
+                userNo = #{userNo} ,
+            </if>
+            <if test="mobileNo !=null and mobileNo != ''">
+                mobileNo = #{mobileNo} ,
+            </if>
+            updateTime = now() ,
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateUserRelatedUserNo" parameterType="com.jrmf.domain.UserRelated">
+		UPDATE qb_userRelated set userNo = #{userNo},mobileNo = #{mobileNo} where userId = #{userId}  and  originalId = #{originalId}
+    </update>
+
+    <update id="updateUserRelatedStatus">
+        UPDATE qb_userRelated
+        <trim prefix="SET" suffixOverrides=",">
+            status = #{status} ,
+        </trim>
+        where userId = #{userId} and originalId = #{originalId}
+    </update>
+
+    <delete id="deleteByOriginalId">
+	DELETE FROM qb_userRelated WHERE  FIND_IN_SET(userId,#{userId})  and  originalId = #{originalId}
+	</delete>
+
+    <delete id="deleteRelatedByBatchId">
+	DELETE FROM qb_userRelated WHERE
+	userId in (SELECT id FROM qb_users WHERE batcheId = #{batcheId})
+	and  originalId = #{originalId}
+	</delete>
+
+    <select id="getRelatedByParam" resultType="com.jrmf.domain.UserRelated">
+        select * from qb_userRelated where 1=1
+        <if test="userNo != null">
+            and userNo = #{userNo}
+        </if>
+        <if test="status != '' and status != null">
+            and status = #{status}
+        </if>
+        <if test="userId != '' and userId != null">
+            and userId = #{userId}
+        </if>
+        <if test="originalId != '' and originalId != null">
+            and originalId = #{originalId}
+        </if>
+        <if test="companyId != '' and companyId != null">
+            and companyId = #{companyId}
+        </if>
+    </select>
+
+    <select id="getRelatedByUserId" resultType="com.jrmf.domain.UserRelated">
+		select * from qb_userRelated where  userId = #{userId}  and originalId = #{originalId}
+	</select>
+
+    <select id="getRelatedByUserNo" resultType="com.jrmf.domain.UserRelated">
+		select * from qb_userRelated where  userNo = #{userNo}  and originalId = #{originalId}
+	</select>
+
+    <select id="getRelatedById" resultType="com.jrmf.domain.UserRelated">
+		select * from qb_userRelated where  id =  #{id}
+	</select>
+
+    <select id="getPaymentConfigByTypeOriginalId" resultType="com.jrmf.domain.PaymentConfig">
+        SELECT cpr.*,bpcr.pathKeyType,bpcr.isSubAccount,bpcr.keyWords,bpcr.containKeyWords,bpcr.shadowAcctNo from
+        company_paychannel_relation cpr,
+        (
+        SELECT
+        bpr.*,
+        bpc.pathKeyType
+        FROM
+        business_payment_channel bpc
+        LEFT JOIN business_payment_route bpr ON bpc.pathNo = bpr.pathNo
+        where bpr.customKey = #{originalId} and bpr.paymentType = #{paymentType}
+        ) bpcr
+        where cpr.companyId = bpcr.companyId
+        and cpr.pathNo = bpcr.pathNo
+        and bpcr.default = 1
+        and cpr.companyId = #{companyId}
+        order by bpcr.default desc LIMIT 1
+    </select>
+
+    <select id="getPaymentConfigByTypeCompanyId" resultType="com.jrmf.domain.PaymentConfig">
+        SELECT cpr.*,bpcr.pathKeyType,bpcr.isSubAccount,bpcr.keyWords,bpcr.containKeyWords,bpcr.shadowAcctNo from
+        company_paychannel_relation cpr,
+        (
+			SELECT
+				bpr.*,
+        bpc.pathKeyType
+			FROM
+				business_payment_channel bpc
+			LEFT JOIN business_payment_route bpr ON bpc.pathNo = bpr.pathNo
+			where (bpr.customKey = '' or bpr.customKey is null) and  bpr.paymentType = #{paymentType}
+		) bpcr
+		where cpr.companyId = bpcr.companyId
+			and cpr.pathNo = bpcr.pathNo
+			and bpcr.default = 1
+			and cpr.companyId = #{companyId}
+        order by bpcr.default desc LIMIT 1
+	</select>
+
+    <select id="selectIsWhiteList" resultType="com.jrmf.domain.UserRelated">
+		select qur.* from qb_userrelated qur left join qb_users qu on qur.userId=qu.id where qur.originalId=#{customKey} and companyId=#{companyId} and qu.certId=#{certId} order by isWhiteList DESC limit 1;
+	</select>
+
+    <select id="getPaymentConfigTwo" resultType="com.jrmf.domain.PaymentConfig">
+        SELECT cpr.*,bpcr.pathKeyType from
+        company_paychannel_relation cpr,
+        (
+			SELECT
+				bpr.*,
+				bpc.pathKeyType
+			FROM
+				business_payment_channel bpc
+			LEFT JOIN business_payment_route bpr ON bpc.pathNo = bpr.pathNo
+			where bpr.customKey = #{originalId} and  bpr.paymentType = #{paymentType}
+		) bpcr
+		where cpr.companyId = bpcr.companyId
+			and cpr.pathNo = bpcr.pathNo
+			and bpcr.default = 1
+			and cpr.companyId = #{companyId}
+			and cpr.pathNo = #{pathNo}
+        order by bpcr.default desc LIMIT 1
+	</select>
+
+    <select id="getPaymentConfigCompanyTwo" resultType="com.jrmf.domain.PaymentConfig">
+        SELECT cpr.*,bpcr.pathKeyType from
+        company_paychannel_relation cpr,
+        (
+			SELECT
+				bpr.*, bpc.pathKeyType
+			FROM
+				business_payment_channel bpc
+			LEFT JOIN business_payment_route bpr ON bpc.pathNo = bpr.pathNo
+			where (bpr.customKey = '' or bpr.customKey is null) and  bpr.paymentType = #{paymentType}
+		) bpcr
+		where cpr.companyId = bpcr.companyId
+			and cpr.pathNo = bpcr.pathNo
+			and bpcr.default = 1
+			and cpr.companyId = #{companyId}
+			and cpr.pathNo = #{pathNo}
+        order by bpcr.default desc LIMIT 1
+	</select>
+
+    <select id="getSubAccountPaymentConfig" resultType="com.jrmf.domain.PaymentConfig">
+     	SELECT
+            cpr.*,
+            bpr.isSubAccount
+        FROM
+            business_payment_route bpr
+            LEFT JOIN company_paychannel_relation cpr ON cpr.companyId = bpr.companyId
+            AND cpr.pathNo = bpr.pathNo
+        WHERE
+            bpr.isSubAccount = 1
+            AND bpr.`default` = 1
+        GROUP BY
+            bpr.companyId,
+            bpr.pathNo;
+	</select>
+
+
+    <select id="getSubAccountList" resultType="java.lang.Integer">
+     	SELECT
+            COUNT(*)
+        FROM
+            business_payment_route
+        WHERE
+            companyId = #{companyId}
+            AND isSubAccount = 1;
+	</select>
+
+    <!-- 查先签约后支付的用户数量 -->
+    <select id="countByOriginalId" resultType="java.lang.Integer">
+        select count(1) from qb_userrelated where originalId=#{originalId};
+    </select>
+
+    <!-- 获取所有先签约后支付用户 -->
+    <select id="getByOriginalId" resultType="int">
+        select u.userId from qb_userrelated as u left join agreement_template as at on at.originalId=u.originalId
+        where u.originalId=#{originalId} and at.agreementPayment=1;
+    </select>
+
+    <select id="getMerchantListByUserId" resultType="java.lang.String">
+        select originalId from qb_userrelated where userid=#{userId} group by originalId
+    </select>
+
+</mapper>

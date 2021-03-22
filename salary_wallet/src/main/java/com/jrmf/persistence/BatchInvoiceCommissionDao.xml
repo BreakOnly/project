@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.BatchInvoiceCommissionDao">
+
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.BatchInvoiceCommission">
+    <id column="id" jdbcType="INTEGER" property="id"/>
+    <result column="company_name" jdbcType="VARCHAR" property="companyName"/>
+    <result column="custom_key" jdbcType="VARCHAR" property="customKey"/>
+    <result column="receipt_status" jdbcType="INTEGER" property="receiptStatus"/>
+    <result column="invoice_status" jdbcType="INTEGER" property="invoiceStatus"/>
+    <result column="individual_name" jdbcType="VARCHAR" property="individualName"/>
+    <result column="account_time" jdbcType="TIMESTAMP" property="accountTime"/>
+    <result column="account_date" jdbcType="TIMESTAMP" property="accountDate"/>
+    <result column="amount" jdbcType="VARCHAR" property="amount"/>
+    <result column="fee" jdbcType="VARCHAR" property="fee"/>
+    <result column="in_account_no" jdbcType="VARCHAR" property="inAccountNo"/>
+    <result column="in_account_name" jdbcType="VARCHAR" property="inAccountName"/>
+    <result column="contract_company_name" jdbcType="VARCHAR" property="contractCompanyName"/>
+    <result column="company_id" jdbcType="INTEGER" property="companyId"/>
+    <result column="document_type" jdbcType="INTEGER" property="documentType"/>
+    <result column="cert_id" jdbcType="VARCHAR" property="certId"/>
+    <result column="remark" jdbcType="VARCHAR" property="remark"/>
+    <result column="receipt_url" jdbcType="VARCHAR" property="receiptUrl"/>
+    <result column="order_no" jdbcType="VARCHAR" property="orderNo"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, company_name, custom_key, receipt_status, invoice_status, individual_name, account_time, amount, fee, in_account_no, in_account_name,
+    contract_company_name, company_id, document_type, cert_id, remark, receipt_url, order_no, create_time, update_time
+  </sql>
+
+  <insert id="insert" parameterType="com.jrmf.domain.BatchInvoiceCommission">
+    INSERT INTO batch_invoice_commission (
+    company_name,
+    custom_key,
+    receipt_status,
+    invoice_status,
+    individual_name,
+    account_time,
+    account_date,
+    amount,
+    fee,
+    in_account_no,
+    in_account_name,
+    contract_company_name,
+    company_id,
+    document_type,
+    cert_id,
+    receipt_url,
+    order_no,
+    create_time,
+    update_time,
+    remark
+    ) VALUES (
+    #{companyName},
+    #{customKey},
+    #{receiptStatus},
+    #{invoiceStatus},
+    #{individualName},
+    #{accountTime},
+    #{accountDate},
+    #{amount},
+    #{fee},
+    #{inAccountNo},
+    #{inAccountName},
+    #{contractCompanyName},
+    #{companyId},
+    #{documentType},
+    #{certId},
+    #{receiptUrl},
+    #{orderNo},
+    now(),
+    now(),
+    #{remark}
+    )
+  </insert>
+
+  <select id="listBatchInvoiceCommission" resultType="com.jrmf.domain.BatchInvoiceCommission" parameterType="com.jrmf.domain.dto.BatchInvoiceCommissionDTO">
+    SELECT
+        bi.id,
+        bi.company_name companyName,
+        bi.custom_key customKey,
+        bi.receipt_status receiptStatus,
+        bi.invoice_status invoiceStatus,
+        bi.individual_name individualName,
+        bi.account_time accountTime,
+        bi.amount,
+        bi.fee,
+        bi.in_account_no inAccountNo,
+        bi.in_account_name inAccountName,
+        bi.contract_company_name contractCompanyName,
+        bi.company_id companyId,
+        qc.companyName serviceCompanyName,
+        bi.document_type documentType,
+        bi.cert_id certId,
+        bi.remark,
+        bi.receipt_url receiptUrl,
+        bi.order_no orderNo
+    FROM
+        batch_invoice_commission bi
+    LEFT JOIN qb_company qc
+    ON bi.company_id = qc.userId
+    where 1 = 1
+    <if test="companyName != null and companyName != ''">
+      and bi.company_name like concat('%', #{companyName}, '%')
+    </if>
+    <if test="individualName != null and individualName != ''">
+      and bi.individual_name = #{individualName}
+    </if>
+    <if test="companyId != null and companyId != ''">
+      and FIND_IN_SET(bi.company_id, #{companyId})
+    </if>
+    <if test="invoiceStatus != null and invoiceStatus != ''">
+      and FIND_IN_SET(bi.invoice_status, #{invoiceStatus})
+    </if>
+    <if test="receiptStatus != null">
+      and bi.receipt_status = #{receiptStatus}
+    </if>
+    <if test="accountStartDate != null and accountStartDate != ''">
+      and date(bi.account_time) &gt;= #{accountStartDate}
+    </if>
+    <if test="accountEndDate != null and accountEndDate != ''">
+      and date(bi.account_time) &lt;= #{accountEndDate}
+    </if>
+    <if test="contractCompanyName != null and contractCompanyName != ''">
+      and bi.contract_company_name like concat('%', #{contractCompanyName}, '%')
+    </if>
+    <if test="certId != null and certId != ''">
+      and bi.cert_id = #{certId}
+    </if>
+    <if test="inAccountNo != null and inAccountNo != ''">
+      and bi.in_account_no = #{inAccountNo}
+    </if>
+    <if test="amountStart != null and amountStart != ''">
+      and bi.amount &gt;= #{amountStart} + 0
+    </if>
+    <if test="amountEnd != null and amountEnd != ''">
+      and bi.amount &lt;= #{amountEnd} + 0
+    </if>
+    order by bi.account_time desc
+  </select>
+
+  <update id="updateByOrderNo" parameterType="com.jrmf.domain.BatchInvoiceCommission">
+    update batch_invoice_commission
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="companyName != null and companyName != ''">
+        company_name = #{companyName},
+      </if>
+      <if test="customKey != null and customKey != ''">
+        custom_key = #{customKey},
+      </if>
+      <if test="individualName != null and individualName != ''">
+        individual_name = #{individualName},
+      </if>
+      <if test="companyId != null and companyId != ''">
+        company_id = #{companyId},
+      </if>
+      <if test="receiptStatus != null">
+        receipt_status = #{receiptStatus},
+      </if>
+      <if test="accountTime != null and accountTime != ''">
+        account_time = #{accountTime},
+      </if>
+      <if test="accountDate != null and accountDate != ''">
+        account_date = #{accountDate}
+      </if>
+      <if test="amount != null and amount != ''">
+        amount = #{amount},
+      </if>
+      <if test="fee != null and fee != ''">
+        fee = #{fee},
+      </if>
+      <if test="inAccountNo != null and inAccountNo != ''">
+        in_account_no = #{inAccountNo},
+      </if>
+      <if test="inAccountName != null and inAccountName != ''">
+        in_account_name = #{inAccountName},
+      </if>
+      <if test="contractCompanyName != null and contractCompanyName != ''">
+        contract_company_name = #{contractCompanyName},
+      </if>
+      <if test="documentType != null and documentType != ''">
+        document_type = #{documentType},
+      </if>
+      <if test="certId != null and certId != ''">
+        cert_id = #{certId},
+      </if>
+      <if test="remark != null and remark != ''">
+        remark = #{remark},
+      </if>
+      <if test="invoiceStatus != null">
+        invoice_status = #{invoiceStatus},
+      </if>
+      <if test="receiptUrl != null and receiptUrl != ''">
+        receipt_url = #{receiptUrl},
+      </if>
+       update_time = now(),
+    </trim>
+    where order_no = #{orderNo}
+  </update>
+
+  <update id="updateStatusById" parameterType="com.jrmf.domain.BatchInvoiceCommission">
+    update batch_invoice_commission
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="receiptStatus != null">
+        receipt_status = #{receiptStatus},
+      </if>
+      <if test="invoiceStatus != null">
+        invoice_status = #{invoiceStatus},
+      </if>
+      update_time = now(),
+    </trim>
+    where id = #{id}
+  </update>
+
+  <select id="getBatchInvoiceCommissionByOrderNo" resultMap="BaseResultMap">
+    SELECT
+        <include refid="Base_Column_List"/>
+    FROM
+        batch_invoice_commission
+    WHERE order_no = #{orderNo}
+  </select>
+</mapper>

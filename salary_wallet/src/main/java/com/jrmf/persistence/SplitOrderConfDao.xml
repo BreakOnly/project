@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SplitOrderConfDao">
+    <insert id="addSplitOrderConf">
+        INSERT INTO split_order_conf (
+        `customKey`,
+        `companyId`,
+        `level`,
+        `amountLimit`,
+        `filePath`,
+        `createTime`,
+        `updateTime`,
+         `splitOrderBalance`)
+        VALUES
+            (
+            #{customKey},
+            #{companyId},
+            #{level},
+            #{amountLimit},
+            '*',
+            now(),
+            now(),
+            #{splitOrderBalance});
+    </insert>
+    <update id="updateSplitOrderConf">
+        update split_order_conf
+        set amountLimit = #{amountLimit} ,level = #{level}, updateTime = now(), splitOrderBalance = #{splitOrderBalance}
+        where customKey = #{customKey} and companyId = #{companyId}
+    </update>
+    <delete id="deleteSplitOrderConf">
+        delete from split_order_conf where customKey = #{customKey} and companyId = #{companyId}
+    </delete>
+
+    <select id="getConfByCustomKey" resultType="com.jrmf.domain.SplitOrderConf">
+        SELECT
+        soc.customKey,
+        soc.companyId,
+        soc.LEVEL 'level',
+        soc.createTime,
+        soc.updateTime,
+        cc.companyName customName,
+        cc1.companyName,
+        soc.amountLimit,
+        soc.splitOrderBalance
+        FROM
+        split_order_conf soc
+        LEFT JOIN channel_custom cc ON cc.customkey = soc.customKey
+        LEFT JOIN channel_custom cc1 ON cc1.customkey = soc.companyId
+        WHERE 1=1
+        <if test="customKeys !=null and customKeys !=''">
+            AND FIND_IN_SET(soc.customKey,#{customKeys})
+        </if>
+        <if test="customKey != null and customKey != ''">
+            and soc.customKey = #{customKey}
+        </if>
+        <if test="customName != null and customName != ''">
+            and cc.companyName like concat('%', #{customName},'%')
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+            and date(soc.createTime) &gt;= #{timeStart}
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+            and date(soc.createTime) &lt;= #{timeEnd}
+        </if>
+        ORDER BY soc.customKey,soc.level
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getConfByCustomKeyAndCompanyId" resultType="com.jrmf.domain.SplitOrderConf">
+        select * from split_order_conf where customKey = #{customKey} and companyId = #{companyId}
+    </select>
+    <select id="listSplitOrderConf" resultType="com.jrmf.domain.SplitOrderConf">
+        select `customKey`, `companyId`, `level`, `amountLimit`, `filePath`,`interval`, `createTime`, `updateTime`,splitOrderBalance
+        from split_order_conf where customKey = #{customKey}
+        ORDER BY customKey,level
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+</mapper>

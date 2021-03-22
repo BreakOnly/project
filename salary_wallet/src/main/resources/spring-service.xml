@@ -1,0 +1,581 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+	<context:component-scan base-package="com.jrmf" />
+	<bean id="pinganBankService" class="com.jrmf.bankapi.pingan.PinganBankService">
+		<constructor-arg>
+			<bean class="com.jrmf.bankapi.pingan.PinganBankAccountInfo">
+				<constructor-arg value="15000094761748" />
+				<constructor-arg value="泉州金财信息科技有限公司" />
+				<constructor-arg value="00901250000000817000" />
+				<constructor-arg value="平安银行泉州分行营业部" />
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="com.jrmf.bankapi.pingan.TransReportTemplates">
+				<constructor-arg>
+					<map>
+						<entry key="4001">
+							<bean
+								class="com.jrmf.bankapi.pingan.transaction.QueryBalanceReportTemplate" />
+						</entry>
+						<entry key="4004">
+							<bean
+								class="com.jrmf.bankapi.pingan.transaction.SubmitTransferReportTemplate" />
+						</entry>
+						<entry key="4005">
+							<bean
+								class="com.jrmf.bankapi.pingan.transaction.QueryTransferResultReportTemplate" />
+						</entry>
+					</map>
+				</constructor-arg>
+			</bean>
+		</constructor-arg>
+		<constructor-arg>
+			<bean class="com.jrmf.bankapi.pingan.SocketDataExchanger">
+				<constructor-arg value="192.168.193.231" />
+				<constructor-arg value="7072" type="int" />
+				<constructor-arg value="60000" type="int" />
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<bean id="bestSignConfig" class="com.jrmf.controller.constant.BestSignConfig">
+        <constructor-arg  value="${ftp.url}"/>
+        <constructor-arg  value="${bestsign.seckey}"/>
+        <constructor-arg  value="${bestsign.pubkey}"/>
+        <constructor-arg  value="${bestsign.url}"/>
+        <constructor-arg  value="${bestsign.serverNameUrl}"/>
+        <constructor-arg  value="${ftp.username}"/>
+        <constructor-arg  value="${ftp.password}"/>
+        <constructor-arg  value="${bestsign.serverNameUrl.client}"/>
+        <constructor-arg  value="${ftp.username.client}"/>
+        <constructor-arg  value="${ftp.password.client}"/>
+	</bean>
+
+    <!-- ftp连接池配置参数 -->
+    <bean id="ftpPoolConfig" class="com.jrmf.utils.ftp.FtpPoolConfig">
+        <property name="host" value="${ftp.url}"/>
+        <property name="username" value="${ftp.username}"/>
+        <property name="password" value="${ftp.password}"/>
+
+        <!--最大空闲等待时间  毫秒-->
+        <property name="maxWaitMillis" value="300000"/>
+        <!--最大连接数-->
+        <property name="maxTotal" value="40"/>
+        <!--最大空闲连接数-->
+        <property name="maxIdle" value="2"/>
+    </bean>
+    <!-- ftp客户端工厂 -->
+    <bean id="ftpClientFactory" class="com.jrmf.utils.ftp.FTPClientFactory">
+        <property name="ftpPoolConfig" ref="ftpPoolConfig"/>
+    </bean>
+
+    <!-- ftp客户端连接池对象 -->
+    <bean id="ftpClientPool" class="com.jrmf.utils.ftp.FTPClientPool">
+        <constructor-arg index="0" ref="ftpClientFactory"/>
+    </bean>
+
+    <!-- ftp客户端辅助bean-->
+    <bean id="ftpClientUtil" class="com.jrmf.utils.ftp.FTPClientUtil">
+        <property name="ftpClientPool"  ref="ftpClientPool"/>
+    </bean>
+
+	<bean id="wechatInfo" class="com.jrmf.controller.constant.WechatInfo">
+		<constructor-arg value="${wechat.zhishuitongAppid}" />
+		<constructor-arg value="${wechat.zhishuitongAppSeckey}" />
+		<constructor-arg value="${wechat.snsAccessTokenUrl}" />
+		<constructor-arg value="${wechat.authorizeUrl}" />
+		<constructor-arg value="${wechat.baseUrl}" />
+		<constructor-arg value="${wechat.aygPrivateKey}" />
+		<constructor-arg value="${wechat.basePath}" />
+	</bean>
+
+	<bean id="baseInfo" class="com.jrmf.controller.constant.BaseInfo">
+		<constructor-arg value="${baseinfo.transferBaffleSwitch}" />
+		<constructor-arg value="${baseinfo.calculationLimit}" />
+		<constructor-arg value="${baseinfo.domainName}" />
+	</bean>
+
+	<bean id="transactionRunner" class="com.jrmf.utils.transaction.TransactionRunner">
+		<constructor-arg>
+			<ref bean="transactionManager" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="apiKeyMapper"
+		class="com.jrmf.taxsettlement.api.gateway.restful.URLAPIKeyMapper">
+		<constructor-arg>
+			<map>
+				<entry key="/api/prepare/sync/unifiedorder.do">
+					<value>SYNC_PREPARE_UNIFIED_ORDER</value>
+				</entry>
+				<entry key="/api/recharge/queryaccount.do">
+					<value>RECHARGE_QUERY_ACCOUNT</value>
+				</entry>
+				<entry key="/api/recharge/queryrecharge.do">
+					<value>QUERY_RECHARGE_RECORD</value>
+				</entry>
+				<entry key="/api/recharge/queryrecharge_list.do">
+					<value>QUERY_RECHARGE_LIST_RECORD</value>
+				</entry>
+				<entry key="/api/recharge/merchantrecharge.do">
+					<value>MERCHANT_RECHARGE</value>
+				</entry>
+				<entry key="/api/prepare/unified/order.do">
+					<value>PREPARE_UNIFIED_ORDER</value>
+				</entry>
+				<entry key="/api/prepare/authority/order/quota.do">
+					<value>QUERY_ORDER_QUOTA</value>
+				</entry>
+				<entry key="/api/verify/3factorsverify.do">
+					<value>VERIFY_3_FACTORS</value>
+				</entry>
+				<entry key="/api/contract/binduserwechataccount.do">
+					<value>BIND_USER_WECHAT_ACCOUNT</value>
+				</entry>
+				<entry key="/api/contract/addmerchanttransferreceiver.do">
+					<value>ADD_MERCHANT_TRANSFER_RECEIVER</value>
+				</entry>
+				<entry key="/api/contract/signagreement.do">
+					<value>SIGN_AGREEMENT</value>
+				</entry>
+				<entry key="/api/transfer/transfertobankcard.do">
+					<value>TRANSFER_TO_BANK_CARD</value>
+				</entry>
+				<entry key="/api/transfer/transfertoalipayaccount.do">
+					<value>TRANSFER_TO_ALIPAY_ACCOUNT</value>
+				</entry>
+				<entry key="/api/transfer/transfertowechataccount.do">
+					<value>TRANSFER_TO_WECHAT_ACCOUNT</value>
+				</entry>
+				<entry key="/api/query/querymerchantbalance.do">
+					<value>QUERY_MERCHANT_BALANCE</value>
+				</entry>
+				<entry key="/api/query/querytransferdeal.do">
+					<value>QUERY_TRANSFER_DEAL</value>
+				</entry>
+				<entry key="/api/query/querytransferbatch.do">
+					<value>QUERY_TRANSFER_BATCH</value>
+				</entry>
+				<entry key="/api/query/querymerchantusercontract.do">
+					<value>QUERY_MERCHANT_USER_CONTRACT</value>
+				</entry>
+				<entry key="/api/download/getdayserialfileurl.do">
+					<value>GET_DAY_SERIAL_FILE_URL</value>
+				</entry>
+				<entry key="/api/download/getmonthreportfileurl.do">
+					<value>GET_MONTH_REPORT_FILE_URL</value>
+				</entry>
+				<entry key="/batch/transfer/batchtransfertobankcard.do">
+					<value>BATCH_TRANSFER_TO_BANK_CARD</value>
+				</entry>
+				<entry key="/api/invoice/addreceiver.do">
+					<value>ADD_INVOICE_RECEIVER</value>
+				</entry>
+				<entry key="/api/invoice/receivers.do">
+					<value>QUERY_INVOICE_RECEIVER</value>
+				</entry>
+				<entry key="/api/invoice/addmerchantinfo.do">
+					<value>ADD_MERCHANT_INVOICE_INFO</value>
+				</entry>
+				<entry key="/api/invoice/merchantinfos.do">
+					<value>QUERY_MERCHANT_INVOICE_INFO</value>
+				</entry>
+				<entry key="/api/invoice/submit.do">
+					<value>APPLY_INVOICE</value>
+				</entry>
+				<entry key="/api/invoices.do">
+					<value>QUERY_INVOICE_HISTORY</value>
+				</entry>
+				<entry key="/api/invoice/summary.do">
+					<value>QUERY_INVOICE_SUMMARY_HISTORY</value>
+				</entry>
+				<entry key="/api/individual/upload/file.do">
+					<value>YUNCR_USER_AUTHENTICATION_UPLOAD</value>
+				</entry>
+				<entry key="/api/individual/video/info.do">
+					<value>YUNCR_USER_AUTHENTICATION_VIDEO_INFO</value>
+				</entry>
+				<entry key="/api/individual/real/name.do">
+					<value>YUNCR_USER_AUTHENTICATION_TRUE_NAME</value>
+				</entry>
+				<entry key="/api/individual/user/register.do">
+					<value>YUNCR_USER_AUTHENTICATION_INDIVIDUAL_REGISTER</value>
+				</entry>
+				<entry key="/api/individual/approval/status.do">
+					<value>YUNCR_USER_AUTHENTICATION_APPROVAL_STATUS</value>
+				</entry>
+				<entry key="/api/individual/bankcard/register.do">
+					<value>YUNCR_USER_AUTHENTICATION_BANK_CARD</value>
+				</entry>
+				<entry key="/api/individual/businesslicense/download.do">
+					<value>YUNCR_USER_AUTHENTICATION_BUSINESSLICENSE_DOWNLOAD</value>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="apiDockingGateway"
+		class="com.jrmf.taxsettlement.api.gateway.DefaultAPIDockingGateway" />
+
+	<bean id="apiDockingManager" class="com.jrmf.taxsettlement.api.CacheAPIDockingManager" />
+
+	<bean id="actionRouter" class="com.jrmf.taxsettlement.api.service.CommonActionSet">
+		<constructor-arg>
+			<list>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.recharge.MerchantRechargeService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.AddInvoiceReceiverService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.AddMerchantInvoiceInfoService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.QueryInvoiceReceiverService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.QueryMerchantInvoiceInfoService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.ApplyInvoiceService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.QueryInvoiceHistoryService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.invoice.QueryInvoiceSummaryHistoryService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.recharge.QueryRechargeRecordService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.recharge.QueryRechargeRecordListService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.recharge.QueryRechargeAccountService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.prepareauthority.SyncPrepareUnifiedOrderService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.prepareauthority.PrepareUnifiedOrderService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.prepareauthority.QueryOrderQuotaService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.verify.Verify3FactorsService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.transfer.TransferToBankCardService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.transfer.TransferToAlipayAccountService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.transfer.TransferToWechatAccountService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.query.QueryTransferDealService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.query.QueryMerchantBalanceService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.query.QueryMerchantUserContractService"/>	
+				<bean
+					class="com.jrmf.taxsettlement.api.service.download.GetMonthReportFileURLService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.download.GetDaySerialFileURLService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.query.QueryTransferBatchService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.contract.AddMerchantTransferReceiverService" />
+				<bean
+					class="com.jrmf.taxsettlement.api.service.contract.BindUserWechatAccountService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.contract.SignAgreementService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationUploadService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationVideoInfoService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationTrueNameService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationRegisterService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationApprovalStatusService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationBankCardService"/>
+				<bean
+					class="com.jrmf.taxsettlement.api.service.yuncr.UserAuthenticationBusinessLicenseDownloadService"/>
+			</list>
+		</constructor-arg>
+	</bean>
+	
+	<!-- redis单机配置 -->
+<!-- 	<bean id="utilCacheManager" class="com.jrmf.taxsettlement.util.cache.RedisCacheManager">
+		<constructor-arg>
+			<bean class="redis.clients.jedis.JedisPoolConfig">
+				<property name="maxIdle" value="${jedis.max_idle}" />
+				<property name="maxTotal" value="${jedis.max_total}" />
+				<property name="maxWaitMillis" value="${jedis.max_wait_millis}" />
+			</bean>
+		</constructor-arg>
+		<constructor-arg value="${jedis.server_ip}" />
+		<constructor-arg type="int" value="${jedis.server_port}" />
+		<constructor-arg type="int"
+			value="${jedis.server_connect_timeout}" />
+		  <constructor-arg value="${jedis.server_password}" />
+	</bean> -->
+	
+	<!-- 集群版 -->
+    <!-- 连接池配置 -->
+    <bean id="jedisConfig" class="redis.clients.jedis.JedisPoolConfig">
+	    <!-- 最大连接数 -->
+	    <property name="maxTotal" value="${jediscluster.maxTotal}" />
+	    <!-- 最大空闲连接数 -->
+	    <property name="maxIdle" value="${jediscluster.maxIdle}" />
+	    <!-- 最小空闲连接数 -->
+	    <property name="minIdle" value="${jediscluster.minIdle}" />
+	    <!-- 获取连接时的最大等待毫秒数,小于零:阻塞不确定的时间,默认-1 -->
+	    <property name="maxWaitMillis" value="${jediscluster.maxWaitMillis}" />
+	    <!-- 每次释放连接的最大数目 -->
+	    <property name="numTestsPerEvictionRun" value="${jediscluster.numTestsPerEvictionRun}" />
+	    <!-- 释放连接的扫描间隔（毫秒） -->
+	    <property name="timeBetweenEvictionRunsMillis" value="${jediscluster.timeBetweenEvictionRunsMillis}" />
+	    <!-- 连接最小空闲时间 -->
+	    <property name="minEvictableIdleTimeMillis" value="${jediscluster.minEvictableIdleTimeMillis}" />
+	    <!-- 连接空闲多久后释放, 当空闲时间>该值 且 空闲连接>最大空闲连接数 时直接释放 -->
+	    <property name="softMinEvictableIdleTimeMillis" value="${jediscluster.softMinEvictableIdleTimeMillis}" />
+	    <!-- 在获取连接的时候检查有效性, 默认false -->
+	    <property name="testOnBorrow" value="${jediscluster.testOnBorrow}" />
+	    <!-- 在空闲时检查有效性, 默认false -->
+	    <property name="testWhileIdle" value="${jediscluster.testWhileIdle}" />
+	    <!-- 在归还给pool时，是否提前进行validate操作 -->
+	    <property name="testOnReturn" value="${jediscluster.testOnReturn}" />
+	    <!-- 连接耗尽时是否阻塞, false报异常,ture阻塞直到超时, 默认true -->
+	    <property name="blockWhenExhausted" value="${jediscluster.blockWhenExhausted}" />
+    </bean>
+
+	<bean id="hostport1" class="redis.clients.jedis.HostAndPort">
+          <constructor-arg name="host" value="${jediscluster.server_ip1}" />
+          <constructor-arg name="port" value="${jediscluster.server_port1}" />
+    </bean>
+
+    <bean id="hostport2" class="redis.clients.jedis.HostAndPort">
+          <constructor-arg name="host" value="${jediscluster.server_ip2}" />
+          <constructor-arg name="port" value="${jediscluster.server_port2}" />
+    </bean>
+
+    <bean id="hostport3" class="redis.clients.jedis.HostAndPort">
+          <constructor-arg name="host" value="${jediscluster.server_ip3}" />
+          <constructor-arg name="port" value="${jediscluster.server_port3}" />
+    </bean>
+
+    <bean id="hostport4" class="redis.clients.jedis.HostAndPort">
+          <constructor-arg name="host" value="${jediscluster.server_ip4}" />
+          <constructor-arg name="port" value="${jediscluster.server_port4}" />
+    </bean>
+
+    <bean id="hostport5" class="redis.clients.jedis.HostAndPort">
+          <constructor-arg name="host" value="${jediscluster.server_ip5}" />
+          <constructor-arg name="port" value="${jediscluster.server_port5}" />
+    </bean>
+
+    <bean id="hostport6" class="redis.clients.jedis.HostAndPort">
+          <constructor-arg name="host" value="${jediscluster.server_ip6}" />
+          <constructor-arg name="port" value="${jediscluster.server_port6}" />
+    </bean>
+    <bean id="jedisCluster" class="redis.clients.jedis.JedisCluster">
+        <constructor-arg  name="jedisClusterNode">
+            <set>
+                <ref bean="hostport1"/>
+                <ref bean="hostport2"/>
+                <ref bean="hostport3"/>
+                <ref bean="hostport4"/>
+                <ref bean="hostport5"/>
+                <ref bean="hostport6"/>
+            </set>
+        </constructor-arg>
+        <constructor-arg name="connectionTimeout" value="${jediscluster.connectionTimeout}"/>
+        <constructor-arg name="soTimeout" value="${jediscluster.soTimeout}"/>
+        <constructor-arg name="maxAttempts" value="${jediscluster.maxAttempts}"/>
+<!--         <constructor-arg name="password" value="${jediscluster.server_password}"/> -->
+        <constructor-arg name="poolConfig">
+            <ref bean="jedisConfig"/>
+        </constructor-arg>
+    </bean>
+    <!--  配置集群版工具类 -->
+    <bean id="utilCacheManager" class="com.jrmf.taxsettlement.util.cache.RedisCluster" />
+    
+
+	<bean id="signWorkers" class="com.jrmf.taxsettlement.api.security.sign.SignWorkers">
+		<constructor-arg>
+			<map>
+				<entry key="SHA256">
+					<bean
+						class="com.jrmf.taxsettlement.api.security.sign.SymmetricKeySignWorker">
+						<constructor-arg value="SHA-256" />
+					</bean>
+				</entry>
+				<entry key="SHA256WithRSA">
+					<bean class="com.jrmf.taxsettlement.api.security.sign.RSA2SignWorker"/>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="jsonDataTransformer"
+		class="com.jrmf.taxsettlement.util.json.FastJsonDataTransformer" />
+
+	<bean id="fileRepository" class="com.jrmf.taxsettlement.util.file.LocalFileRepository">
+		<constructor-arg value="${file.repository_root_path}" />
+		<constructor-arg value="${file.publish_url_context}" />
+	</bean>
+
+	<bean
+		class="com.jrmf.taxsettlement.api.service.transfer.LocalTransferDealStatusNotifier" />
+
+	<bean id="requestDealers"
+		class="com.jrmf.taxsettlement.api.gateway.batch.BatchTransferRequestDealers">
+		<constructor-arg>
+			<map>
+				<entry key="*">
+					<bean
+						class="com.jrmf.taxsettlement.api.gateway.batch.DefaultBatchTransferRequestDealer">
+						<constructor-arg value="100" type="int" />
+						<constructor-arg>
+							<bean
+								class="com.jrmf.taxsettlement.api.gateway.batch.form.TextDistiller">
+								<constructor-arg>
+									<bean
+										class="com.jrmf.taxsettlement.api.gateway.batch.form.SerialFieldDataFormTemplate">
+										<constructor-arg>
+											<map />
+										</constructor-arg>
+										<constructor-arg>
+											<map>
+												<entry key="requestNo">
+													<value type="int">0</value>
+												</entry>
+												<entry key="name">
+													<value type="int">1</value>
+												</entry>
+												<entry key="bankCardNo">
+													<value type="int">2</value>
+												</entry>
+												<entry key="amount">
+													<value type="int">3</value>
+												</entry>
+												<entry key="certificateType">
+													<value type="int">4</value>
+												</entry>
+												<entry key="certificateNo">
+													<value type="int">5</value>
+												</entry>
+												<entry key="reservedMobile">
+													<value type="int">6</value>
+												</entry>
+												<entry key="remark">
+													<value type="int">7</value>
+												</entry>
+											</map>
+										</constructor-arg>
+									</bean>
+								</constructor-arg>
+								<constructor-arg value="utf-8" />
+								<constructor-arg value="true" type="boolean" />
+								<constructor-arg value="\|" />
+							</bean>
+						</constructor-arg>
+					</bean>
+				</entry>
+				<entry key="JRMF-9IwEH3rN8jV45nCV8i2w">
+					<bean
+						class="com.jrmf.taxsettlement.api.gateway.batch.dealer.ext.CheckAmountBatchTransferRequestDealer">
+						<constructor-arg value="100" type="int" />
+						<constructor-arg>
+							<bean
+								class="com.jrmf.taxsettlement.api.gateway.batch.form.TextDistiller">
+								<constructor-arg>
+									<bean
+										class="com.jrmf.taxsettlement.api.gateway.batch.form.SerialFieldDataFormTemplate">
+										<constructor-arg>
+											<map />
+										</constructor-arg>
+										<constructor-arg>
+											<map>
+												<entry key="requestNo">
+													<value type="int">0</value>
+												</entry>
+												<entry key="transferCorpId">
+													<value type="int">1</value>
+												</entry>
+												<entry key="name">
+													<value type="int">2</value>
+												</entry>
+												<entry key="bankCardNo">
+													<value type="int">3</value>
+												</entry>
+												<entry key="amount">
+													<value type="int">4</value>
+												</entry>
+												<entry key="certificateType">
+													<value type="int">5</value>
+												</entry>
+												<entry key="certificateNo">
+													<value type="int">6</value>
+												</entry>
+												<entry key="reservedMobile">
+													<value type="int">7</value>
+												</entry>
+												<entry key="remark">
+													<value type="int">8</value>
+												</entry>
+											</map>
+										</constructor-arg>
+									</bean>
+								</constructor-arg>
+								<constructor-arg value="utf-8" />
+								<constructor-arg value="true" type="boolean" />
+								<constructor-arg value="\|" />
+							</bean>
+						</constructor-arg>
+						<constructor-arg>
+							<list>
+								<bean
+									class="com.jrmf.taxsettlement.api.gateway.paramseditor.TiananInsuranceServiceParamsEditor">
+									<constructor-arg>
+										<map>
+											<entry key="天安财产保险股份有限公司白城中心支公司">
+												<value>801hi4mfTUP28W1Il8n6,994</value>
+											</entry>
+											<entry key="天安财产保险股份有限公司松原中心支公司">
+												<value>8MFW6jL1Yw5l663Sm2mE,994</value>
+											</entry>
+										</map>
+									</constructor-arg>
+								</bean>
+							</list>
+						</constructor-arg>
+					</bean>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="channelRelatedCache" class="com.jrmf.taxsettlement.api.util.ChannelRelatedCache" />
+
+	<bean id="bankInfoCache" class="com.jrmf.taxsettlement.api.util.BankInfoCache" />
+
+	<bean id="merchantDataFileGenerators"
+		class="com.jrmf.taxsettlement.api.task.MerchantDataFileGenerators">
+		<constructor-arg>
+			<map>
+				<entry key="MERCHANT_DAY_SERIAL">
+					<bean class="com.jrmf.taxsettlement.api.task.MerchantDaySerialGenerator" />
+				</entry>
+				<entry key="MERCHANT_COMPANY_DAY_SERIAL">
+					<bean class="com.jrmf.taxsettlement.api.task.MerchantCompanyDaySerialGenerator" />
+				</entry>
+				<entry key="MERCHANT_MONTH_REPORT">
+					<bean class="com.jrmf.taxsettlement.api.task.MerchantMonthReportGenerator" />
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+<!--	<bean id="merchantDataFileGenerationTask"-->
+<!--		class="com.jrmf.taxsettlement.api.task.MerchantDataFileGenerationTask" />-->
+
+<!--    <bean id="SpringContextUtil" class="com.jrmf.utils.SpringContextUtil"/>-->
+</beans>

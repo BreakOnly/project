@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.LdOrderStepDao" >
+
+	<!-- 添加拆单步骤明细记录 -->
+	<insert id="insert" parameterType="com.jrmf.domain.LdOrderStep">
+		insert into ld_order_step(step_order_no,register_type,business_type,orderNo,payment_account,receive_account,amount,status,Issued_companyId,step_order,pathNo,payment_user,receive_user,create_time,issued_real_companyId)
+		values(#{stepOrderNo},#{registerType},#{businessType},#{orderno},#{paymentAccount},#{receiveAccount},#{amount},#{status},#{issuedCompanyid},#{stepOrder},#{pathno},#{paymentUser},#{receiveUser},#{createTime},#{issuedRealCompanyId})
+	</insert>
+
+	<!-- 修改拆单步骤明细记录 -->
+	<update id="update" parameterType="com.jrmf.domain.LdOrderStep">
+		update ld_order_step set pathNo=#{pathno},aisle_info=#{aisleInfo},status=#{status},status_desc=#{statusDesc} where step_order_no=#{stepOrderNo}
+	</update>
+
+	<!-- 修改拆单步骤明细记录 -->
+	<update id="updateById" parameterType="com.jrmf.domain.LdOrderStep">
+		update ld_order_step set pathNo=#{pathno},aisle_info=#{aisleInfo},status=#{status},status_desc=#{statusDesc},pre_step_order=#{preStepOrder},step_order_no=#{stepOrderNo},is_correct=#{isCorrect},correct_status=#{correctStatus} where id=#{id}
+	</update>
+
+	<!-- 根据明细订单号查询步骤信息 -->
+	<select id="getList" parameterType="String" resultType="com.jrmf.domain.LdOrderStep">
+		select * from ld_order_step where orderNo=#{value}
+	</select>
+
+	<!-- 获取成功步骤订单数量根据明细订单号 -->
+	<select id="getCountSuccessByOrderNo" parameterType="String" resultType="int">
+		select count(1) from ld_order_step where orderNo=#{value} and status=1
+	</select>
+
+	<!-- 获取失败步骤订单数量根据明细订单号 -->
+	<select id="getCountFailByOrderNo" parameterType="String" resultType="int">
+		select count(1) from ld_order_step where orderNo=#{value} and status=2
+	</select>
+
+	<!-- 获取步骤订单数量根据明细订单号 -->
+	<select id="getCountByOrderNo" parameterType="String" resultType="int">
+		select count(1) from ld_order_step where orderNo=#{value}
+	</select>
+
+	<!-- 查询联动下发步骤明细count -->
+	<select id="queryLdStepOrderDetailListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		select count(1) from (select cc.companyName merchant_name,qcc.companyName sign_company,qc.companyName issued_company,qu.amount old_amount,bpc.pathName,ls.* from ld_order_step ls
+		left join qb_usercommission qu on ls.orderNo=qu.orderNo
+		left join channel_custom cc on qu.originalId=cc.customkey
+		left join qb_company qc on ls.Issued_companyId= qc.userId
+		left join qb_company qcc on qu.companyId=qcc.userId
+		left join business_payment_channel bpc on ls.pathNo=bpc.pathNo
+		where 1=1
+		<if test="params.orderNo!=null and params.orderNo!=''">
+			and ls.orderNo=#{params.orderNo}
+		</if>
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		 <if test="params.startTime!=null and params.startTime!=''">
+		 	and date_format(ls.create_time,'%Y-%m-%d')&gt;=#{params.startTime}
+		 </if>
+		 <if test="params.endTime!=null and params.endTime!=''">
+		 	and date_format(ls.create_time,'%Y-%m-%d')&lt;=#{params.endTime}
+		 </if>
+		<if test="params.startAmount!=null and params.startAmount!=''">
+			and qu.amount &gt;=#{params.startAmount}
+		</if>
+		<if test="params.endAmount!=null and params.endAmount!=''">
+			and qu.amount &lt;=#{params.endAmount}
+		</if>
+		<if test="params.issuedCompany!=null and params.issuedCompany!=''">
+			and ls.Issued_companyId=#{params.issuedCompany}
+		</if>
+		<if test="params.businessType!=null and params.businessType!=''">
+			and ls.business_type=#{params.businessType}
+		</if>
+		<if test="params.paymentUser!=null and params.paymentUser!=''">
+			and ls.payment_user like concat('%',#{params.paymentUser},'%')
+		</if>
+		<if test="params.paymentAccount!=null and params.paymentAccount!=''">
+			and ls.payment_account=#{params.paymentAccount}
+		</if>
+		<if test="params.lsStartAmount!=null and params.lsStartAmount!=''">
+			and ls.amount &gt;=#{params.lsStartAmount}
+		</if>
+		<if test="params.lsEndAmount!=null and params.lsEndAmount!=''">
+			and ls.amount &lt;=#{params.lsEndAmount}
+		</if>
+		<if test="params.status!=null and params.status!=''">
+			and ls.status=#{params.status}
+		</if>
+		<if test="params.receiveUser!=null and params.receiveUser!=''">
+			and ls.receive_user like concat('%',#{params.receiveUser},'%')
+		</if>
+		<if test="params.receiveAccount!=null and params.receiveAccount!=''">
+			and ls.receive_account=#{params.receiveAccount}
+		</if>
+		<if test="params.stepOrder!=null and params.stepOrder!=''">
+			and ls.step_order=#{params.stepOrder}
+		</if>
+		<if test="params.loginCustomer!=null and params.loginCustomer!=''">
+			and qu.originalId=#{params.loginCustomer}
+		</if>
+		ORDER BY ls.id desc
+		) temp
+	</select>
+
+	<!-- 查询联动下发步骤明细 -->
+	<select id="queryLdStepOrderDetailList" parameterType="com.jrmf.domain.Page" resultType="map">
+		select cc.companyName merchant_name,qcc.companyName sign_company,qc.companyName issued_company,qu.amount old_amount,bpc.pathName,ls.* from ld_order_step ls
+		left join qb_usercommission qu on ls.orderNo=qu.orderNo
+		left join channel_custom cc on qu.originalId=cc.customkey
+		left join qb_company qc on ls.Issued_companyId= qc.userId
+		left join qb_company qcc on qu.companyId=qcc.userId
+		left join business_payment_channel bpc on ls.pathNo=bpc.pathNo
+		where 1=1
+		<if test="params.notInBusinessType!=null and params.notInBusinessType!=''">
+			and ls.business_type != #{params.notInBusinessType}
+		</if>
+		<if test="params.orderNo!=null and params.orderNo!=''">
+			and ls.orderNo=#{params.orderNo}
+		</if>
+		<if test="params.status!=null and params.status!=''">
+			and ls.status=#{params.status}
+		</if>
+		<if test="params.businessType!=null and params.businessType!=''">
+			and ls.business_type=#{params.businessType}
+		</if>
+		<if test="params.issuedCompany!=null and params.issuedCompany!=''">
+			and ls.Issued_companyId=#{params.issuedCompany}
+		</if>
+		<if test="params.stepOrder!=null and params.stepOrder!=''">
+			and ls.step_order=#{params.stepOrder}
+		</if>
+		<if test="params.loginCustomer!=null and params.loginCustomer!=''">
+			and qu.originalId=#{params.loginCustomer}
+		</if>
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+			and date_format(ls.create_time,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+		<if test="params.endTime!=null and params.endTime!=''">
+			and date_format(ls.create_time,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+		<if test="params.startAmount!=null and params.startAmount!=''">
+			and qu.amount &gt;=#{params.startAmount}
+		</if>
+		<if test="params.endAmount!=null and params.endAmount!=''">
+			and qu.amount &lt;=#{params.endAmount}
+		</if>
+		<if test="params.paymentUser!=null and params.paymentUser!=''">
+			and ls.payment_user like concat('%',#{params.paymentUser},'%')
+		</if>
+		<if test="params.paymentAccount!=null and params.paymentAccount!=''">
+			and ls.payment_account=#{params.paymentAccount}
+		</if>
+		<if test="params.lsStartAmount!=null and params.lsStartAmount!=''">
+			and ls.amount &gt;=#{params.lsStartAmount}
+		</if>
+		<if test="params.lsEndAmount!=null and params.lsEndAmount!=''">
+			and ls.amount &lt;=#{params.lsEndAmount}
+		</if>
+		<if test="params.receiveUser!=null and params.receiveUser!=''">
+			and ls.receive_user like concat('%',#{params.receiveUser},'%')
+		</if>
+		<if test="params.receiveAccount!=null and params.receiveAccount!=''">
+			and ls.receive_account=#{params.receiveAccount}
+		</if>
+		 ORDER BY ls.id desc
+<!--		<if test="pageSize !=null and offset !=null">-->
+<!--            limit #{offset},#{pageSize}-->
+<!--        </if>-->
+	</select>
+
+	<!-- 查询步骤明细 -->
+	<select id="getOrderStep" parameterType="String" resultType="com.jrmf.domain.LdOrderStep">
+		select * from ld_order_step where step_order_no=#{value}
+	</select>
+
+	<!-- 查询上笔步骤明细 -->
+	<select id="getPreStepOrder" parameterType="map" resultType="com.jrmf.domain.LdOrderStep">
+		select * from ld_order_step where orderNo=#{orderNo} and step_order=#{stepOrder}
+	</select>
+</mapper>

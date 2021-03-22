@@ -1,0 +1,1484 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ChannelCustomDao">
+
+    <select id="getChannelCustemGroup" resultType="com.jrmf.domain.ChannelCustom">
+        SELECT *
+        FROM
+            channel_custom
+        WHERE
+            customkey = #{customeky}
+            OR masterCustom = #{customeky}
+    </select>
+
+    <select id="getBankName" resultType="com.jrmf.domain.BankName">
+        select *
+        from qb_bankname
+        where mark = #{mark}
+    </select>
+
+    <insert id="insertBankName" parameterType="java.util.Map">
+        INSERT INTO qb_bankname
+        (mark,
+         name)
+        VALUES
+            (#{mark},
+             #{name});
+    </insert>
+
+    <update id="updateCompanyAccountDetail" parameterType="com.jrmf.domain.ChannelConfig">
+        UPDATE channel_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="channelId !=null">
+                channelId = #{channelId},
+            </if>
+            <if test="payType !=null">
+                payType = #{payType},
+            </if>
+            <if test="accountName !=null">
+                accountName = #{accountName},
+            </if>
+            <if test="accountNum !=null">
+                accountNum = #{accountNum},
+            </if>
+            <if test="bankName !=null">
+                bankName = #{bankName},
+            </if>
+            <if test="usefor !=null">
+                usefor = #{usefor},
+            </if>
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+    <insert id="insertCompanyAccountDetail" parameterType="com.jrmf.domain.ChannelConfig">
+        INSERT INTO channel_config (
+            channelId,
+            payType,
+            accountName,
+            accountNum,
+            bankName,
+            usefor
+        )
+        VALUES
+            (
+                #{channelId},
+                #{payType},
+                #{accountName},
+                #{accountNum},
+                #{bankName},
+                #{usefor}
+            );
+    </insert>
+    <select id="getChannelConfigByParam" resultType="com.jrmf.domain.ChannelConfig">
+        SELECT * FROM channel_config WHERE
+        <trim suffixOverrides="and">
+            <if test="channelId != null">
+                channelId = #{channelId} and
+            </if>
+            <if test="payType != null">
+                payType = #{payType} and
+            </if>
+            <if test="id != null">
+                id = #{id} and
+            </if>
+            <if test="accountName != null">
+                accountName = #{accountName} and
+            </if>
+            <if test="accountNum != null">
+                accountNum = #{accountNum} and
+            </if>
+        </trim>
+    </select>
+
+    <select id="getChannelConfigListByParam" resultType="com.jrmf.domain.ChannelConfig">
+        SELECT * FROM channel_config WHERE
+        <trim suffixOverrides="and">
+            <if test="channelId != null">
+                channelId = #{channelId} and
+            </if>
+            <if test="payType != null">
+                payType = #{payType} and
+            </if>
+            <if test="id != null">
+                id = #{id} and
+            </if>
+            <if test="accountName != null">
+                accountName = #{accountName} and
+            </if>
+            <if test="accountNum != null">
+                accountNum = #{accountNum} and
+            </if>
+            <if test="status != null">
+                status = #{status} and
+            </if>
+        </trim>
+    </select>
+
+    <insert id="saveChannelCustom" parameterType="com.jrmf.domain.ChannelCustom"
+            keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO channel_custom (
+            companyName,
+            contractCompanyName,
+            password,
+            enabled,
+            customkey,
+            appSecret,
+            createTime,
+            phoneNo,
+            email,
+            username,
+            tranPassword,
+            customType,
+            bankcardno,
+            bankname,
+            startTime,
+            endTime,
+            AgentId,
+            masterCustom,
+            receiverName,
+            address,
+            workAddress,
+            bankMessage,
+            invoiceType,
+            invoiceNo,
+            taxpayerType,
+            companyOpenNotifyUrl,
+            productNo,
+            addressAndPhone,
+            bankNameAndBankNo,
+            dataReview,
+            isReviewTransfer,
+            transferType,
+            reviewType,
+            loginRole,
+            splitOrderLimit,
+            businessPlatform,
+            businessPlatformId,
+            businessManager,
+            proxyType,
+            businessChannel,
+            customLabel,
+            companyPhone,
+            fundModelType,
+            subAccountType,
+            addAccount,
+            updateTime,
+            operationsManager
+        )
+        VALUES
+            (
+                #{companyName},
+                #{contractCompanyName},
+                #{password},
+                #{enabled},
+                #{customkey},
+                #{appSecret},
+                now(),
+                #{phoneNo},
+                #{email},
+                #{username},
+                #{tranPassword},
+                #{customType},
+                #{bankcardno},
+                #{bankname},
+                #{startTime},
+                now(),
+                #{AgentId},
+                #{masterCustom},
+                #{receiverName},
+                #{address},
+                #{workAddress},
+                #{bankMessage},
+                #{invoiceType},
+                #{invoiceNo},
+                #{taxpayerType},
+                #{companyOpenNotifyUrl},
+                #{productNo},
+                #{addressAndPhone},
+                #{bankNameAndBankNo},
+                #{dataReview},
+                #{isReviewTransfer},
+                #{transferType},
+                #{reviewType},
+                #{loginRole},
+                #{splitOrderLimit},
+                #{businessPlatform},
+                #{businessPlatformId},
+                #{businessManager},
+                #{proxyType},
+                #{businessChannel},
+                #{customLabel},
+                #{companyPhone},
+                #{fundModelType},
+                #{subAccountType},
+                #{addAccount},
+                now(),
+                #{operationsManager}
+            )
+    </insert>
+    <select id="queryGroupInfoByParams" resultType="java.util.Map">
+        select
+        cc.companyName,
+        cc.username userName,
+        cc.phoneNo,
+        cc.dataReview,
+        cg1.customkey customKey,
+        cc.reviewType,
+        cc.transferType,
+        cg.hasChilden,
+        cc.createTime
+        from channel_custom cc
+        left join custom_group cg on cc.customkey = cg.customkey
+        left join custom_group cg1 on cg.parentId = cg1.id
+        where FIND_IN_SET(cc.customkey,#{customKeys})
+        <if test="companyName != null and companyName != ''">
+            and cc.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="userName != null and userName != ''">
+            and cc.username like concat('%',#{userName},'%')
+        </if>
+        order by cc.createTime desc
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="queryProxyInfoByParams" resultType="java.util.Map">
+        select
+        cc.companyName,
+        cc.username userName,
+        cc.phoneNo,
+        cc.customType,
+        cc.createTime
+        from channel_custom cc
+        where FIND_IN_SET(cc.customkey,#{customKeys})
+        <if test="companyName != null and companyName != ''">
+            and cc.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="userName != null and userName != ''">
+            and cc.username like concat('%',#{userName},'%')
+        </if>
+        order by cc.createTime desc
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getCustomByCustomkey" resultType="com.jrmf.domain.ChannelCustom">
+        select cc.*
+        from channel_custom cc
+        where cc.customkey = #{customkey}
+    </select>
+    <select id="getCustomByCustomkeyMap" resultType="java.util.Map">
+        select DISTINCT
+            cc.*,
+            cg.parentId parentId,
+            cp.parentId proxyId,
+            cc.AgentId agentId
+        from channel_custom cc
+            left join custom_group cg on cg.customkey = cc.customkey
+            left join custom_proxy cp on cp.customkey = cc.customkey
+        where cc.customkey = #{customkey}
+    </select>
+
+    <update id="updateCustomById" parameterType="com.jrmf.domain.ChannelCustom">
+        UPDATE channel_custom
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="bankcardno !=null">
+                bankcardno = #{bankcardno},
+            </if>
+            <if test="bankname !=null">
+                bankname = #{bankname},
+            </if>
+            <if test="email !=null and email != ''">
+                email = #{email},
+            </if>
+            <if test="companyName !=null and companyName != ''">
+                companyName = #{companyName},
+            </if>
+            <if test="contractCompanyName !=null and contractCompanyName != ''">
+                contractCompanyName = #{contractCompanyName},
+            </if>
+            <if test="phoneNo !=null and phoneNo != ''">
+                phoneNo = #{phoneNo},
+            </if>
+            <if test="username !=null and username != ''">
+                username = #{username},
+            </if>
+            <if test="productNo !=null and productNo != ''">
+                productNo = #{productNo},
+            </if>
+            <if test="address !=null">
+                address = #{address},
+            </if>
+            <if test="workAddress !=null">
+                workAddress = #{workAddress},
+            </if>
+            <if test="dataReview !=null and dataReview != ''">
+                dataReview = #{dataReview},
+            </if>
+            <if test="isReviewTransfer !=null and isReviewTransfer != ''">
+                isReviewTransfer = #{isReviewTransfer},
+            </if>
+            <if test="reviewType !=null and reviewType != ''">
+                reviewType = #{reviewType},
+            </if>
+            <if test="customType !=null and customType != ''">
+                customType = #{customType},
+            </if>
+            <if test="transferType !=null and transferType != ''">
+                transferType = #{transferType},
+            </if>
+            <if test="AgentId !=null and AgentId != ''">
+                AgentId = #{AgentId},
+            </if>
+            <if test="receiverName !=null and receiverName != ''">
+                receiverName = #{receiverName},
+            </if>
+            <if test="invoiceNo !=null and invoiceNo != ''">
+                invoiceNo = #{invoiceNo},
+            </if>
+            <if test="taxpayerType !=null and taxpayerType != ''">
+                taxpayerType = #{taxpayerType},
+            </if>
+            <if test="invoiceType !=null and invoiceType != ''">
+                invoiceType = #{invoiceType},
+            </if>
+            <if test="password !=null and password != ''">
+                password = #{password},
+            </if>
+            <if test="loginRole !=null and loginRole != ''">
+                loginRole = #{loginRole},
+            </if>
+            <if test="phoneNo !=null and phoneNo != ''">
+                phoneNo = #{phoneNo},
+            </if>
+            <if test="subscribeStatus !=null and subscribeStatus != ''">
+                subscribeStatus = #{subscribeStatus},
+            </if>
+            <if test="officialAccOpenId !=null and officialAccOpenId != ''">
+                officialAccOpenId = #{officialAccOpenId},
+            </if>
+            <if test="splitOrderLimit != null">
+                splitOrderLimit = #{splitOrderLimit},
+            </if>
+            <if test="businessManager !=null">
+                businessManager = #{businessManager},
+            </if>
+            <if test="proxyType !=null">
+                proxyType = #{proxyType},
+            </if>
+            <if test="businessChannel !=null">
+                businessChannel = #{businessChannel},
+            </if>
+            <if test="customLabel !=null">
+                customLabel = #{customLabel},
+            </if>
+            <if test="companyPhone!=null">
+                companyPhone = #{companyPhone},
+            </if>
+            <if test="fundModelType != null and fundModelType != ''">
+                fundModelType = #{fundModelType},
+            </if>
+            <if test="subAccountType != null and subAccountType !='' ">
+                subAccountType = #{subAccountType},
+            </if>
+            <if test="businessPlatformId != null and businessPlatformId != ''">
+                businessPlatformId = #{businessPlatformId},
+            </if>
+            <if test="businessPlatform != null and businessPlatform != ''">
+                businessPlatform = #{businessPlatform},
+            </if>
+            <if test="operationsManager != null and operationsManager != ''">
+                operationsManager = #{operationsManager},
+            </if>
+            updateTime = now()
+        </trim>
+        WHERE id=#{id}
+    </update>
+
+
+    <select id="getCustomById" resultType="com.jrmf.domain.ChannelCustom">
+        select *
+        from channel_custom
+        where id = #{id}
+    </select>
+
+    <select id="customUserLogin" resultType="com.jrmf.domain.ChannelCustom">
+        select *
+        from channel_custom
+        where enabled = '1'
+              and username = #{userName} and password = #{password}
+              and customkey is not null
+    </select>
+
+    <select id="customUsername" resultType="com.jrmf.domain.ChannelCustom">
+        select *
+        from channel_custom
+        where username = #{userName} or email = #{userName}
+        limit 1
+    </select>
+
+    <update id="updateTranPassword">
+        update channel_custom
+        set
+            tranPassword = #{tranPassword},updateTime = now()
+        where
+            id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update channel_custom
+        set
+            password = #{password},updateTime = now()
+        where
+            id = #{id}
+    </update>
+
+    <update id="enabledCustom">
+        update channel_custom
+        set
+            enabled = #{enabled},updateTime = now()
+        where
+            id = #{id}
+    </update>
+
+    <update id="checkCustom">
+         update channel_custom
+        set
+            enabled = #{enabled},addAccount = #{addAccount}, updateTime = now()
+        where
+            id = #{id}
+    </update>
+
+    <select id="getCustomCount" resultType="java.lang.Integer">
+        select count(m.id) from channel_custom m WHERE 1=1
+        <if test="enabled ==0 ">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="enabled !=0 ">
+            and m.enabled = 1
+        </if>
+        <if test="customkey != '' and customkey != null">
+            and m.customkey = #{customkey}
+        </if>
+        <if test="masterCustom != '' and masterCustom != null">
+            and m.masterCustom = #{masterCustom}
+        </if>
+        <if test="customType !=0">
+            and m.customType = #{customType}
+        </if>
+        <if test="bankcardno != '' and bankcardno != null">
+            and m.bankcardno = #{bankcardno}
+        </if>
+        <if test="name!= '' and name!= null">
+            and ( m.companyName like CONCAT('%',#{name},'%')
+            or m.phoneNo like CONCAT('%',#{name},'%')
+            or m.userName like CONCAT('%',#{name},'%')
+            or m.AgentId like CONCAT('%',#{name},'%')
+            or m.id like CONCAT('%',#{name},'%')
+            or m.email like CONCAT('%',#{name},'%'))
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(m.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(m.createTime) &lt;= #{endTime}
+        </if>
+    </select>
+
+    <select id="getCustomList" resultType="com.jrmf.domain.ChannelCustom">
+        select m.*,c.companyName merchantName from channel_custom m
+        LEFT JOIN channel_custom c ON m.masterCustom = c.customkey
+        LEFT JOIN channel_custom c2 ON m.customkey = c2.customkey
+        WHERE 1=1
+
+        <if test="customkey != '' and customkey != null">
+            and FIND_IN_SET(m.customkey, #{customkey})
+        </if>
+        <if test="customType != '' and customType != null">
+            and m.customType = #{customType}
+        </if>
+        <if test="masterCustom != '' and masterCustom != null">
+            and FIND_IN_SET(m.masterCustom, #{masterCustom})
+        </if>
+        <if test="bankcardno != '' and bankcardno != null">
+            and m.bankcardno = #{bankcardno}
+        </if>
+        <if test="enabled != null and enabled != ''">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="loginName != '' and loginName != null">
+            and m.userName like CONCAT('%',#{loginName},'%')
+        </if>
+        <if test="name != '' and name != null">
+            and m.companyName like CONCAT('%',#{name},'%')
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(m.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(m.createTime) &lt;= #{endTime}
+        </if>
+        <if test="loginRole != '' and loginRole != null">
+            and m.loginRole = #{loginRole}
+        </if>
+        <if test="openId !=null and openId !=''">
+            and m.openId = #{openId}
+            and m.officialAccOpenId is not null
+        </if>
+        ORDER BY m.createTime DESC
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getListCustom" resultType="com.jrmf.domain.ChannelCustom">
+        select m.* from channel_custom m left join qb_company qc on m.customkey = qc.userId
+        WHERE if(m.customType = 2,qc.companyType = 1,true)
+        <if test="customkey != '' and customkey != null">
+            and m.customkey = #{customkey}
+        </if>
+        <if test="customKeys != null and customKeys != ''">
+            and FIND_IN_SET(customkey, #{customKeys})
+        </if>
+        <if test="addAccount != '' and addAccount != null">
+            and m.addAccount = #{addAccount}
+        </if>
+        <if test="businessPlatformId != null">
+            and m.businessPlatformId = #{businessPlatformId}
+        </if>
+        <choose>
+            <when test="customType != '' and customType != null">
+                and m.customType = #{customType}
+            </when>
+            <otherwise>
+                and m.customType in (1,2,3,5)
+            </otherwise>
+        </choose>
+        <if test="masterCustom != '' and masterCustom != null">
+            and m.masterCustom = #{masterCustom}
+        </if>
+        <if test="bankcardno != '' and bankcardno != null">
+            and m.bankcardno = #{bankcardno}
+        </if>
+        <if test="enabled != null ">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="name!= '' and name!= null">
+            and ( m.companyName like CONCAT('%',#{name},'%')
+            or m.contractCompanyName like CONCAT('%',#{name},'%')
+            or m.phoneNo like CONCAT('%',#{name},'%')
+            or m.userName like CONCAT('%',#{name},'%')
+            or m.AgentId like CONCAT('%',#{name},'%')
+            or m.id like CONCAT('%',#{name},'%')
+            or m.email like CONCAT('%',#{name},'%'))
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(m.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(m.createTime) &lt;= #{endTime}
+        </if>
+        ORDER BY m.createTime DESC
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <!--查询商户列表明细-->
+    <select id="getListCustomDetail" resultType="com.jrmf.domain.ChannelCustom">
+        select * from (
+        SELECT
+        a.id,a.username email,a.companyName username,b.companyName,a.phoneNo,a.customType,a.loginRole,a.createTime,a.businessPlatformId
+        FROM
+        channel_custom a
+        LEFT JOIN channel_custom b ON a.masterCustom = b.customkey
+        WHERE a.masterCustom IS NOT NULL AND a.masterCustom != ''
+        UNION ALL
+        SELECT
+        a.id,a.username email,a.companyName username,a.companyName,a.phoneNo,a.customType,a.loginRole,a.createTime,a.businessPlatformId
+        FROM
+        channel_custom a
+        WHERE a.customkey IS NOT NULL AND a.customkey != ''
+
+        )aa where 1=1
+        <if test="customType != '' and customType != null">
+            and aa.customType = #{customType}
+        </if>
+        <if test="platform != '' and platform != null">
+            and aa.customType != 7
+        </if>
+
+        <if test="hideAdmin != '' and hideAdmin != null">
+            and aa.customType != 4
+        </if>
+        <if test="name!= '' and name!= null">
+            and ( aa.companyName like CONCAT('%',#{name},'%')
+            or aa.phoneNo like CONCAT('%',#{name},'%')
+            or aa.userName like CONCAT('%',#{name},'%')
+            or aa.id like CONCAT('%',#{name},'%')
+            or aa.email like CONCAT('%',#{name},'%'))
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(aa.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(aa.createTime) &lt;= #{endTime}
+        </if>
+        ORDER BY aa.createTime DESC
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCustomListExRoot" resultType="com.jrmf.domain.ChannelCustom">
+        select m.* from channel_custom m WHERE 1=1
+        <if test="customkey != '' and customkey != null">
+            and m.customkey = #{customkey}
+        </if>
+        <if test="masterCustom != '' and masterCustom != null">
+            and m.masterCustom = #{masterCustom}
+        </if>
+        <if test="bankcardno != '' and bankcardno != null">
+            and m.bankcardno = #{bankcardno}
+        </if>
+        <if test="enabled != null ">
+            and m.enabled = #{enabled}
+        </if>
+        <if test="customType != 0">
+            and m.customType in (1,3,5)
+        </if>
+        <if test="name!= '' and name!= null">
+            and ( m.companyName like CONCAT('%',#{name},'%')
+            or m.phoneNo like CONCAT('%',#{name},'%')
+            or m.userName like CONCAT('%',#{name},'%')
+            or m.AgentId like CONCAT('%',#{name},'%')
+            or m.id like CONCAT('%',#{name},'%')
+            or m.email like CONCAT('%',#{name},'%'))
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(m.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(m.createTime) &lt;= #{endTime}
+        </if>
+        ORDER BY m.createTime DESC
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM `channel_custom`
+        where id = #{id}
+    </delete>
+
+    <select id="getPaymentList" resultType="com.jrmf.domain.CompanyPayment">
+        select *
+        from (
+                 select DISTINCT
+                     ccr.id,
+                     ccr.implementor,
+                     ccr.paymentType payType,
+                     ccr.merchantId
+                 from qb_channelrelated qc
+                     left join company_payment_relation ccr on qc.companyId = ccr.companyId
+                 where qc.companyId = #{companyId}
+                       and qc.originalId = #{originalId}
+             ) tmep
+        where tmep.merchantId = #{merchantId}
+    </select>
+
+    <select id="getPaymentListDefault" resultType="com.jrmf.domain.CompanyPayment">
+        select
+            ccr.id,
+            ccr.implementor,
+            ccr.paymentType payType,
+            ccr.merchantId
+        from qb_channelrelated qc
+            left join company_payment_relation ccr on qc.companyId = ccr.companyId
+        where
+            qc.companyId = #{companyId}
+            and qc.originalId = #{originalId}
+    </select>
+    <select id="getPaymentListByOriginalId" resultType="java.util.Map">
+        select
+            a.originalId,
+            a.companyId,
+            a.merchantId,
+            b.companyName
+        from qb_channelrelated a
+            LEFT JOIN qb_company b on a.companyId = b.userId
+        where
+            a.originalId = #{originalId}
+    </select>
+    <!-- 查询商户列表,传入customkey 字符串（字符串拼接）-->
+    <select id="listCustomByCustomKeys" resultType="com.jrmf.domain.ChannelCustom">
+        select * from channel_custom WHERE 1=1
+        <if test="companyName != '' and companyName != null">
+            and companyName like CONCAT('%',#{companyName},'%')
+        </if>
+        <if test="customkey != '' and customkey != null">
+            and FIND_IN_SET(customkey, #{customkey}) and customkey != ''
+        </if>
+        ORDER BY createTime DESC
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <update id="updateCustomTransFerPassword">
+        update channel_custom
+        set tranPassword = #{password},updateTime = now()
+        where customkey = #{customKey} or masterCustom = #{customKey}
+    </update>
+
+    <select id="getCustomByOfficialAccOpenId" resultType="com.jrmf.domain.ChannelCustom">
+        select *
+        from channel_custom
+        where officialAccOpenId = #{officialAccOpenId}
+        limit 1
+    </select>
+
+    <update id="removeAgentIdById">
+        update channel_custom
+        set AgentId = null,updateTime = now()
+        where id = #{id}
+    </update>
+    <update id="updateTranPasswordNew">
+
+    </update>
+    <select id="getAllCompany" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cc.id,
+            0  AS          parentId,
+            1  AS          enable,
+            1  AS          contentLevel,
+            cc.customkey,
+            cc.customType,
+            cc.createTime,
+            cc.companyName organizationName,
+            -1 AS          hasChilden
+        from channel_custom cc
+        where cc.customType = 2 and cc.enabled = 1
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+    <select id="getNodeById" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cc.id,
+            0  AS          parentId,
+            1  AS          enable,
+            1  AS          contentLevel,
+            cc.customkey,
+            cc.customType,
+            cc.createTime,
+            cc.companyName organizationName,
+            -1 AS          hasChilden
+        from channel_custom cc
+        where cc.customType = 2 and cc.enabled = 1 and cc.id = #{id}
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+    <select id="getAllCustom" resultType="com.jrmf.domain.ChannelCustom">
+        select companyName,customkey,createTime from channel_custom where customType in (1,5)
+    </select>
+    <select id="queryGroupCustom" resultType="com.jrmf.domain.ChannelCustom">
+        select
+        cc.companyName,
+        cc.customkey,
+        cc.createTime,
+        qc.companyType companyType
+        from channel_custom cc
+        LEFT JOIN qb_company qc
+				ON cc.customkey = qc.userId
+        where FIND_IN_SET(cc.customkey,#{customKeys})
+    </select>
+    <!--根据参数  查询  ChannelCustom  sql中没有的 ，可以自行添加-->
+    <select id="getCustomByParam" resultType="com.jrmf.domain.ChannelCustom">
+        select * from channel_custom WHERE 1=1
+        <if test="umfId != '' and umfId != null">
+            and umfId = #{umfId}
+        </if>
+        <if test="customType != '' and customType != null">
+            and customType = #{customType}
+        </if>
+        <if test="customTypes != '' and customTypes != null">
+            and FIND_IN_SET(customType,#{customTypes})
+        </if>
+        <if test="customkey != '' and customkey != null">
+            and customkey = #{customkey}
+        </if>
+        <if test="businessPlatformId != '' and businessPlatformId != null">
+            and businessPlatformId = #{businessPlatformId}
+        </if>
+        <if test="umfIdLength != '' and umfIdLength != null">
+            and LENGTH(umfId)>0
+        </if>
+    </select>
+
+    <update id="removeProxyTypeById">
+        update channel_custom
+        set proxyType = 0,updateTime = now()
+        where id = #{id}
+    </update>
+
+    <select id="queryCustom" resultType="java.util.Map">
+        select
+        cc.companyName customName,
+        cc.customkey customKey,
+        cc.username userName
+        from channel_custom cc
+        where cc.customType in (1,5)
+        <if test="customKeys != '' and customKeys != null">
+            and FIND_IN_SET(cc.customkey,#{customKeys})
+        </if>
+        group by cc.customkey
+    </select>
+
+    <select id="getBusinessInfoByCustomkey" resultType="com.jrmf.domain.ChannelCustom">
+       select cc.customkey,cc.businessManager,cc.operationsManager,cc.businessPlatform,cc.customLabel,cc2.companyName businessChannel,cc.businessChannel businessChannelKey,cc.businessPlatformId from channel_custom cc
+       left join channel_custom cc2 on cc.businessChannel=cc2.customkey where cc.customkey = #{customkey}
+    </select>
+
+    <select id="getChannelCustomByEmail" resultType="com.jrmf.domain.ChannelCustom">
+        SELECT customkey,companyName,email,username FROM channel_custom WHERE email = #{email} OR username = #{email}
+    </select>
+    <select id="getChannelCustomByKey" resultType="com.jrmf.domain.ChannelCustom">
+      SELECT id,invoiceNo,address FROM channel_custom WHERE customkey = #{customKey}
+    </select>
+    <select id="getChannelCustomById" resultType="com.jrmf.domain.ChannelCustom">
+        SELECT * FROM channel_custom WHERE customkey = #{customkey}
+    </select>
+
+    <update id="updateCustomPassword">
+        update channel_custom
+        set password = #{password},updateTime = now()
+        where id = #{id}
+    </update>
+    <insert id="insertChannelCustomInfo" parameterType="com.jrmf.domain.ChannelCustom">
+        INSERT INTO channel_custom
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyName != null and companyName !=''">
+                companyName,
+            </if>
+            <if test="password != null and password !=''">
+                password,
+            </if>
+            <if test="enabled != null and enabled !=''">
+                enabled,
+            </if>
+            <if test="customkey != null and customkey !=''">
+                customkey,
+            </if>
+            <if test="createTime != null and createTime !=''">
+                createTime,
+            </if>
+            <if test="phoneNo != null and phoneNo !=''">
+                phoneNo,
+            </if>
+            <if test="email != null and email !=''">
+                email,
+            </if>
+            <if test="username != null and username !=''">
+                username,
+            </if>
+            <if test="tranPassword != null and tranPassword !=''">
+                tranPassword,
+            </if>
+            <if test="customType != null and customType !=''">
+                customType,
+            </if>
+            <if test="bankcardno != null and bankcardno !=''">
+                bankcardno,
+            </if>
+            <if test="bankname != null and bankname !=''">
+                bankname,
+            </if>
+            <if test="startTime != null and startTime !=''">
+                startTime,
+            </if>
+            <if test="endTime != null and endTime !=''">
+                endTime,
+            </if>
+            <if test="AgentId != null and AgentId !=''">
+                AgentId,
+            </if>
+            <if test="masterCustom != null and masterCustom !=''">
+                masterCustom,
+            </if>
+            <if test="receiverName != null and receiverName !=''">
+                receiverName,
+            </if>
+            <if test="address != null and address !=''">
+                address,
+            </if>
+            <if test="bankMessage != null and bankMessage !=''">
+                bankMessage,
+            </if>
+            <if test="invoiceType != null and invoiceType !=''">
+                invoiceType,
+            </if>
+            <if test="taxpayerType != null and taxpayerType !=''">
+                taxpayerType,
+            </if>
+            <if test="companyOpenNotifyUrl != null and companyOpenNotifyUrl !=''">
+                companyOpenNotifyUrl,
+            </if>
+            <if test="invoiceNo != null and invoiceNo !=''">
+                invoiceNo,
+            </if>
+            <if test="productNo != null and productNo !=''">
+                productNo,
+            </if>
+            <if test="addressAndPhone != null and addressAndPhone !=''">
+                addressAndPhone,
+            </if>
+            <if test="bankNameAndBankNo != null and bankNameAndBankNo !=''">
+                bankNameAndBankNo,
+            </if>
+            <if test="subscribeStatus != null and subscribeStatus !=''">
+                subscribeStatus,
+            </if>
+            <if test="loginRole != null and loginRole !=''">
+                loginRole,
+            </if>
+            <if test="workAddress != null and workAddress !=''">
+                workAddress,
+            </if>
+            <if test="officialAccOpenId != null and officialAccOpenId !=''">
+                officialAccOpenId,
+            </if>
+            <if test="businessManager != null and businessManager !=''">
+                businessManager,
+            </if>
+            <if test="businessPlatform != null and businessPlatform !=''">
+                businessPlatform,
+            </if>
+            <if test="businessChannel != null and businessChannel !=''">
+                businessChannel,
+            </if>
+            <if test="customLabel != null and customLabel !=''">
+                customLabel,
+            </if>
+            <if test="splitOrderLimit != null and splitOrderLimit !=''">
+                splitOrderLimit,
+            </if>
+            <if test="umfId != null and umfId !=''">
+                umfId,
+            </if>
+            <if test="proxyType != null and proxyType !=''">
+                proxyType,
+            </if>
+            <if test="companyPhone != null and companyPhone !=''">
+                companyPhone,
+            </if>
+            <if test="minTransferAmount != null and minTransferAmount !=''">
+                minTransferAmount,
+            </if>
+            <if test="minSumFee != null and minSumFee !=''">
+                minSumFee,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="companyName != null and companyName !=''">
+                #{companyName},
+            </if>
+            <if test="password != null and password !=''">
+                #{password},
+            </if>
+            <if test="enabled != null and enabled !=''">
+                #{enabled},
+            </if>
+            <if test="customkey != null and customkey !=''">
+                #{customkey},
+            </if>
+            <if test="createTime != null and createTime !=''">
+                #{createTime},
+            </if>
+            <if test="phoneNo != null and phoneNo !=''">
+                #{phoneNo},
+            </if>
+            <if test="email != null and email !=''">
+                #{email},
+            </if>
+            <if test="username != null and username !=''">
+                #{username},
+            </if>
+            <if test="tranPassword != null and tranPassword !=''">
+                #{tranPassword},
+            </if>
+            <if test="customType != null and customType !=''">
+                #{customType},
+            </if>
+            <if test="bankcardno != null and bankcardno !=''">
+                #{bankcardno},
+            </if>
+            <if test="bankname != null and bankname !=''">
+                #{bankname},
+            </if>
+            <if test="startTime != null and startTime !=''">
+                #{startTime},
+            </if>
+            <if test="endTime != null and endTime !=''">
+                #{endTime},
+            </if>
+            <if test="AgentId != null and AgentId !=''">
+                #{AgentId},
+            </if>
+            <if test="masterCustom != null and masterCustom !=''">
+                #{masterCustom},
+            </if>
+            <if test="receiverName != null and receiverName !=''">
+                #{receiverName},
+            </if>
+            <if test="address != null and address !=''">
+                #{address},
+            </if>
+            <if test="bankMessage != null and bankMessage !=''">
+                #{bankMessage},
+            </if>
+            <if test="invoiceType != null and invoiceType !=''">
+                #{invoiceType},
+            </if>
+            <if test="taxpayerType != null and taxpayerType !=''">
+                #{taxpayerType},
+            </if>
+            <if test="companyOpenNotifyUrl != null and companyOpenNotifyUrl !=''">
+                #{companyOpenNotifyUrl},
+            </if>
+            <if test="invoiceNo != null and invoiceNo !=''">
+                #{invoiceNo},
+            </if>
+            <if test="productNo != null and productNo !=''">
+                #{productNo},
+            </if>
+            <if test="addressAndPhone != null and addressAndPhone !=''">
+                #{addressAndPhone},
+            </if>
+            <if test="bankNameAndBankNo != null and bankNameAndBankNo !=''">
+                #{bankNameAndBankNo},
+            </if>
+            <if test="subscribeStatus != null and subscribeStatus !=''">
+                #{subscribeStatus},
+            </if>
+            <if test="loginRole != null and loginRole !=''">
+                #{loginRole},
+            </if>
+            <if test="workAddress != null and workAddress !=''">
+                #{workAddress},
+            </if>
+            <if test="officialAccOpenId != null and officialAccOpenId !=''">
+                #{officialAccOpenId},
+            </if>
+            <if test="businessManager != null and businessManager !=''">
+                #{businessManager},
+            </if>
+            <if test="businessPlatform != null and businessPlatform !=''">
+                #{businessPlatform},
+            </if>
+            <if test="businessChannel != null and businessChannel !=''">
+                #{businessChannel},
+            </if>
+            <if test="customLabel != null and customLabel !=''">
+                #{customLabel},
+            </if>
+            <if test="splitOrderLimit != null and splitOrderLimit !=''">
+                #{splitOrderLimit},
+            </if>
+            <if test="umfId != null and umfId !=''">
+                #{umfId},
+            </if>
+            <if test="proxyType != null and proxyType !=''">
+                #{proxyType},
+            </if>
+            <if test="companyPhone != null and companyPhone !=''">
+                #{companyPhone},
+            </if>
+            <if test="minTransferAmount != null and minTransferAmount !=''">
+                #{minTransferAmount},
+            </if>
+            <if test="minSumFee != null and minSumFee !=''">
+                #{minSumFee},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateChannelCustomInfo" parameterType="com.jrmf.domain.ChannelCustom">
+        UPDATE channel_custom
+        <trim prefix="set" suffixOverrides=",">
+            <if test="companyName != null and companyName !=''">
+                companyName = #{companyName},
+            </if>
+            <if test="companyName != null and companyName !=''">
+                contractCompanyName = #{companyName},
+            </if>
+            <if test="password !=null and password != ''">
+                password = #{password},
+            </if>
+            <if test="appSecret != null and appSecret !=''">
+                appSecret = #{appSecret},
+            </if>
+            <if test="phoneNo != null and phoneNo !=''">
+                phoneNo = #{phoneNo},
+            </if>
+            <if test="email != null and email !=''">
+                email = #{email},
+            </if>
+            <if test="username != null and username !=''">
+                username = #{username},
+            </if>
+            <if test="tranPassword != null and tranPassword !=''">
+                tranPassword = #{tranPassword},
+            </if>
+            <if test="customType != null and customType !=''">
+                customType = #{customType},
+            </if>
+            <if test="startTime != null and startTime !=''">
+                startTime = #{startTime},
+            </if>
+            <if test="endTime != null and endTime !=''">
+                endTime = #{endTime},
+            </if>
+            <if test="AgentId !=null and AgentId != ''">
+                AgentId = #{AgentId},
+            </if>
+            <if test="taxpayerType !=null and taxpayerType != ''">
+                taxpayerType = #{taxpayerType},
+            </if>
+            <if test="invoiceType !=null and invoiceType != ''">
+                invoiceType = #{invoiceType},
+            </if>
+            <if test="loginRole !=null and loginRole != ''">
+                loginRole = #{loginRole},
+            </if>
+            updateTime = now()
+        </trim>
+        where customkey = #{customkey}
+    </update>
+    <update id="updateSubAccountPlatformId">
+        UPDATE channel_custom
+        SET businessPlatformId = #{businessPlatformId},updateTime = now()
+        WHERE
+          customType = 4
+          AND masterCustom = #{masterCustomKey}
+    </update>
+
+    <select id="getChannelCustomEmail" resultType="com.jrmf.domain.ChannelCustom">
+        SELECT * FROM channel_custom WHERE username = #{email}
+    </select>
+
+    <select id="getUserByUserNameAndOemUrl" resultType="com.jrmf.domain.ChannelCustom">
+        select *
+        from channel_custom
+        where (username = #{userName} or email = #{userName}) and oemUrl = #{oemUrl}
+        limit 1
+    </select>
+
+    <select id="getCountByUserName" resultType="java.lang.Integer">
+       SELECT
+            COUNT( * )
+        FROM
+            channel_custom
+        WHERE
+            username = #{userName} or email = #{userName}
+    </select>
+
+    <select id="getChannelcustomByCompanyName" resultType="int">
+        SELECT count(1) FROM channel_custom WHERE companyName = #{proxyName}
+    </select>
+
+    <select id="getchannelcustomByCustomkey" resultType="int">
+        SELECT count(1) FROM channel_custom WHERE customkey = #{customkey}
+    </select>
+
+    <select id="queryAccount" resultType="map">
+        SELECT acr.id, acr.accountId, cc.companyName, cc.customType companyType,cc.username userName,cc.customkey,
+        acr.changeAccountId, cc2.companyName configCompanyName, cc2.customType configCompanyType, cc2.username
+        configUserName,cc2.customkey configCustomkey, date_format(acr.createTime,'%Y-%m-%d %H:%i:%s') createTime,
+        acr.addUser
+        FROM account_change_relation acr
+        LEFT JOIN channel_custom cc
+        ON acr.accountId = cc.id
+        LEFT JOIN channel_custom cc2
+        ON acr.changeAccountId = cc2.id
+        WHERE 1 = 1
+        <if test="companyName != '' and companyName != null">
+            and cc.companyName like concat('%', #{companyName}, '%')
+        </if>
+        <if test="companyType != '' and companyType != null">
+            and cc.customType = #{companyType}
+        </if>
+        <if test="userName != '' and userName != null">
+            and cc.userName = #{userName}
+        </if>
+        <if test="configCompanyName != '' and configCompanyName != null">
+            and cc2.companyName like concat('%', #{configCompanyName}, '%')
+        </if>
+        <if test="configCompanyType != '' and configCompanyType != null">
+            and cc2.customType = #{configCompanyType}
+        </if>
+        <if test="configUserName != '' and configUserName != null">
+            and cc2.username = #{configUserName}
+        </if>
+        order by createTime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCustomByCustomType" resultType="map">
+        SELECT
+            id,
+            username,
+            masterCustom,
+            customkey,
+            companyName
+        from
+            channel_custom where 1 = 1
+        <if test="companyType != null and companyType != ''">
+            and customType = #{companyType}
+        </if>
+    </select>
+
+    <select id="getIdByCustomkey" resultType="com.jrmf.domain.ChannelCustom">
+        select id,customkey,companyName,username from channel_custom where 1 = 1
+        <if test="customkey != null and customkey != ''">
+            and customkey = #{customkey}
+        </if>
+    </select>
+    <select id="getCustomIdByCustomkey" resultType="java.lang.String">
+        select id from channel_custom where 1=1
+        <if test="customkey != null and customkey != ''">
+            and customkey = #{customkey}
+        </if>
+    </select>
+
+    <select id="getAllList" resultType="java.util.Map" parameterType="map">
+        SELECT
+        cc.id,
+        cc.companyName customName,
+        cc.username userName,
+        cc.customType,
+        cc.loginRole,
+        masterCustom,
+        customkey
+        FROM
+        channel_custom cc
+        WHERE 1 = 1
+        <if test="customType != null">
+            AND customType = #{customType}
+        </if>
+        <if test="content != null and content != ''">
+            AND (companyName like concat('%', #{content}, '%') or username like concat('%', #{content}, '%') or phoneNo
+            like concat('%', #{content}, '%') or email like concat('%', #{content}, '%'))
+        </if>
+        <if test="loginRole != null">
+            AND cc.loginRole = #{loginRole}
+        </if>
+        <if test="fundModelType!=null">
+        	and cc.fundModelType=#{fundModelType}
+        </if>
+        <if test="customkey!=null and customkey!=''">
+        	and cc.customkey=#{customkey}
+        </if>
+    </select>
+
+    <select id="getCustomByIds" resultType="java.util.Map">
+        SELECT
+        id,companyName,username,customType,loginRole
+        FROM channel_custom
+        WHERE 1=1
+        <if test="customType != null">
+            AND customType = #{customType}
+        </if>
+        <if test="ids != null">
+            AND FIND_IN_SET(id, #{ids})
+        </if>
+        <if test="loginRole != null">
+            AND loginRole = #{loginRole}
+        </if>
+        <if test="content != null and content != ''">
+            AND (companyName like concat('%', #{content}, '%') or username like concat('%', #{content}, '%') or phoneNo
+            like concat('%', #{content}, '%') or email like concat('%', #{content}, '%'))
+        </if>
+        order by createTime desc
+        <if test="start != null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getChannelCustomByCustomType" resultType="java.lang.String">
+        SELECT id FROM channel_custom c,
+        (SELECT customkey FROM channel_custom WHERE customType = #{customType}) cc
+        WHERE 1= 1
+        AND (c.customkey = cc.customkey OR c.masterCustom = cc.customkey)
+    </select>
+
+    <select id="getChannelCustomId" resultType="java.lang.String">
+        select id FROM channel_custom
+    </select>
+
+    <select id="getCustomByCustomTypeAndLoginRole" resultType="java.lang.String">
+       SELECT
+	        id
+        FROM
+	        channel_custom c,
+	    (
+		    SELECT
+			    customkey
+		    FROM
+			    channel_custom
+		    WHERE
+			    customType = #{customType}
+	    ) cc
+        WHERE 1 = 1 AND c.loginRole =  #{loginRole}
+        AND (
+	        c.customkey = cc.customkey
+	        OR c.masterCustom = cc.customkey
+            )
+    </select>
+
+    <select id="getAgentCustomByCustomTypeAndLoginRole" resultType="java.lang.String">
+          SELECT
+	        *
+        FROM
+	        channel_custom cc
+        WHERE
+	        cc.customType = 3
+        AND NOT EXISTS (
+	        SELECT
+	        	customkey
+	        FROM
+	        	oem_config o
+	        WHERE
+	        	o.customkey = cc.customkey
+        )
+    </select>
+
+    <select id="getOemAgentCustomByCustomTypeAndLoginRole" resultType="java.lang.String">
+        SELECT
+	        *
+        FROM
+	        channel_custom cc
+        WHERE
+	        cc.customType = 3
+        AND EXISTS (
+	        SELECT
+	        	customkey
+	        FROM
+	        	oem_config o
+	        WHERE
+	        	o.customkey = cc.customkey
+        )
+    </select>
+
+    <select id="getCustomByCompanyId" resultType="java.lang.String">
+        SELECT
+	        c.id
+        FROM
+	        company_rate_conf cc
+        LEFT JOIN custom_company_rate_conf ccrc
+        ON ccrc.rateConfId = cc.id
+        LEFT JOIN channel_custom c
+        ON c.customkey = ccrc.customkey
+        WHERE FIND_IN_SET(cc.companyId,#{companyIds})
+        GROUP BY c.id
+    </select>
+
+    <select id="getProxyByCompanyId" resultType="java.lang.String">
+        SELECT cc.id FROM proxy_cost_maintain pcm
+        LEFT JOIN channel_custom cc
+        ON pcm.customkey = cc.customkey
+        WHERE FIND_IN_SET(pcm.companyId,#{companyIds})
+    </select>
+
+    <select id="getIdByCompanyId" resultType="java.lang.String">
+        SELECT id FROM channel_custom WHERE FIND_IN_SET(customkey,#{companyIds})
+    </select>
+
+    <select id="getChannelCustomByCompanyName" resultType="com.jrmf.domain.ChannelCustom">
+        SELECT * FROM channel_custom WHERE companyName = #{companyName} AND customType = '2'
+    </select>
+
+    <select id="getChannelCustomCompanyNameByCustomType" resultType="java.lang.Integer">
+        SELECT count(1) FROM channel_custom WHERE companyName = #{companyName} AND customType = '2'
+    </select>
+
+    <select id="queryCustom2" resultType="java.util.Map">
+        select
+        cc.companyName customName,
+        cc.customkey customKey
+        from channel_custom cc
+        where cc.customType in (1,3,5)
+        <if test="customKeys != '' and customKeys != null">
+            and FIND_IN_SET(cc.customkey,#{customKeys})
+        </if>
+        group by cc.customkey
+    </select>
+    <select id="getByCompanyIdAndPayType" resultType="com.jrmf.domain.CompanyPayment">
+          select
+            ccr.id,
+            ccr.implementor,
+            ccr.paymentType payType,
+            ccr.merchantId
+        from company_payment_relation ccr
+        where
+            ccr.companyId = #{companyId}
+            and ccr.paymentType = #{paymentType}
+    </select>
+    <select id="getChannelConfigByCustomKeyAndCompanyId"
+      resultType="com.jrmf.domain.ChannelConfig">
+        SELECT * FROM channel_config WHERE
+        status = 1
+        <trim suffixOverrides="and">
+            <if test="companyId != null">
+                channelId = #{companyId} and
+            </if>
+            <if test="payType != null">
+                payType = #{payType} and
+            </if>
+        </trim>
+        limit 1
+    </select>
+
+    <select id="selectPlatformList" resultType="java.util.HashMap">
+     SELECT pi.id, pai.custom_Id AS businessPlatformId,
+	   pi.platform_name AS businessPlatform FROM
+	  platform_info pi
+	  LEFT JOIN platform_associated_info pai ON pai.associated_Id = pi.id
+	  AND pai.associated_type = 1
+    </select>
+    <select id="selectPlatformByCostomId" resultType="hashmap">
+         SELECT pi.id, pai.custom_Id AS businessPlatformId,pi.platform_name AS businessPlatform FROM  platform_info pi LEFT JOIN platform_associated_info pai ON pai.associated_Id = pi.id
+        WHERE pai.associated_type = 1 AND custom_Id = #{customId}
+    </select>
+    <select id="getCompanyUserIdByBusinessPlatformId" resultType="java.lang.String">
+        SELECT
+          qc.userId
+        FROM
+          ( SELECT * FROM platform_associated_info pai WHERE associated_type = '2' ) pai
+          LEFT JOIN qb_company qc ON pai.associated_Id = qc.id
+        WHERE
+          pai.custom_Id = #{businessPlatformId}
+    </select>
+    <select id="getCustomKeyByBusinessPlatformId" resultType="java.lang.String">
+        SELECT customkey FROM channel_custom WHERE businessPlatformId = #{businessPlatformId}
+        AND (customkey != '' OR customkey is NOT NULL)
+    </select>
+
+    <select id="queryAllCustom" resultType="java.util.Map">
+        select
+        cc.companyName customName,
+        cc.customkey customKey,
+        cc.username userName
+        from channel_custom cc
+        where 1 = 1
+        <if test="customKeys != '' and customKeys != null">
+            and FIND_IN_SET(cc.customkey,#{customKeys})
+        </if>
+        group by cc.customkey
+    </select>
+</mapper>

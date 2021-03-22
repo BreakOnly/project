@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomCompanyRateConfDao">
+
+    <update id="updateCustomCompanyRateConf" parameterType="com.jrmf.domain.CustomCompanyRateConf">
+        UPDATE custom_company_rate_conf
+        SET
+        <if test="feeRuleType != null and feeRuleType != ''">
+            feeRuleType = #{feeRuleType},
+        </if>
+        <if test="chargeRule != null and chargeRule != ''">
+            chargeRule = #{chargeRule},
+        </if>
+        <if test="rateConfId != null and rateConfId != ''">
+            rateConfId = #{rateConfId},
+        </if>
+        <if test="customRate != null and customRate != ''">
+            customRate = #{customRate},
+        </if>
+        <if test="mfIncomeRate != null and mfIncomeRate != ''">
+            mfIncomeRate = #{mfIncomeRate},
+        </if>
+        <if test="serviceFeeType!=null and serviceFeeType!=''">
+            serviceFeeType = #{serviceFeeType},
+        </if>
+        <if test="confDesc != null">
+            confDesc = #{confDesc},
+        </if>
+        updateTime = now()
+        WHERE
+        id = #{id};
+    </update>
+    <insert id="insertCustomCompanyRateConf" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.jrmf.domain.CustomCompanyRateConf">
+        insert into custom_company_rate_conf
+        (
+        customkey,
+        rateConfId,
+        feeRuleType,
+        chargeRule,
+        customRate,
+        mfIncomeRate,
+        confDesc,
+        createTime,
+        updateTime,
+        reserved1,
+        reserved2,
+        serviceFeeType
+        )
+        values
+        (
+        #{customkey},
+        #{rateConfId},
+        #{feeRuleType},
+        #{chargeRule},
+        #{customRate},
+        #{mfIncomeRate},
+        #{confDesc},
+        now(),
+        now(),
+        #{reserved1},
+        #{reserved2},
+        #{serviceFeeType}
+        )
+    </insert>
+    <delete id="deleteCustomCompanyRateConf">
+        delete from custom_company_rate_conf where id = #{id}
+    </delete>
+    <select id="listCustomCompanyRateConf" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+        ccrc.id,
+        ccrc.customkey,
+        ccrc.rateConfId,
+        ccrc.chargeRule,
+        ccrc.feeRuleType,
+        ROUND(ccrc.customRate * 100,2) as customRate,
+        ROUND(ccrc.mfIncomeRate * 100,2) as mfIncomeRate,
+        ccrc.confDesc,
+        ccrc.createTime,
+        ccrc.updateTime,
+        crc.gearPositionShorthand,
+        cc1.companyName customName,
+        cc2.companyName,
+        crc.gearPosition,
+        crc.gearPositionDesc,
+        crc.amountStart,
+        crc.amountEnd,
+        crc.operator,
+        qci.customname merchantName,
+        qci.customkey merchantId,
+        crc.companyId,
+        qcr.appIdAyg 'appId',
+        ccrc.serviceFeeType
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN channel_custom cc1 ON ccrc.customkey = cc1.customkey
+        LEFT JOIN channel_custom cc2 ON crc.companyId = cc2.customkey
+        LEFT JOIN qb_custom_info qci on qci.customkey = crc.merchantId
+        LEFT JOIN qb_channelrelated qcr on ccrc.customkey = qcr.originalId and crc.companyId = qcr.companyId
+        <if test="customKey != null and customKey != ''">
+            where ccrc.customkey = #{customKey}
+        </if>
+        GROUP BY ccrc.rateConfId
+        ORDER BY
+        ccrc.id DESC
+    </select>
+
+    <select id="realCompanyList" resultType="java.util.Map">
+        SELECT
+        cc1.id customId,
+        cc1.customkey,
+        cc1.companyName customName,
+        cc2.companyName,
+        crc.companyId
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN channel_custom cc1 ON ccrc.customkey = cc1.customkey
+        LEFT JOIN channel_custom cc2 ON crc.companyId = cc2.customkey
+        LEFT JOIN qb_custom_info qci on qci.customkey = crc.merchantId
+        LEFT JOIN qb_channelrelated qcr on ccrc.customkey = qcr.originalId and crc.companyId = qcr.companyId
+        <if test="customKey != null and customKey != ''">
+            where ccrc.customkey = #{customKey}
+        </if>
+        GROUP BY crc.companyId
+        ORDER BY ccrc.id DESC
+    </select>
+
+    <select id="getCustomCompanyRateConf" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+        ccrc.id,
+        ccrc.customkey,
+        ccrc.rateConfId,
+        ccrc.chargeRule,
+        ccrc.feeRuleType,
+        ccrc.customRate,
+        ccrc.mfIncomeRate,
+        ccrc.confDesc,
+        ccrc.createTime,
+        ccrc.updateTime,
+        crc.gearPosition,
+        crc.gearPositionDesc,
+        crc.amountStart,
+        crc.amountEnd,
+        crc.operator,
+        crc.companyId,
+        ccrc.serviceFeeType
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        where 1 = 1
+        <if test="originalId != null and originalId != ''">
+            and ccrc.customkey = #{originalId}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and crc.companyId = #{companyId}
+        </if>
+        <if test="sumAmount != null and sumAmount != ''">
+            and #{sumAmount} + 0 &gt; crc.amountStart
+            and #{sumAmount} + 0 &lt;= crc.amountEnd
+        </if>
+        limit 1
+    </select>
+
+    <select id="getById" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+            ccrc.id,
+            ccrc.customkey,
+            ccrc.rateConfId,
+            ccrc.chargeRule,
+            ccrc.feeRuleType,
+            crc.gearPosition,
+            crc.companyId,
+            ccrc.customRate
+        FROM
+            custom_company_rate_conf ccrc
+            LEFT JOIN company_rate_conf crc
+            on ccrc.rateConfId = crc.id
+        WHERE
+            ccrc.id = #{id}
+    </select>
+    <select id="queryByCustomKeyAndRateConfId" resultType="java.lang.Integer">
+        select count(id) from custom_company_rate_conf where customkey = #{customkey} and rateConfId =  #{rateConfId}
+    </select>
+    <select id="getConfByCustomKey" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+            ccrc.id,
+            ccrc.customkey,
+            ccrc.rateConfId,
+            ccrc.chargeRule,
+            ccrc.feeRuleType,
+            ccrc.customRate,
+            crc.gearPosition,
+            crc.companyId
+        FROM
+            custom_company_rate_conf ccrc
+            LEFT JOIN company_rate_conf crc
+            on ccrc.rateConfId = crc.id
+        WHERE
+            FIND_IN_SET(customkey,#{customkey})
+    </select>
+    <select id="getConfsByCustomKeyAndCompanyId" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+            ccrc.id,
+            ccrc.customkey,
+            ccrc.rateConfId,
+            ccrc.chargeRule,
+            ccrc.feeRuleType,
+            ccrc.customRate,
+            crc.gearPosition,
+            crc.companyId
+        FROM
+            custom_company_rate_conf ccrc
+            LEFT JOIN company_rate_conf crc
+            on ccrc.rateConfId = crc.id
+        WHERE
+            ccrc.customkey = #{customkey} and crc.companyId = #{companyId}
+    </select>
+    <select id="getConfByCustomKeyAndCompanyId" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+        ccrc.id,
+        ccrc.customkey,
+        ccrc.rateConfId,
+        ccrc.chargeRule,
+        ccrc.feeRuleType,
+        ROUND(ccrc.customRate * 100,2) as customRate,
+        ROUND(ccrc.mfIncomeRate * 100,2) as mfIncomeRate,
+        -- CAST(ccrc.customRate as DECIMAL) * 100 as customRate,
+        -- CAST(ccrc.mfIncomeRate as DECIMAL) * 100 as mfIncomeRate,
+        ccrc.confDesc,
+        ccrc.createTime,
+        ccrc.updateTime,
+        crc.gearPositionShorthand,
+        cc1.companyName customName,
+        cc2.companyName,
+        crc.gearPosition,
+        crc.gearPositionDesc,
+        crc.amountStart,
+        crc.amountEnd,
+        crc.operator,
+        qci.customname merchantName,
+        crc.companyId,
+        ccrc.serviceFeeType
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN channel_custom cc1 ON ccrc.customkey = cc1.customkey
+        LEFT JOIN channel_custom cc2 ON crc.companyId = cc2.customkey
+        LEFT JOIN qb_custom_info qci on qci.customkey = crc.merchantId
+        WHERE ccrc.customkey = #{customkey}
+        AND crc.companyId = #{companyId}
+        limit 1
+    </select>
+    <select id="getConfByCustomKeyAndCompanyRateConfId" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        select * from custom_company_rate_conf where customkey = #{customkey} and rateConfId = #{id} limit 1
+    </select>
+
+    <!-- 根据商户和下发公司id查询费率配置信息 -->
+    <select id="getServiceTypeGroup" parameterType="com.jrmf.domain.CustomCompanyRateConf" resultType="int">
+	select serviceFeeType from custom_company_rate_conf ccrf
+	left join company_rate_conf crf on ccrf.rateConfId=crf.id
+	where ccrf.customkey=#{customkey} and crf.companyId=#{companyId}
+	GROUP BY serviceFeeType
+    </select>
+
+    <select id="getCustomRateConf" resultType="java.util.Map">
+	select GROUP_CONCAT(cast(ccrc.customRate*100 as decimal(15,2)),'%') as customRate,ccrc.serviceFeeType
+	from custom_company_rate_conf ccrc left join company_rate_conf crc on ccrc.rateConfId=crc.id
+	where ccrc.customkey=#{customkey} and crc.companyId=#{companyId} group by ccrc.customkey;
+    </select>
+
+    <select id="getCustomRateConfList" resultType="java.util.Map">
+	select ccrc.id,cast(ccrc.customRate*100 as decimal(11,2)) as customRate,ccrc.serviceFeeType
+	from custom_company_rate_conf ccrc left join company_rate_conf crc on ccrc.rateConfId=crc.id
+	where ccrc.customkey=#{customkey} and crc.companyId=#{companyId};
+    </select>
+
+    <select id="getCustomRateIntervalList" resultType="com.jrmf.domain.CompanyRateConf">
+        SELECT
+        crc.id,
+        crc.amountStart,
+        crc.amountEnd
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        WHERE
+        ccrc.customkey = #{customKey}
+        AND crc.companyId = #{companyId}
+        <if test="rateConfId != null">
+            and crc.id != #{rateConfId}
+        </if>
+    </select>
+
+    <select id="getCustomMonthLimit" resultType="java.lang.String">
+        SELECT
+            CAST( crc.amountEnd AS DECIMAL ( 15, 2 ) ) amountEnd
+        FROM
+            custom_company_rate_conf ccrc
+            LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        WHERE
+            ccrc.customkey = #{customKey}
+            AND crc.companyId = #{companyId}
+        ORDER BY
+            amountEnd DESC
+            LIMIT 1;
+    </select>
+
+    <select id="getCustomRateConfByKeyAndId" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT
+            *
+        FROM
+        custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN qb_channelrelated qcr on ccrc.customkey = qcr.originalId and crc.companyId = qcr.companyId
+        where ccrc.customkey = #{customkey} and crc.companyId = #{companyId}
+        <if test="id != null and id != ''">
+            and ccrc.id != #{id}
+        </if>
+        GROUP BY ccrc.rateConfId
+    </select>
+
+    <select id="getCustomCompanyMinRate" resultType="com.jrmf.domain.CustomCompanyRateConf">
+        SELECT ccrc.id,ccrc.customkey,ccrc.customRate,ccrc.rateConfId,ccrc.serviceFeeType
+        FROM custom_company_rate_conf ccrc
+        LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+        LEFT JOIN qb_channelrelated qcr on ccrc.customkey = qcr.originalId and crc.companyId = qcr.companyId
+        where ccrc.customkey = #{customkey} and crc.companyId = #{companyId}
+        order by ccrc.customRate + 0 limit 1
+    </select>
+
+</mapper>

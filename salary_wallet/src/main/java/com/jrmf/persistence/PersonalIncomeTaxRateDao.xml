@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.PersonalIncomeTaxRateDao">
+  <resultMap id="baseResultMap" type="com.jrmf.domain.PersonalIncomeTaxRate">
+    <id column="id" property="id"/>
+    <result column="company_id" property="companyId"/>
+    <result column="amount_start" property="amountStart"/>
+    <result column="amount_end" property="amountEnd"/>
+    <result column="operator" property="operator"/>
+    <result column="tax_rate" property="taxRate"/>
+    <result column="create_time" property="createTime"/>
+    <result column="last_update_time" property="lastUpdateTime"/>
+    <result column="remark" property="remark"/>
+  </resultMap>
+
+
+  <resultMap id="baseQcResultMap" type="com.jrmf.domain.UserCommission">
+    <id column="id" property="id"/>
+    <result column="amount" property="amount"/>
+    <result column="calculationRates" property="calculationRates"/>
+    <result column="individualTax" property="individualTax"/>
+    <result column="individualBackTax" property="individualBackTax"/>
+    <result column="companyId" property="companyId"/>
+    <result column="createtime" property="createtime"/>
+    <result column="invoiceStatus2" property="invoiceStatus2"/>
+    <result column="originalId" property="originalId"/>
+    <result column="taxRate" property="taxRate"/>
+  </resultMap>
+
+  <select id="selectByCompanyId" resultMap="baseResultMap">
+    select id,company_id,amount_start,amount_end,operator,tax_rate*100 AS tax_rate,
+    create_time,last_update_time from personal_income_tax_rate where
+    company_id = #{companyId}
+    <if test="excludeId != null and excludeId != '' ">
+      and id <![CDATA[ != ]]> #{excludeId}
+    </if>
+    order by create_time desc
+  </select>
+  <insert id="insert" parameterType="com.jrmf.domain.PersonalIncomeTaxRate">
+
+
+
+
+                            insert into personal_income_tax_rate(company_id,amount_start,amount_end,operator,tax_rate,create_time,remark) values
+                            (#{companyId},#{amountStart},#{amountEnd},#{operator},#{taxRate},now(),#{remark})
+
+
+
+
+
+  </insert>
+  <delete id="delete" parameterType="Integer">
+
+
+
+
+                            delete from personal_income_tax_rate where id = #{id}
+
+
+
+
+  </delete>
+  <update id="updateById" parameterType="com.jrmf.domain.PersonalIncomeTaxRate">
+    update personal_income_tax_rate
+    <set>
+      <if test="amountStart != '' and amountStart != null ">
+        amount_start = #{amountStart},
+      </if>
+      <if test="amountEnd != '' and amountEnd != null ">
+        amount_end = #{amountEnd},
+      </if>
+      <if test="operator != '' and operator != null ">
+        operator = #{operator},
+      </if>
+      <if test="taxRate != '' and taxRate != null ">
+        tax_rate = #{taxRate},
+      </if>
+      <if test="remark != '' and remark != null ">
+        remark = #{remark},
+      </if>
+      last_update_time = now()
+    </set>
+    where id = #{id}
+  </update>
+
+  <select id="selectByCompanyIdAndAmount" resultType="com.jrmf.domain.PersonalIncomeTaxRate"
+    parameterType="Integer">
+
+
+
+
+                          SELECT id,MAX( tax_rate ) AS tax_rate FROM personal_income_tax_rate
+                          WHERE company_id = #{companyId}
+                          AND #{amount} BETWEEN amount_start
+                          AND amount_end
+
+
+
+
+
+  </select>
+
+  <select id="selectCommissionByCustom" resultMap="baseQcResultMap">
+
+
+
+
+                    SELECT uc.id,uc.amount,uc.calculationRates,uc.individualTax,uc.individualBackTax,uc.createtime,uc.invoiceStatus2,uc.companyId,
+                    uc.originalId,uc.taxRate
+                    FROM qb_usercommission  uc
+                    LEFT JOIN qb_company c  ON uc.companyId = c.userId
+                    WHERE c.invoice_category = 2
+                    <![CDATA[
+                    AND uc.invoiceStatus2 in(1,2)
+                    AND  month(uc.createtime) = month(#{createDate}) AND year(uc.createtime) = year(#{createDate})
+                    AND uc.originalId = #{originalId}  AND uc.companyId = #{companyId}
+
+
+
+    ]]>
+  </select>
+
+  <select id="selectByInvoiceSerialNo" resultMap="baseQcResultMap">
+
+
+
+                   SELECT uc.id,uc.amount,uc.calculationRates,uc.individualTax,uc.individualBackTax,uc.createtime,uc.invoiceStatus2,uc.companyId,
+                    uc.originalId,uc.taxRate
+                    FROM qb_usercommission  uc
+                    LEFT JOIN qb_company c  ON uc.companyId = c.userId
+                    WHERE c.invoice_category = 2
+                       <![CDATA[
+                    AND uc.invoiceStatus2 in(1,2)
+                    AND uc.invoiceSerialNo = #{invoiceSerialNo}
+                        ]]>
+                ORDER BY uc.createtime DESC
+
+
+
+
+  </select>
+
+  <select id="selectByListInvoiceSerialNo" resultMap="baseQcResultMap">
+    SELECT uc.id,ROUND(uc.calculationRates*100,2) AS calculationRates,ROUND(uc.taxRate*100,2) AS
+    taxRate,
+    DATE_FORMAT( uc.accountDate, '%Y-%m' )AS accountDate,
+    uc.invoiceSerialNo
+    FROM qb_usercommission uc
+    LEFT JOIN qb_company c ON uc.companyId = c.userId
+    WHERE c.invoice_category = 2
+    <![CDATA[
+        AND uc.invoiceStatus2 in(1,2)
+			      ]]>
+    AND uc.invoiceSerialNo in
+    <foreach collection="list" item="invoiceSerialNo" index="index" open="(" close=")"
+      separator=",">
+      #{invoiceSerialNo}
+    </foreach>
+  </select>
+  <select id="selectSumByListInvoiceSerialNo" resultMap="baseQcResultMap">
+    SELECT
+    uc.id,
+    SUM( CAST( uc.amount AS DECIMAL ( 12, 2 )) ) AS amount,
+    SUM( CAST( uc.individualTax AS DECIMAL ( 12, 2 )) ) AS individualTax,
+    SUM( CAST( uc.individualBackTax AS DECIMAL ( 12, 2 )) ) AS individualBackTax,
+    DATE_FORMAT( uc.accountDate, '%Y-%m' )AS accountDate,
+    uc.invoiceSerialNo,
+    ROUND(uc.calculationRates*100,2) AS calculationRates,
+    ROUND(uc.taxRate*100,2) AS taxRate
+    FROM
+    qb_usercommission uc
+    LEFT JOIN qb_company c ON uc.companyId = c.userId
+    WHERE
+    c.invoice_category = 2
+    <![CDATA[
+        AND uc.invoiceStatus2 IN ( 1, 2 )
+          ]]>
+    AND uc.invoiceSerialNo IN
+    <foreach collection="list" item="invoiceSerialNo" index="index" open="(" close=")"
+      separator=",">
+      #{invoiceSerialNo}
+    </foreach>
+    GROUP BY
+    DATE_FORMAT( uc.accountDate, '%Y-%m' ),
+    uc.invoiceSerialNo
+  </select>
+  <select id="getCompanyTaxRateList" resultMap="baseResultMap">
+
+
+            select id,company_id,amount_start,amount_end,tax_rate,create_time,last_update_time
+            from personal_income_tax_rate
+            where company_id = #{companyId}
+            order by amount_start + 0;
+
+
+  </select>
+
+  <select id="findIndividualBackTax" resultMap="baseQcResultMap">
+
+    SELECT id,ROUND(SUM(individualBackTax),2) AS individualBackTax,invoiceSerialNo2 AS invoiceSerialNo,
+    DATE_FORMAT(accountDate, '%Y-%m' )AS accountDate
+    FROM qb_usercommission
+     WHERE invoiceSerialNo2 in
+    <foreach collection="list" item="it" index="index" open="(" close=")" separator=",">
+      #{it}
+    </foreach>
+    GROUP BY
+    DATE_FORMAT(accountDate, '%Y-%m' ),invoiceSerialNo2
+  </select>
+</mapper>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomPaymentTotalAmountDao">
+
+	<update id="updateCustomPaymentTotalAmount">
+		update custom_payment_totalamount
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="lastDayTotal !=null and lastDayTotal !=''">
+                lastDayTotal = lastDayTotal + #{lastDayTotal},
+            </if>
+            <if test="todayTotal !=null and todayTotal !=''">
+                todayTotal = todayTotal + #{todayTotal},
+            </if>
+            <if test="lastMonthTotal !=null and lastMonthTotal !=''">
+                lastMonthTotal = lastMonthTotal + #{lastMonthTotal},
+            </if>
+            <if test="currentMonthTotal !=null and currentMonthTotal !=''">
+                currentMonthTotal = currentMonthTotal + #{currentMonthTotal},
+            </if>
+            <if test="currentQuarterTotal !=null and currentQuarterTotal !=''">
+                currentQuarterTotal = currentQuarterTotal + #{currentQuarterTotal},
+            </if>
+            updatetime = now(),
+        </trim>
+        where 1 = 1
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="originalId != null and originalId != ''">
+             and originalId = #{originalId}
+        </if>
+         <if test="identityNo != null and identityNo != ''">
+            and identityNo = #{identityNo}
+        </if>
+	</update>
+
+	<update id="initDayMonthPaymentTotalAmount">
+		update custom_payment_totalamount cpt
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="timeFlag == &quot;D&quot;">
+				cpt.lastDayTotal = cpt.todayTotal,
+				cpt.todayTotal = 0,
+			</if>
+			<if test="timeFlag == &quot;M&quot;">
+				cpt.lastMonthTotal = cpt.currentMonthTotal,
+				cpt.currentMonthTotal = 0,
+			</if>
+			<if test="timeFlag == &quot;Q&quot;">
+				cpt.lastQuarterTotal = cpt.currentQuarterTotal,
+				cpt.currentQuarterTotal = 0,
+			</if>
+			updatetime = now(),
+		</trim>
+	</update>
+
+	<select id="queryCustomPaymentTotalAmount" resultType="com.jrmf.domain.CustomPaymentTotalAmount">
+		select
+		*,
+		ROUND(lastDayTotal/100, 2) 'lastDayTotalStr',
+		ROUND(todayTotal/100, 2) 'todayTotalStr',
+		ROUND(lastMonthTotal/100, 2) 'lastMonthTotalStr',
+		ROUND(currentMonthTotal/100, 2) 'currentMonthTotalStr',
+		ROUND(currentQuarterTotal/100, 2) 'currentQuarterTotalStr'
+		from custom_payment_totalamount
+		<trim prefix="where" suffixOverrides="and">
+			<if test="originalId != null and originalId != ''">
+				originalId = #{originalId} and
+			</if>
+			<if test="companyId != null and companyId != ''">
+				companyId = #{companyId} and
+			</if>
+			<if test="identityNo != null and identityNo != ''">
+				identityNo = #{identityNo} and
+			</if>
+		</trim>
+		limit 1
+	</select>
+
+	<select id="listCustomPaymentTotalAmountByParam" resultType="com.jrmf.domain.CustomPaymentTotalAmount">
+	SELECT
+		cpt.id,
+		cpt.companyId,
+		cpt.originalId,
+		cpt.identityNo,
+		cpt.lastDayTotal,
+		cpt.todayTotal,
+		cpt.lastMonthTotal,
+		cpt.currentMonthTotal,
+		ROUND(cpt.lastDayTotal/100, 2) 'lastDayTotalStr',
+		ROUND(cpt.todayTotal/100, 2) 'todayTotalStr',
+		ROUND(cpt.lastMonthTotal/100, 2) 'lastMonthTotalStr',
+		ROUND(cpt.currentMonthTotal/100, 2) 'currentMonthTotalStr',
+		ROUND(cpt.lastQuarterTotal/100, 2) 'lastQuarterTotalStr',
+		ROUND(cpt.currentQuarterTotal/100, 2) 'currentQuarterTotalStr',
+		cpt.updateTime,
+		cpt.createTime,
+		cc.companyName as 'customName',
+		qc.companyName as 'companyName'
+	FROM
+		custom_payment_totalamount cpt
+		LEFT JOIN qb_channelrelated qcr ON cpt.companyId = qcr.companyId and cpt.originalId = qcr.originalId
+		left join channel_custom cc on cpt.originalId = cc.customkey
+		left join qb_company qc on cpt.companyId = qc.userId
+	where 1 = 1
+	    <if test="companyId != null and companyId != ''">
+            and cpt.companyId = #{companyId}
+        </if>
+        <if test="companyName != null and companyName != ''">
+            and cc.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="identityNo != null and identityNo != ''">
+            and cpt.identityNo = #{identityNo}
+        </if>
+        ORDER BY cpt.updateTime desc
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+	</select>
+
+	<insert id="initCustomPaymentTotalAmount" parameterType="com.jrmf.domain.CustomPaymentTotalAmount">
+		INSERT INTO custom_payment_totalamount (
+		`companyId`,
+		`originalId`,
+		`identityNo`,
+		`lastDayTotal`,
+		`todayTotal`,
+		`lastMonthTotal`,
+		`currentMonthTotal`,
+		`createTime`
+		)
+		VALUES
+			(
+				#{companyId},
+				#{originalId},
+				#{identityNo},
+				#{lastDayTotal},
+				#{todayTotal},
+				#{lastMonthTotal},
+				#{currentMonthTotal},
+				now()
+			);
+	</insert>
+
+
+	<select id="queryCompanyPaymentTotalAmount" resultType="com.jrmf.domain.CustomPaymentTotalAmount">
+		SELECT
+			cast( COALESCE ( SUM( currentMonthTotal )/100, 0 ) AS DECIMAL ( 15, 2 ) ) AS currentMonthTotalStr,
+			cast( COALESCE ( SUM( currentQuarterTotal )/100, 0 ) AS DECIMAL ( 15, 2 ) ) AS currentQuarterTotalStr
+		FROM
+			custom_payment_totalamount
+		WHERE
+			companyId = #{companyId}
+			AND identityNo = #{identityNo}
+		GROUP BY
+			identityNo;
+	</select>
+
+	<!-- 获取使用实际下发公司的累计限额 -->
+	<select id="queryCompanyPaymentTotalAmountByRealCompany" resultType="map">
+		select
+		     cast( COALESCE ( SUM( currentMonthTotal )/100, 0 ) AS DECIMAL ( 15, 2 ) ) AS currentMonthTotalStr,
+			 cast( COALESCE ( SUM( currentQuarterTotal )/100, 0 ) AS DECIMAL ( 15, 2 ) ) AS currentQuarterTotalStr
+	    from
+	    	custom_payment_totalamount
+	    where
+       		companyId in(select userId from qb_company where realCompanyId=#{companyId} and realCompanyId is not null and realCompanyId!=userId)
+			and identityNo=#{identityNo}
+		GROUP BY
+			identityNo;
+
+	</select>
+
+	<select id="listCustomPaymentTotalAmountByParamCount" resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		custom_payment_totalamount cpt
+		LEFT JOIN qb_channelrelated qcr ON cpt.companyId = qcr.companyId and cpt.originalId = qcr.originalId
+		left join channel_custom cc on cpt.originalId = cc.customkey
+		left join qb_company qc on cpt.companyId = qc.userId
+		where 1 = 1
+		<if test="companyId != null and companyId != ''">
+			and cpt.companyId = #{companyId}
+		</if>
+		<if test="companyName != null and companyName != ''">
+			and cc.companyName like concat('%',#{companyName},'%')
+		</if>
+		<if test="identityNo != null and identityNo != ''">
+			and cpt.identityNo = #{identityNo}
+		</if>
+	</select>
+</mapper>

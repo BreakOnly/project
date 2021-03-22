@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.OemConfigDao">
+
+    <select id="getOemByParam" resultType="com.jrmf.domain.OemConfig">
+        SELECT * FROM oem_config where 1=1
+        <if test="portalDomain != null  and portalDomain !=''">
+            and portal_domain = #{portalDomain}
+        </if>
+        <if test="status != null  and status !=''">
+            and status = #{status}
+        </if>
+    </select>
+
+    <select id="getOemConfig" resultType="com.jrmf.domain.OemConfig">
+        SELECT * FROM oem_config where 1=1
+        <if test="portalDomain != null  and portalDomain !=''">
+            and portal_domain = #{portalDomain}
+        </if>
+        <if test="oemName != null  and oemName !=''">
+            and oem_name LIKE concat('%',#{oemName},'%')
+        </if>
+        <if test="clientDomain != null  and clientDomain !=''">
+            and client_domain = #{clientDomain}
+        </if>
+        ORDER BY create_time DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getOemConfigById" resultType="com.jrmf.domain.OemConfig">
+         SELECT * FROM oem_config where id = #{id}
+    </select>
+
+    <select id="getOemConfigByCustomkey" resultType="java.lang.Integer">
+        SELECT count(1) FROM oem_config WHERE customkey = #{customkey}
+    </select>
+
+    <delete id="deleteOemConfig">
+        DELETE FROM oem_config WHERE id = #{id}
+    </delete>
+
+    <update id="updateOemConfig" parameterType="com.jrmf.domain.OemConfig">
+        UPDATE oem_config
+        <trim prefix="set" suffixOverrides=",">
+            <if test="oemName != null and oemName != ''">
+                oem_name = #{oemName},
+            </if>
+            <if test="portalDomain != null and portalDomain != ''">
+                portal_domain = #{portalDomain},
+            </if>
+            <if test="clientDomain != null and clientDomain != ''">
+                client_domain = #{clientDomain},
+            </if>
+            <if test="portalLogo != null and portalLogo != ''">
+                portal_logo = #{portalLogo},
+            </if>
+            <if test="portalTitle != null and portalTitle != ''">
+                portal_title = #{portalTitle},
+            </if>
+            <if test="protalIcp != null">
+                protal_icp = #{protalIcp},
+            </if>
+            <if test="welcomePicture != null and welcomePicture != ''">
+                welcome_picture = #{welcomePicture},
+            </if>
+            <if test="clientIcp != null">
+                client_icp = #{clientIcp},
+            </if>
+            <if test="clientLogo != null and clientLogo != ''">
+                client_logo = #{clientLogo},
+            </if>
+            <if test="smsSignature != null and smsSignature != ''">
+                sms_signature = #{smsSignature},
+            </if>
+            <if test="serviceHotline != null and serviceHotline != ''">
+                service_hotline = #{serviceHotline},
+            </if>
+            <if test="smsStatus != null">
+                sms_status = #{smsStatus},
+            </if>
+            <if test="updateTime != null and updateTime != ''">
+                update_time = #{updateTime},
+            </if>
+        </trim>
+        WHERE
+        id = #{id}
+    </update>
+
+    <insert id="insertOemConfig" parameterType="com.jrmf.domain.OemConfig">
+        INSERT INTO oem_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="oemName != null and oemName != ''">
+                oem_name,
+            </if>
+            <if test="portalDomain != null and portalDomain != ''">
+                portal_domain,
+            </if>
+            <if test="clientDomain != null and clientDomain != ''">
+                client_domain,
+            </if>
+            <if test="portalLogo != null and portalLogo != ''">
+                portal_logo,
+            </if>
+            <if test="portalTitle != null and portalTitle != ''">
+                portal_title,
+            </if>
+            <if test="protalIcp != null and protalIcp != ''">
+                protal_icp,
+            </if>
+            <if test="welcomePicture != null and welcomePicture != ''">
+                welcome_picture,
+            </if>
+            <if test="clientIcp != null and clientIcp != ''">
+                client_icp,
+            </if>
+            <if test="clientLogo != null and clientLogo != ''">
+                client_logo,
+            </if>
+            <if test="smsSignature != null and smsSignature != ''">
+                sms_signature,
+            </if>
+            <if test="serviceHotline != null and serviceHotline != ''">
+                service_hotline,
+            </if>
+            <if test="smsStatus != null">
+                sms_status,
+            </if>
+            create_time,
+            update_time,
+            status,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="oemName != null and oemName != ''">
+                #{oemName},
+            </if>
+            <if test="portalDomain != null and portalDomain != ''">
+                #{portalDomain},
+            </if>
+            <if test="clientDomain != null and clientDomain != ''">
+                #{clientDomain},
+            </if>
+            <if test="portalLogo != null and portalLogo != ''">
+                #{portalLogo},
+            </if>
+            <if test="portalTitle != null and portalTitle != ''">
+                #{portalTitle},
+            </if>
+            <if test="protalIcp != null and protalIcp != ''">
+                #{protalIcp},
+            </if>
+            <if test="welcomePicture != null and welcomePicture != ''">
+                #{welcomePicture},
+            </if>
+            <if test="clientIcp != null and clientIcp != ''">
+                #{clientIcp},
+            </if>
+            <if test="clientLogo != null and clientLogo != ''">
+                #{clientLogo},
+            </if>
+            <if test="smsSignature != null and smsSignature != ''">
+                #{smsSignature},
+            </if>
+            <if test="serviceHotline != null and serviceHotline != ''">
+                #{serviceHotline},
+            </if>
+            <if test="smsStatus != null">
+                #{smsStatus},
+            </if>
+            now(),
+            now(),
+            1,
+        </trim>
+    </insert>
+
+    <update id="updateOemConfigIsNull" parameterType="com.jrmf.domain.OemConfig">
+        UPDATE oem_config
+        <trim prefix="set" suffixOverrides=",">
+            <if test="portalLogo != null and portalLogo != ''">
+                portal_logo = '',
+            </if>
+            <if test="welcomePicture != null and welcomePicture != ''">
+                welcome_picture = '',
+            </if>
+            <if test="clientLogo != null and clientLogo != ''">
+                client_logo = '',
+            </if>
+        </trim>
+        WHERE
+        id = #{id}
+    </update>
+</mapper>

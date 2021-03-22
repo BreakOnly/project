@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.LinkConfigDao">
+
+	<!-- 获取联动基础配置信息 -->
+	<select id="getLinkConfigList" parameterType="com.jrmf.domain.Page" resultType="map">
+		select lbc.*,bpc.pathName from linkage_base_config lbc 
+		left join business_payment_channel bpc on lbc.pathNo=bpc.pathNo
+		where 1=1
+		<if test="params.corporationAccountName!=null and params.corporationAccountName!=''">
+			and lbc.corporationAccountName like concat ('%',#{params.corporationAccountName},'%')
+		</if>
+		<if test="params.corporationAccount!=null and params.corporationAccount!=''">
+			and lbc.corporationAccount = #{params.corporationAccount}
+		</if>
+	 	<if test="params.startTime!=null and params.startTime!=''">
+	 		and date(lbc.createTime) &gt;= #{params.startTime}
+	 	</if>
+	 	<if test="params.endTime!=null and params.endTime!=''">
+	 		and date(lbc.createTime) &lt;= #{params.endTime}
+	 	</if>
+	 	<if test="params.linkageType!=null and params.linkageType!=''">
+	 		and lbc.linkageType = #{params.linkageType}
+	 	</if>
+	 	<if test="params.pathType!=null and params.pathType!=''">
+	 		and lbc.pathType = #{params.pathType}
+	 	</if>
+	 	<if test="params.bankName!=null and params.bankName!=''">
+	 		and lbc.bankName like concat ('%',#{params.bankName},'%')
+	 	</if>
+	 	<if test="params.status!=null and params.status!=''">
+	 		and lbc.status=#{params.status}
+	 	</if>
+		order by id desc
+		<if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+        </if>
+	</select>
+	
+	<select id="getLinkConfigListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		select count(1) from (select lbc.*,bpc.pathName from linkage_base_config lbc 
+		left join business_payment_channel bpc on lbc.pathNo=bpc.pathNo
+		where 1=1
+		<if test="params.corporationAccountName!=null and params.corporationAccountName!=''">
+			and lbc.corporationAccountName like concat ('%',#{params.corporationAccountName},'%')
+		</if>
+		<if test="params.corporationAccount!=null and params.corporationAccount!=''">
+			and lbc.corporationAccount = #{params.corporationAccount}
+		</if>
+	 	<if test="params.startTime!=null and params.startTime!=''">
+	 		and date(lbc.createTime) &gt;= #{params.startTime}
+	 	</if>
+	 	<if test="params.endTime!=null and params.endTime!=''">
+	 		and date(lbc.createTime) &lt;= #{params.endTime}
+	 	</if>
+	 	<if test="params.linkageType!=null and params.linkageType!=''">
+	 		and lbc.linkageType = #{params.linkageType}
+	 	</if>
+	 	<if test="params.pathType!=null and params.pathType!=''">
+	 		and lbc.pathType = #{params.pathType}
+	 	</if>
+	 	<if test="params.bankName!=null and params.bankName!=''">
+	 		and lbc.bankName like concat ('%',#{params.bankName},'%')
+	 	</if>
+	 	<if test="params.status!=null and params.status!=''">
+	 		and lbc.status=#{params.status}
+	 	</if>
+		order by id desc
+		)temp
+	</select>
+	
+	<!-- 添加联动基础配置信息 -->
+	<insert id="insert" parameterType="com.jrmf.domain.LinkageBaseConfig" >
+    insert into linkage_base_config (corporationAccountName, corporationAccount, 
+      bankName,pathType,linkageType, status, 
+      pathNo, preHost, remotePort, 
+      readTimeOut, connectTimeOut, corpToBankStandardCode, 
+      corporationName, isSubAccount, shadowAcctNo, 
+      privateKey,selPublicKey,apiKey,
+      parameter1, parameter2, parameter3, 
+      createTime, updateTime, addUser,subAccount
+      )
+    values (#{corporationAccountName,jdbcType=VARCHAR}, #{corporationAccount,jdbcType=VARCHAR}, 
+      #{bankName,jdbcType=VARCHAR},#{pathType,jdbcType=INTEGER},#{linkageType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{pathNo,jdbcType=VARCHAR}, #{preHost,jdbcType=VARCHAR}, #{remotePort,jdbcType=INTEGER}, 
+      #{readTimeOut,jdbcType=INTEGER}, #{connectTimeOut,jdbcType=INTEGER}, #{corpToBankStandardCode,jdbcType=VARCHAR}, 
+      #{corporationName,jdbcType=VARCHAR}, #{isSubAccount,jdbcType=INTEGER}, #{shadowAcctNo,jdbcType=VARCHAR}, 
+      #{privateKey,jdbcType=VARCHAR}, #{selPublicKey,jdbcType=VARCHAR}, #{apiKey,jdbcType=VARCHAR}, 
+      #{parameter1,jdbcType=VARCHAR}, #{parameter2,jdbcType=VARCHAR}, #{parameter3,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{addUser,jdbcType=VARCHAR}, #{subAccount,jdbcType=VARCHAR}
+      )
+    </insert>
+  	
+  	<!-- 修改联动基础配置信息 -->
+    <update id="update" parameterType="com.jrmf.domain.LinkageBaseConfig" >
+    update linkage_base_config
+    set corporationAccountName = #{corporationAccountName,jdbcType=VARCHAR},
+      corporationAccount = #{corporationAccount,jdbcType=VARCHAR},
+      bankName = #{bankName,jdbcType=VARCHAR},
+      pathType = #{pathType,jdbcType=INTEGER},
+      linkageType = #{linkageType,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      pathNo = #{pathNo,jdbcType=VARCHAR},
+      preHost = #{preHost,jdbcType=VARCHAR},
+      remotePort = #{remotePort,jdbcType=INTEGER},
+      readTimeOut = #{readTimeOut,jdbcType=INTEGER},
+      connectTimeOut = #{connectTimeOut,jdbcType=INTEGER},
+      corpToBankStandardCode = #{corpToBankStandardCode,jdbcType=VARCHAR},
+      corporationName = #{corporationName,jdbcType=VARCHAR},
+      isSubAccount = #{isSubAccount,jdbcType=INTEGER},
+      shadowAcctNo = #{shadowAcctNo,jdbcType=VARCHAR},
+      privateKey = #{privateKey,jdbcType=VARCHAR},
+      selPublicKey = #{selPublicKey,jdbcType=VARCHAR},
+      apiKey = #{apiKey,jdbcType=VARCHAR},
+      subAccount = #{subAccount,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+    </update>
+  
+  	<!-- 删除联动基础配置信息 -->
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from linkage_base_config
+    where id = #{id,jdbcType=INTEGER}
+   </delete>
+   
+   <!-- 根据id查询联动配置信息 -->
+   <select id="getLinkConfigById" parameterType="int" resultType="com.jrmf.domain.LinkageBaseConfig">
+   select * from linkage_base_config where id = #{id}
+   </select>
+   
+  <!-- 获取付款通道信息 -->
+  <select id="getPathInfo" resultType="map">
+  select pathNo,pathName from business_payment_channel order by id desc
+  </select>
+</mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.UserNameCertIdCheckDao">
+    <insert id="addUserNameCertIdCheck">
+        INSERT INTO username_certid_check(customkey, userName, certId, result,resultMessage,createTime)
+        VALUES (#{customkey}, #{userName}, #{certId}, #{result},#{resultMessage},now())
+    </insert>
+    <select id="getUserNameCertIdCheckBaseConfigList"
+            resultType="com.jrmf.domain.UserNameCertIdCheckBaseConfig">
+        select * from username_certid_check_base_config
+    </select>
+    <select id="getUserNameCertIdCheckBaseConfigByCheckType"
+            resultType="com.jrmf.domain.UserNameCertIdCheckBaseConfig">
+        select * from username_certid_check_base_config where checkType = #{checkType} limit 1
+    </select>
+    <select id="getUserNameCertIdWhiteAndBlackConfigByCustomkeyAndType"
+            resultType="com.jrmf.domain.UserNameCertIdWhiteBlackConfig">
+        select * from username_certid_white_black_config where customkey = #{customkey} and type = #{type}
+    </select>
+    <select id="getUserNameCertIdCheckBaseConfigByNotAllCheckCustomkey"
+            resultType="com.jrmf.domain.UserNameCertIdCheckBaseConfig">
+        select * from username_certid_check_base_config where checkType = 3 and notAllCheckCustomkey = #{customkey} limit 1
+    </select>
+</mapper>

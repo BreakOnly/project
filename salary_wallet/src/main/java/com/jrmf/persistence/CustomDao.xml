@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.jrmf.persistence.CustomDao">
+
+    <select id="listCustomInfo" resultType="com.jrmf.splitorder.domain.Custom">
+        SELECT
+            companyName customName,
+            customkey customKey
+        FROM
+            channel_custom
+        WHERE
+            customkey is not NULL
+            AND customType in (1,5)
+    </select>
+</mapper>

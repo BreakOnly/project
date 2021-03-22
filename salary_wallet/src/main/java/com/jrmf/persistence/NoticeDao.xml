@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.NoticeDao">
+
+    <update id="updateCustomNoticeReadIsByIds">
+        UPDATE custom_notice SET readIs = '1', readTime = now(),updateTime = now() WHERE accountId = #{accountId}
+    </update>
+
+    <update id="updateCustomNoticeReadIsById">
+        UPDATE custom_notice SET readIs = '1', readTime = now(),updateTime = now() WHERE accountId = #{accountId} AND noticeId = #{id}
+    </update>
+
+    <update id="deleteNoticeEnabled">
+        UPDATE notice SET enabled = 3, updateTime = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateNoticeEnabled">
+        UPDATE notice SET enabled = 1, updateTime = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="deleteCustomOrganization">
+        UPDATE custom_organization SET enabled = 1, updateTime = NOW() WHERE id = #{id}
+    </update>
+
+    <select id="getNoticeCount" resultType="int">
+        SELECT
+            COUNT(1)
+        FROM (
+          SELECT
+        n.id,
+        n.noticeType,
+        n.title,
+        (SELECT GROUP_CONCAT(co.organizationName) FROM custom_organization co where FIND_IN_SET(co.id,n.organizationId) OR FIND_IN_SET(co.customType,n.organizationType))  as organizationName,
+        n.publishAuthor,
+        n.publishTime,
+        n.addUser,
+        SUM(CASE cn.readIs WHEN 1 THEN 1 ELSE 0 END) as readAmount,
+        CONCAT(CAST(SUM(CASE cn.readIs WHEN 1 THEN 1 ELSE 0 END)/count(cn.readIs)*100 AS decimal(15,2)),'%') as checkRate,
+        n.accessoryName,
+        n.accessoryUrl,
+        n.organizationType,
+        n.organizationId,
+        n.enabled
+        FROM
+        notice n
+        LEFT JOIN custom_notice cn
+        ON cn.noticeId = n.id
+        WHERE (n.enabled = 2 OR n.enabled = 1)
+        <if test="organizationType != null and organizationType != ''">
+            AND (n.organizationType REGEXP (#{organizationType}) or n.organizationId REGEXP (#{organizationType}))
+        </if>
+        <if test="title != null and title != ''">
+            AND n.title LIKE CONCAT('%',#{title},'%')
+        </if>
+        <if test="noticeType != null and noticeType != ''">
+            AND n.noticeType = #{noticeType}
+        </if>
+        <if test="organizationId != null and organizationId != ''">
+            AND n.organizationId in (#{organizationId})
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND date(n.publishTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND date(n.publishTime) &lt;= #{endTime}
+        </if>
+        GROUP BY n.id) temp
+    </select>
+
+    <select id="getNoticeList" resultType="com.jrmf.domain.Notice">
+        SELECT
+        n.id,
+        n.noticeType,
+        n.title,
+        (SELECT GROUP_CONCAT(co.organizationName) FROM custom_organization co where FIND_IN_SET(co.id,n.organizationId) OR FIND_IN_SET(co.customType,n.organizationType))  as organizationName,
+        n.publishAuthor,
+        n.publishTime,
+        n.addUser,
+        SUM(CASE cn.readIs WHEN 1 THEN 1 ELSE 0 END) as readAmount,
+        CONCAT(CAST(SUM(CASE cn.readIs WHEN 1 THEN 1 ELSE 0 END)/count(cn.readIs)*100 AS decimal(15,2)),'%') as checkRate,
+        n.accessoryName,
+        n.accessoryUrl,
+        n.organizationType,
+        n.organizationId,
+        n.enabled
+        FROM
+        notice n
+        LEFT JOIN custom_notice cn
+        ON cn.noticeId = n.id
+        WHERE (n.enabled = 2 OR n.enabled = 1)
+        <if test="organizationType != null and organizationType != ''">
+            AND (n.organizationType REGEXP (#{organizationType}) or n.organizationId REGEXP (#{organizationType}))
+        </if>
+        <if test="title != null and title != ''">
+            AND n.title LIKE CONCAT('%',#{title},'%')
+        </if>
+        <if test="noticeType != null and noticeType != ''">
+            AND n.noticeType = #{noticeType}
+        </if>
+        <if test="organizationId != null and organizationId != ''">
+            AND n.organizationId in (#{organizationId})
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND date(n.publishTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND date(n.publishTime) &lt;= #{endTime}
+        </if>
+        GROUP BY n.id ORDER BY n.publishTime DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="queryCustomOrganizationId" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT * FROM custom_organization where enabled = 2 and FIND_IN_SET(id,#{id})
+    </select>
+
+    <insert id="insertCustomOrganization" parameterType="com.jrmf.domain.CustomOrganization">
+        INSERT INTO custom_organization (accountIds, organizationName, createTime, updateTime, enabled) VALUES(#{accountIds}, #{organizationName}, NOW(), NOW(), 2)
+    </insert>
+
+    <insert id="insertNotice" parameterType="com.jrmf.domain.Notice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notice(title,organizationType,noticeType,publishAuthor,publishTime,addUser,
+        accountScope,stationType,textHtml,accessoryName,accessoryUrl,enabled,organizationId,createTime,updateTime)
+         VALUES (#{title},#{organizationType},#{noticeType},#{publishAuthor},#{publishTime},#{addUser},
+         #{accountScope},#{stationType},#{textHtml},#{accessoryName},#{accessoryUrl},2,#{organizationId},now(),now())
+    </insert>
+
+    <insert id="insertCustomNotice" parameterType="java.util.List">
+        INSERT INTO custom_notice(accountId,noticeId,readIs,createTime,updateTime) VALUES
+        <foreach collection="accountIds" item="accountId" separator=",">
+            (#{accountId},#{noticeId},2,now(),now())
+        </foreach>
+    </insert>
+
+    <select id="getNoticeById" resultType="com.jrmf.domain.Notice">
+        SELECT * FROM notice WHERE id = #{id} AND (enabled = 2 OR enabled = 1)
+    </select>
+
+    <select id="getCustomNoticeByCustomNoticeId" resultType="java.util.Map">
+        SELECT
+            n.id,
+            cn.id noticeId,
+            n.title,
+            n.content,
+            cn.readIs,
+            n.enabled,
+            n.publishTime publishTime,
+            n.noticeType
+        FROM notice n
+        LEFT JOIN custom_notice cn
+        ON n.id = cn.noticeId
+        WHERE n.enabled = '2' AND n.publishTime &lt;= NOW() AND cn.readIs = '2'
+            <if test="id != null">
+                AND cn.accountId = #{id}
+            </if>
+        GROUP BY noticeId
+        ORDER BY publishTime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCustomAllNoticeByCustomNoticeId" resultType="java.util.Map">
+        SELECT
+            n.id,
+            cn.id noticeId,
+            n.title,
+            cn.readIs,
+            n.enabled,
+            date_format(n.publishTime,'%Y-%m-%d %H:%i:%s') publishTime,
+            n.accessoryName,
+            n.noticeType
+        FROM notice n
+        LEFT JOIN custom_notice cn
+        ON n.id = cn.noticeId
+        WHERE n.enabled = '2' AND n.publishTime &lt;= NOW()
+        <if test="accountId != null and accountId != ''">
+            AND cn.accountId = #{accountId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND date(n.publishTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND date(n.publishTime) &lt;= #{endTime}
+        </if>
+        <if test="noticeType != null and noticeType !=''">
+            AND n.noticeType = #{noticeType}
+        </if>
+        GROUP BY noticeId
+        ORDER BY n.publishTime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCustomAllNoticeByCustomNoticeIdCount" resultType="java.lang.Integer">
+        SELECT count(1) from
+        (SELECT
+        n.id,
+        cn.id noticeId,
+        n.title,
+        cn.readIs,
+        n.enabled,
+        date_format(n.publishTime,'%Y-%m-%d %H:%i:%s') publishTime,
+        n.accessoryName,
+        n.noticeType
+        FROM notice n
+        LEFT JOIN custom_notice cn
+        ON n.id = cn.noticeId
+        WHERE n.enabled = '2' AND n.publishTime &lt;= NOW()
+        <if test="accountId != null and accountId != ''">
+            AND cn.accountId = #{accountId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND date(n.publishTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND date(n.publishTime) &lt;= #{endTime}
+        </if>
+        <if test="noticeType != null and noticeType !=''">
+            AND n.noticeType = #{noticeType}
+        </if>
+        GROUP BY noticeId
+        ORDER BY n.publishTime desc ) temp
+    </select>
+
+    <select id="getCustomANoticeByNoticeId" resultType="java.util.Map">
+        SELECT
+	        n.id,
+	        n.title,
+	        SUBSTR(n.content,1,100) content,
+	        date_format(n.publishTime,'%Y-%m-%d %H:%i:%s') publishTime,
+	        n.accessoryName,
+	        n.textHtml
+        FROM
+	        custom_notice cn
+        LEFT JOIN notice n ON cn.noticeId = n.id
+        WHERE
+	        n.id = #{id} AND (n.enabled = '2' OR n.enabled = '1')
+        GROUP BY n.id
+    </select>
+
+    <!-- 新增商户根据商户类型查询有关公告 -->
+    <select id="getNoticeByCustomType" parameterType="int" resultType="com.jrmf.domain.Notice">
+        select * from notice where FIND_IN_SET(#{customType},organizationType) and accountScope=2 and enabled=2
+    </select>
+
+    <select id="getOrganizationNamByOrganizationNam" resultType="java.lang.Integer">
+        SELECT COUNT(1) FROM custom_organization WHERE organizationName = #{organizationName} AND enabled = 2
+    </select>
+
+    <select id="queryCustomOrganizationIdByTypeIs1" resultType="com.jrmf.domain.CustomOrganization">
+        select id,organizationName,parentId,customType FROM custom_organization WHERE type = 1 AND enabled = 2 AND parentId = 0
+    </select>
+
+    <select id="queryCustomOrganizationIdByTypeIs2" resultType="com.jrmf.domain.CustomOrganization">
+        select id,organizationName,type,accountIds FROM custom_organization WHERE type = 2 AND enabled = 2
+    </select>
+
+    <select id="getOrganizationById" resultType="java.util.Map">
+        select id,organizationName FROM custom_organization WHERE parentId = #{id} AND enabled = 2 AND type = 1
+    </select>
+
+    <select id="getCustomOrganization" resultType="java.lang.String">
+        SELECT accountIds FROM custom_organization WHERE FIND_IN_SET(id,#{id}) AND enabled = 2 AND type = 2
+    </select>
+
+    <select id="getCustomOrganizationIdByTypeIs1" resultType="java.lang.String">
+        select id FROM custom_organization WHERE type = 1 AND enabled = 2
+    </select>
+    <select id="queryOrganizationInfo" resultType="java.lang.String">
+        SELECT accountIds FROM custom_organization WHERE id in (#{id}) AND enabled = 2
+    </select>
+
+    <select id="getCustomOrganizationById" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT customType FROM custom_organization WHERE id = #{accountId} AND type = 1 AND enabled = 2
+    </select>
+
+    <select id="queryCustomOrganizationByTypeAndParentId" resultType="com.jrmf.domain.CustomOrganization">
+        select id,organizationName,parentId,customType FROM custom_organization WHERE type = 1 AND enabled = 2
+    </select>
+
+    <select id="selectAllCustomOrganization" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT
+	        id,
+	        organizationName,
+	        type,
+	        customType
+        FROM
+	        custom_organization
+        WHERE
+	        enabled = 2
+    </select>
+
+    <select id="selectAllCompany" resultType="java.util.Map">
+        SELECT CONCAT('A',userId) as id,companyName as organizationName FROM qb_company
+    </select>
+
+    <select id="getCustomTypeByParentId" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT * FROM custom_organization where type = 1 AND enabled = 2 AND id = #{id}
+    </select>
+
+    <select id="getCustomOrganizationByCustomType" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT * FROM custom_organization WHERE customType = #{customType} AND type = '1' AND enabled = '2'
+    </select>
+
+    <select id="getCustomOrganizationByParentId" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT * FROM custom_organization WHERE parentId = #{id} AND type = '1' AND enabled = '2'
+    </select>
+
+    <select id="getCustomOrganizationByCustomTypeAndLoginRole" resultType="com.jrmf.domain.Notice">
+     SELECT n.* FROM notice n WHERE n.enabled = 2 and accountScope = 2
+      AND ((n.organizationType = '' OR n.organizationType REGEXP #{customType})  or n.organizationId REGEXP (#{id}))
+    </select>
+
+    <select id="getOrganizationByCustomType" resultType="com.jrmf.domain.Notice">
+         SELECT
+            n.*
+        FROM
+            notice n
+        WHERE n.enabled = 2  and accountScope = 2
+        AND (n.organizationType = '' OR n.organizationType REGEXP #{customType})
+    </select>
+
+    <select id="getCustomAdminByCustomType" resultType="com.jrmf.domain.CustomOrganization">
+        SELECT * FROM custom_organization WHERE parentId = #{customType} AND type = '1' AND enabled = '2' AND loginRole = 1
+    </select>
+</mapper>

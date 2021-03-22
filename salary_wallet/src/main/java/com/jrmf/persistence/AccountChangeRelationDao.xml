@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.AccountChangeRelationDao">
+
+    <sql id="Base_Column_List">
+    id, accountId, customKey, customName, changeAccountId, relationType
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer"
+            resultType="com.jrmf.domain.AccountChangeRelation">
+        select
+        <include refid="Base_Column_List"/>
+        from account_change_relation
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from account_change_relation
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+    <insert id="insert" parameterType="com.jrmf.domain.AccountChangeRelation">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into account_change_relation (accountId, customKey, customName,
+        changeAccountId, relationType)
+        values (#{accountId,jdbcType=INTEGER}, #{customKey,jdbcType=VARCHAR}, #{customName,jdbcType=VARCHAR},
+        #{changeAccountId,jdbcType=INTEGER}, #{relationType,jdbcType=INTEGER})
+    </insert>
+    <insert id="insertSelective" parameterType="com.jrmf.domain.AccountChangeRelation">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into account_change_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountId != null">
+                accountId,
+            </if>
+            <if test="customKey != null">
+                customKey,
+            </if>
+            <if test="customName != null">
+                customName,
+            </if>
+            <if test="changeAccountId != null">
+                changeAccountId,
+            </if>
+            <if test="relationType != null">
+                relationType,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountId != null">
+                #{accountId,jdbcType=INTEGER},
+            </if>
+            <if test="customKey != null">
+                #{customKey,jdbcType=VARCHAR},
+            </if>
+            <if test="customName != null">
+                #{customName,jdbcType=VARCHAR},
+            </if>
+            <if test="changeAccountId != null">
+                #{changeAccountId,jdbcType=INTEGER},
+            </if>
+            <if test="relationType != null">
+                #{relationType,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.AccountChangeRelation">
+        update account_change_relation
+        <set>
+            <if test="accountId != null">
+                accountId = #{accountId,jdbcType=INTEGER},
+            </if>
+            <if test="customKey != null">
+                customKey = #{customKey,jdbcType=VARCHAR},
+            </if>
+            <if test="customName != null">
+                customName = #{customName,jdbcType=VARCHAR},
+            </if>
+            <if test="changeAccountId != null">
+                changeAccountId = #{changeAccountId,jdbcType=INTEGER},
+            </if>
+            <if test="relationType != null">
+                relationType = #{relationType,jdbcType=INTEGER},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.AccountChangeRelation">
+    update account_change_relation
+    set accountId = #{accountId,jdbcType=INTEGER},
+      customKey = #{customKey,jdbcType=VARCHAR},
+      customName = #{customName,jdbcType=VARCHAR},
+      changeAccountId = #{changeAccountId,jdbcType=INTEGER},
+      relationType = #{relationType,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <select id="changeAccountList" resultType="HashMap">
+        SELECT acr.id,acr.accountId,acr.customKey,cc.companyName customName,acr.changeAccountId,cc.username changeAccountName,acr.relationType,acr.addUser,acr.createTime
+        FROM account_change_relation acr
+        LEFT JOIN channel_custom c
+        ON c.id = acr.accountId
+        LEFT JOIN channel_custom cc
+        ON cc.id = acr.changeAccountId where acr.accountId=#{accountId}
+        <if test="changeAccountId !=null and changeAccountId !=''">
+            and acr.changeAccountId =  #{changeAccountId}
+        </if>
+  </select>
+
+    <select id="getAccountChangeRelationById" resultType="com.jrmf.domain.AccountChangeRelation">
+        select * from account_change_relation where id = #{id}
+    </select>
+
+    <delete id="deleteAccountChangeRelationById">
+        delete from account_change_relation where id = #{id}
+    </delete>
+
+    <insert id="insertAccountChangeRelation"  parameterType="com.jrmf.domain.AccountChangeRelation">
+        insert into account_change_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="accountId != null and accountId != ''">
+                accountId,
+            </if>
+            <if test="customKey != null and customKey !=''">
+                customKey,
+            </if>
+            <if test="customName != null and customName != ''">
+                customName,
+            </if>
+            <if test="changeAccountId != null and changeAccountId != ''">
+                changeAccountId,
+            </if>
+            <if test="changeAccountName != null and changeAccountName != ''">
+                changeAccountName,
+            </if>
+            <if test="addUser != null and addUser != ''">
+                addUser,
+            </if>
+            createTime,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="accountId != null and accountId != ''">
+                #{accountId,jdbcType=INTEGER},
+            </if>
+            <if test="customKey != null and customKey !=''">
+                #{customKey,jdbcType=VARCHAR},
+            </if>
+            <if test="customName != null and customName != ''">
+                #{customName,jdbcType=VARCHAR},
+            </if>
+            <if test="changeAccountId != null and changeAccountId != ''">
+                #{changeAccountId,jdbcType=INTEGER},
+            </if>
+            <if test="changeAccountName != null and changeAccountName != ''">
+                #{changeAccountName,jdbcType=VARCHAR},
+            </if>
+            <if test="addUser != null and addUser != ''">
+                #{addUser,jdbcType=VARCHAR},
+            </if>
+            now(),
+        </trim>
+    </insert>
+
+    <update id="updateAccountChangeRelation" parameterType="com.jrmf.domain.AccountChangeRelation">
+        update account_change_relation
+        <trim prefix="set" suffixOverrides=",">
+            <if test="accountId != null and accountId != ''">
+                accountId = #{accountId,jdbcType=INTEGER},
+            </if>
+            <if test="customKey != null and customKey != ''">
+                customKey = #{customKey,jdbcType=VARCHAR},
+            </if>
+            <if test="customName != null and customName != ''">
+                customName = #{customName,jdbcType=VARCHAR},
+            </if>
+            <if test="changeAccountId != null and changeAccountId != ''">
+                changeAccountId = #{changeAccountId,jdbcType=INTEGER},
+            </if>
+            <if test="relationType != null and relationType!= ''">
+                relationType = #{relationType,jdbcType=INTEGER},
+            </if>
+            <if test="changeAccountName != null and changeAccountName != ''">
+                changeAccountName = #{changeAccountName,jdbcType=VARCHAR},
+            </if>
+            <if test="addUser != null and addUser != ''">
+                addUser = #{addUser,jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="getAccountChangeRelationByAccountId" resultType="com.jrmf.domain.AccountChangeRelation">
+        SELECT * FROM account_change_relation WHERE accountId = #{id} AND changeAccountId = #{id}
+    </select>
+
+    <select id="getAccountByChangeIdAndChangeAccountId" resultType="com.jrmf.domain.AccountChangeRelation">
+        SELECT * FROM account_change_relation WHERE accountId = #{accountId} AND changeAccountId = #{changeAccountId}
+    </select>
+</mapper>

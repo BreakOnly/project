@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.TaskCustomConfigDao" >
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.TaskCustomConfig" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="baseConfigId" property="baseConfigId" jdbcType="INTEGER" />
+    <result column="customKey" property="customKey" jdbcType="VARCHAR" />
+    <result column="configStatus" property="configStatus" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="VARCHAR" />
+    <result column="updateTime" property="updateTime" jdbcType="VARCHAR" />
+  </resultMap>
+
+</mapper>

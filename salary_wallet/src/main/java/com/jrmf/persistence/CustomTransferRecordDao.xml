@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomTransferRecordDao">
+    <resultMap id="BaseResultMap" type="com.jrmf.domain.CustomTransferRecord">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="customKey" jdbcType="VARCHAR" property="customKey"/>
+        <result column="companyId" jdbcType="VARCHAR" property="companyId"/>
+        <result column="mainAccount" jdbcType="VARCHAR" property="mainAccount"/>
+        <result column="mainAccountName" jdbcType="VARCHAR" property="mainAccountName"/>
+        <result column="subAccount" jdbcType="VARCHAR" property="subAccount"/>
+        <result column="subAccoutName" jdbcType="VARCHAR" property="subAccoutName"/>
+        <result column="flag" jdbcType="VARCHAR" property="flag"/>
+        <result column="tranAmount" jdbcType="VARCHAR" property="tranAmount"/>
+        <result column="oppAccountNo" jdbcType="VARCHAR" property="oppAccountNo"/>
+        <result column="oppAccountName" jdbcType="VARCHAR" property="oppAccountName"/>
+        <result column="oppBankName" jdbcType="VARCHAR" property="oppBankName"/>
+        <result column="oppBankNo" jdbcType="VARCHAR" property="oppBankNo"/>
+        <result column="bizFlowNo" jdbcType="VARCHAR" property="bizFlowNo"/>
+        <result column="isConfirm" jdbcType="INTEGER" property="isConfirm"/>
+        <result column="confirmOrderNo" jdbcType="VARCHAR" property="confirmOrderNo"/>
+        <result column="confirmDate" jdbcType="VARCHAR" property="confirmDate"/>
+        <result column="tranType" jdbcType="INTEGER" property="tranType"/>
+        <result column="tranTime" jdbcType="VARCHAR" property="tranTime"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+    </resultMap>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select *
+        from custom_transfer_record
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectByPrimaryKeys" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select *
+        from custom_transfer_record
+        where find_in_set(id,#{selectByPrimaryKeys})
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete
+        from custom_transfer_record
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.jrmf.domain.CustomTransferRecord">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into custom_transfer_record (customKey, companyId, mainAccount,
+        mainAccountName, subAccount, subAccoutName,
+        flag, tranAmount, oppAccountNo,
+        oppAccountName, oppBankName, oppBankNo,
+        bizFlowNo, isConfirm, confirmOrderNo,
+        confirmDate, tranType, tranTime,remark,createTime,updateTime
+        )
+        values (#{customKey,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, #{mainAccount,jdbcType=VARCHAR},
+        #{mainAccountName,jdbcType=VARCHAR}, #{subAccount,jdbcType=VARCHAR}, #{subAccoutName,jdbcType=VARCHAR},
+        #{flag,jdbcType=VARCHAR}, #{tranAmount,jdbcType=VARCHAR}, #{oppAccountNo,jdbcType=VARCHAR},
+        #{oppAccountName,jdbcType=VARCHAR}, #{oppBankName,jdbcType=VARCHAR}, #{oppBankNo,jdbcType=VARCHAR},
+        #{bizFlowNo,jdbcType=VARCHAR}, #{isConfirm,jdbcType=INTEGER}, #{confirmOrderNo,jdbcType=VARCHAR},
+        #{confirmDate,jdbcType=VARCHAR}, #{tranType,jdbcType=INTEGER}, #{tranTime,jdbcType=VARCHAR},
+        #{remark,jdbcType=VARCHAR}, now(), now()
+        )
+    </insert>
+
+    <insert id="insertWithPathNo" parameterType="com.jrmf.domain.CustomTransferRecord">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into custom_transfer_record (customKey, companyId, mainAccount,
+        mainAccountName, subAccount, subAccoutName,
+        flag, tranAmount, oppAccountNo,
+        oppAccountName, oppBankName, oppBankNo,
+        bizFlowNo, isConfirm, confirmOrderNo,
+        confirmDate, tranType, tranTime,remark,createTime,updateTime,pathNo
+        )
+        values (#{customKey,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, #{mainAccount,jdbcType=VARCHAR},
+        #{mainAccountName,jdbcType=VARCHAR}, #{subAccount,jdbcType=VARCHAR}, #{subAccoutName,jdbcType=VARCHAR},
+        #{flag,jdbcType=VARCHAR}, #{tranAmount,jdbcType=VARCHAR}, #{oppAccountNo,jdbcType=VARCHAR},
+        #{oppAccountName,jdbcType=VARCHAR}, #{oppBankName,jdbcType=VARCHAR}, #{oppBankNo,jdbcType=VARCHAR},
+        #{bizFlowNo,jdbcType=VARCHAR}, #{isConfirm,jdbcType=INTEGER}, #{confirmOrderNo,jdbcType=VARCHAR},
+        #{confirmDate,jdbcType=VARCHAR}, #{tranType,jdbcType=INTEGER}, #{tranTime,jdbcType=VARCHAR},
+        #{remark,jdbcType=VARCHAR}, now(), now(), #{pathNo,jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.CustomTransferRecord">
+        update custom_transfer_record
+        set customKey = #{customKey,jdbcType=VARCHAR},
+        companyId = #{companyId,jdbcType=VARCHAR},
+        mainAccount = #{mainAccount,jdbcType=VARCHAR},
+        mainAccountName = #{mainAccountName,jdbcType=VARCHAR},
+        subAccount = #{subAccount,jdbcType=VARCHAR},
+        subAccoutName = #{subAccoutName,jdbcType=VARCHAR},
+        flag = #{flag,jdbcType=VARCHAR},
+        tranAmount = #{tranAmount,jdbcType=VARCHAR},
+        oppAccountNo = #{oppAccountNo,jdbcType=VARCHAR},
+        oppAccountName = #{oppAccountName,jdbcType=VARCHAR},
+        oppBankName = #{oppBankName,jdbcType=VARCHAR},
+        oppBankNo = #{oppBankNo,jdbcType=VARCHAR},
+        bizFlowNo = #{bizFlowNo,jdbcType=VARCHAR},
+        isConfirm = #{isConfirm,jdbcType=INTEGER},
+        confirmOrderNo = #{confirmOrderNo,jdbcType=VARCHAR},
+        confirmDate = now(),
+        tranType = #{tranType,jdbcType=INTEGER},
+        tranTime = #{tranTime,jdbcType=VARCHAR},
+        remark = #{remark,jdbcType=VARCHAR},
+        updateTime = now()
+        where id = #{id,jdbcType=INTEGER}
+        <if test="currentStatus!=null">
+            and isConfirm=#{currentStatus}
+        </if>
+    </update>
+
+
+    <select id="getToBeConfirmedRecord" resultType="com.jrmf.domain.CustomTransferRecord">
+        SELECT *
+        FROM custom_transfer_record
+        WHERE tranType = 1
+          AND isConfirm = 0
+          AND TO_DAYS(tranTime) >= (TO_DAYS(NOW()) - 5)
+        ORDER BY DATE(tranTime) ASC
+    </select>
+
+
+    <select id="getSyncBalanceList" resultType="com.jrmf.domain.CustomTransferRecord">
+        SELECT *
+        FROM custom_transfer_record
+        WHERE isConfirm = 20
+          AND tranType in (3, 4)
+    </select>
+
+
+    <update id="updateState" parameterType="com.jrmf.domain.CustomTransferRecord">
+
+        UPDATE custom_transfer_record
+        SET isConfirm = #{state,jdbcType=INTEGER}
+        WHERE isConfirm = 20
+          AND tranType IN (3, 4)
+          AND bizFlowNo = #{bizFlowNo,jdbcType=VARCHAR}
+
+    </update>
+
+    <!-- 子账户交易记录查询(分页) -->
+    <select id="getSubTransRecordListByPage" parameterType="com.jrmf.domain.Page" resultType="map">
+        select DISTINCT ctr.customKey, ctr.companyId, ctr.mainAccount,cc.companyName,cc.contractCompanyName,
+        ctr.mainAccountName, ctr.subAccount, ctr.subAccoutName,
+        ctr.flag, ctr.tranAmount, ctr.oppAccountNo,
+        ctr.oppAccountName, ctr.oppBankName, ctr.oppBankNo,
+        ctr.bizFlowNo, ctr.isConfirm, ctr.confirmOrderNo,
+        ctr.confirmDate, ctr.tranType, date_format(ctr.tranTime,'%Y-%m-%d %H:%i:%s')
+        tranTime,ctr.remark,ctr.createTime,ctr.updateTime
+        from custom_transfer_record ctr
+        left join company_paychannel_relation cpr on ctr.mainAccount = cpr.corporationAccount and cpr.pathNo=ctr.pathNo
+        left join qb_company qc on qc.userId=cpr.companyId
+        left join channel_custom cc on cc.customkey = ctr.customKey
+        where 1=1
+        <if test="params.companyId!=null and params.companyId!=''">
+            and cpr.companyId=#{params.companyId}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(ctr.tranTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(ctr.tranTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.flag!=null and params.flag!=''">
+            and ctr.flag=#{params.flag}
+        </if>
+        <if test="params.oppAccountNo!=null and params.oppAccountNo!=''">
+            and ctr.oppAccountNo like concat('%',#{params.oppAccountNo},'%')
+        </if>
+        <if test="params.remark!=null and params.remark!=''">
+            and ctr.remark like concat('%',#{params.remark},'%')
+        </if>
+        <if test="params.startAmount!=null and params.startAmount!=''">
+            and cast(ctr.tranAmount as decimal(15,2)) &gt;=#{params.startAmount}
+        </if>
+        <if test="params.endAmount!=null and params.endAmount!=''">
+            and cast(ctr.tranAmount as decimal(15,2)) &lt;=#{params.endAmount}
+        </if>
+        <if test="params.tranType!=null and params.tranType!=''">
+            and ctr.tranType=#{params.tranType}
+        </if>
+        <if test="params.subAccount!=null and params.subAccount!=''">
+            and ctr.subAccount like concat('%',#{params.subAccount},'%')
+        </if>
+        <if test="params.subAccoutName!=null and params.subAccoutName!=''">
+            and ctr.subAccoutName like concat('%',#{params.subAccoutName},'%')
+        </if>
+        <if test="params.oppAccountName!=null and params.oppAccountName!=''">
+            and ctr.oppAccountName like concat('%',#{params.oppAccountName},'%')
+        </if>
+        <if test="params.isConfirm!=null and params.isConfirm!=''">
+            and ctr.isConfirm=#{params.isConfirm}
+        </if>
+        order by ctr.id desc
+    </select>
+
+    <!-- 子账户交易查询总记录数 -->
+    <select id="getSubTransRecordListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+        select count(1) from (select ctr.customKey, ctr.companyId, ctr.mainAccount,
+        ctr.mainAccountName, ctr.subAccount, ctr.subAccoutName,
+        ctr.flag, ctr.tranAmount, ctr.oppAccountNo,
+        ctr.oppAccountName, ctr.oppBankName, ctr.oppBankNo,
+        ctr.bizFlowNo, ctr.isConfirm, ctr.confirmOrderNo,
+        ctr.confirmDate, ctr.tranType, date_format(ctr.tranTime,'%Y-%m-%d %H:%i:%s')
+        tranTime,ctr.remark,ctr.createTime,ctr.updateTime from custom_transfer_record ctr
+        left join company_paychannel_relation cpr on ctr.mainAccount = cpr.corporationAccount and cpr.pathNo=ctr.pathNo
+        left join qb_company qc on qc.userId=cpr.companyId
+        where 1=1
+        <if test="params.companyId!=null and params.companyId!=''">
+            and cpr.companyId=#{params.companyId}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(ctr.tranTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(ctr.tranTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.flag!=null and params.flag!=''">
+            and ctr.flag=#{params.flag}
+        </if>
+        <if test="params.oppAccountNo!=null and params.oppAccountNo!=''">
+            and ctr.oppAccountNo like concat('%',#{params.oppAccountNo},'%')
+        </if>
+        <if test="params.remark!=null and params.remark!=''">
+            and ctr.remark like concat('%',#{params.remark},'%')
+        </if>
+        <if test="params.startAmount!=null and params.startAmount!=''">
+            and ctr.tranAmount &gt;=#{params.startAmount}
+        </if>
+        <if test="params.endAmount!=null and params.endAmount!=''">
+            and ctr.tranAmount &lt;=#{params.endAmount}
+        </if>
+        <if test="params.tranType!=null and params.tranType!=''">
+            and ctr.tranType=#{params.tranType}
+        </if>
+        <if test="params.subAccount!=null and params.subAccount!=''">
+            and ctr.subAccount like concat('%',#{params.subAccount},'%')
+        </if>
+        <if test="params.subAccoutName!=null and params.subAccoutName!=''">
+            and ctr.subAccoutName like concat('%',#{params.subAccoutName},'%')
+        </if>
+        <if test="params.oppAccountName!=null and params.oppAccountName!=''">
+            and ctr.oppAccountName like concat('%',#{params.oppAccountName},'%')
+        </if>
+        <if test="params.isConfirm!=null and params.isConfirm!=''">
+            and ctr.isConfirm=#{params.isConfirm}
+        </if>
+        order by ctr.id desc
+        )temp
+    </select>
+
+    <!-- 子账户交易记录查询 -->
+    <select id="getSubTransRecordListNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+        select ctr.customKey, ctr.companyId, ctr.mainAccount,
+        ctr.mainAccountName, ctr.subAccount, ctr.subAccoutName,cc.contractCompanyName,cc.companyName,
+        ctr.flag, ctr.tranAmount, ctr.oppAccountNo,
+        ctr.oppAccountName, ctr.oppBankName, ctr.oppBankNo,
+        ctr.bizFlowNo, ctr.isConfirm, ctr.confirmOrderNo,
+        ctr.confirmDate, ctr.tranType, date_format(ctr.tranTime,'%Y-%m-%d %H:%i:%s')
+        tranTime,ctr.remark,ctr.createTime,ctr.updateTime from custom_transfer_record ctr
+        left join company_paychannel_relation cpr on ctr.mainAccount = cpr.corporationAccount and cpr.pathNo=ctr.pathNo
+        left join qb_company qc on qc.userId=cpr.companyId
+        left join channel_custom cc on cc.customkey = ctr.customKey
+        where 1=1
+        <if test="params.companyId!=null and params.companyId!=''">
+            and cpr.companyId=#{params.companyId}
+        </if>
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(ctr.tranTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(ctr.tranTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.flag!=null and params.flag!=''">
+            and ctr.flag=#{params.flag}
+        </if>
+        <if test="params.oppAccountNo!=null and params.oppAccountNo!=''">
+            and ctr.oppAccountNo like concat('%',#{params.oppAccountNo},'%')
+        </if>
+        <if test="params.remark!=null and params.remark!=''">
+            and ctr.remark like concat('%',#{params.remark},'%')
+        </if>
+        <if test="params.startAmount!=null and params.startAmount!=''">
+            and ctr.tranAmount &gt;=#{params.startAmount}
+        </if>
+        <if test="params.endAmount!=null and params.endAmount!=''">
+            and ctr.tranAmount &lt;=#{params.endAmount}
+        </if>
+        <if test="params.tranType!=null and params.tranType!=''">
+            and ctr.tranType=#{params.tranType}
+        </if>
+        <if test="params.subAccount!=null and params.subAccount!=''">
+            and ctr.subAccount like concat('%',#{params.subAccount},'%')
+        </if>
+        <if test="params.subAccoutName!=null and params.subAccoutName!=''">
+            and ctr.subAccoutName like concat('%',#{params.subAccoutName},'%')
+        </if>
+        <if test="params.oppAccountName!=null and params.oppAccountName!=''">
+            and ctr.oppAccountName like concat('%',#{params.oppAccountName},'%')
+        </if>
+        <if test="params.isConfirm!=null and params.isConfirm!=''">
+            and ctr.isConfirm=#{params.isConfirm}
+        </if>
+        order by ctr.id desc
+    </select>
+
+    <select id="getCustomTransferRecordByParam" resultType="com.jrmf.domain.CustomTransferRecord">
+        select * from custom_transfer_record
+        <trim prefix=" where " suffixOverrides="and">
+            <if test="tranType != null">
+                tranType = #{tranType} and
+            </if>
+            <if test="status != null">
+                FIND_IN_SET(isConfirm,#{status}) and
+            </if>
+            <if test="startTime != null and startTime != ''">
+                date(tranTime) &gt;=#{startTime} and
+            </if>
+            <if test="endTime != null and endTime != ''">
+                date(tranTime) &lt;= #{endTime} and
+            </if>
+            <choose>
+                <when test="containEntity == 1">
+                    (subAccount = #{subAccount} or (subAccount = #{shadowAcctNo} and oppAccountName=#{oppAccountName}))
+                    and
+                </when>
+                <otherwise>
+                    <if test="subAccount != null and subAccount != ''">
+                        subAccount = #{subAccount} and
+                    </if>
+                    <if test="oppAccountNo != null and oppAccountNo != ''">
+                        oppAccountNo = #{oppAccountNo} and
+                    </if>
+                </otherwise>
+            </choose>
+        </trim>
+        order by date(tranTime) desc
+    </select>
+</mapper>

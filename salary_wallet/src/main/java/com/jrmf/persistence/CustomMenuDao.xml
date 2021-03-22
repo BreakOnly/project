@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomMenuDao">
+
+	<select id="getCustomMenuList" resultType="com.jrmf.domain.CustomMenu">
+		SELECT
+			*
+		FROM
+			custom_menu
+		<trim prefix=" WHERE ">
+			originalId = #{originalId} and
+			<if test="enabled != null">
+				enabled = #{enabled} AND
+			</if>
+			<if test="startTime != null and startTime != ''">
+				date(createTime) &gt;= #{startTime} AND
+			</if>
+			<if test="endTime != null and endTime != ''">
+				date(createTime) &lt;= #{endTime} AND
+			</if>
+			FIND_IN_SET(id,#{ids}) OR FIND_IN_SET(parentId,#{ids})
+		</trim>
+		order by createTime desc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="getCustomContentByCustomId" resultType="com.jrmf.domain.ChannelCustomCatalog">
+		select * from custom_menu  where enabled =1 AND originalId = #{originalId} 
+		<if test="level!=null and level!='' "> 
+	  		and contentLevel=#{level} 
+	  	</if>
+	  	order by showLevel asc
+	</select>
+	
+	<select id="getAllPermission" resultType="com.jrmf.domain.CustomMenu">
+		select * from custom_menu  where   originalId = #{originalId}  order by showLevel asc
+	</select>
+	
+	<select id="getCustomMenuByOriginalId" resultType="com.jrmf.domain.CustomMenu">
+		select  * from custom_menu  where  isShow=1 and originalId = #{originalId} 
+		<if test="enabled != null">
+			and enabled = #{enabled}
+		</if>
+		<if test="contentName != null and contentName != ''">
+			and contentName like concat('%', #{contentName},'%')
+		</if>
+		<if test="createTimeStart != null and createTimeStart != ''">
+			and date(createTime) &gt;= #{createTimeStart}
+		</if>
+		<if test="createTimeEnd != null and createTimeEnd != ''">
+			and date(createTime) &lt;= #{createTimeEnd}
+		</if>
+		order by showLevel asc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<select id="getCustomMenuByName" resultType="com.jrmf.domain.CustomMenu">
+		select  * from custom_menu  where  isShow=1 
+		and originalId = #{originalId}
+		and contentName like concat('%', #{contentName}, '%')
+		order by showLevel asc
+	</select>
+	
+
+	<insert id="savePermission" useGeneratedKeys="true" keyProperty="id" parameterType="com.jrmf.domain.CustomMenu">
+		insert into custom_menu
+		(contentName,
+		contentLevel,
+		parentId,
+		originalId,
+		isShow,
+		showLevel,
+		enabled,
+		remark,
+		createTime,
+		updateTime,
+		levelCode,
+		isParentNode
+		)values(
+		#{contentName},
+		#{contentLevel},
+		#{parentId},
+		#{originalId},
+		#{isShow},
+		#{showLevel},
+		#{enabled},
+		#{remark},
+		now(),
+		now(),
+		#{levelCode},
+		#{isParentNode}
+		)
+	</insert>
+	
+	<update id="updatePermission" parameterType="com.jrmf.domain.CustomMenu">
+		<trim prefix="UPDATE custom_menu SET ">
+			<if test=" contentName != null and contentName != '' ">
+				contentName = #{contentName},
+			</if>
+			<if test=" isShow != null">
+				isShow = #{isShow},
+			</if>
+			<if test=" remark != null and remark != '' ">
+				remark = #{remark},
+			</if>
+			<if test=" enabled != null ">
+				enabled = #{enabled},
+			</if>
+			<if test=" showLevel != null ">
+				showLevel = #{showLevel},
+			</if>
+			<if test=" isParentNode != null ">
+				isParentNode = #{isParentNode},
+			</if>
+			<if test=" levelCode != null and levelCode != ''">
+				levelCode = #{levelCode},
+			</if>
+				updateTime = now()
+		</trim>
+		WHERE
+		id=#{id}
+	</update>
+	
+	<select id="getCustomMenuById" resultType="com.jrmf.domain.CustomMenu">
+		select *  from custom_menu  where  id = #{id} 
+	</select>
+	
+	<select id="getNodeTree" resultType="com.jrmf.domain.CustomMenu">
+		SELECT * FROM custom_menu WHERE levelCode LIKE concat('',#{levelCode},'%')
+		<if test="enabled != null">
+			and enabled = #{enabled}
+		</if>
+		<if test="contentName != null and contentName != ''">
+			and contentName like concat('%', #{contentName},'%')
+		</if>
+		<if test="createTimeStart != null and createTimeStart != ''">
+			and date(createTime) &gt;= #{createTimeStart}
+		</if>
+		<if test="createTimeEnd != null and createTimeEnd != ''">
+			and date(createTime) &lt;= #{createTimeEnd}
+		</if>
+		order by createTime desc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	
+	<delete id="deleteNodeById" >
+		DELETE FROM custom_menu WHERE id = #{id}
+	</delete>
+
+	<select id="getProjectIdByMenuId" resultType="java.lang.String">
+		SELECT
+			projectId
+		FROM
+			custom_menu
+		WHERE
+			id = #{id}
+	</select>
+
+	<select id="getProjectIdByCustomKey" resultType="java.lang.String">
+		SELECT
+			projectId
+		FROM
+			custom_menu
+		WHERE
+			originalId = #{customKey}
+			AND projectId &lt;&gt; ''
+			LIMIT 1
+	</select>
+</mapper>

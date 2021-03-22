@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1.0, user-scalable=0" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="email=no" />
+    <meta name="msapplication-tap-highlight" content="no">
+    <script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <title>智税通测试登陆页面</title>
+  </head>
+  <body>
+	ticket: <input id="ticket" name="ticket" type="text"/> <br>
+	生成二维码链接：<button>二维码</button><br>
+	二维码链接：<iframe id="scanpic" width="450px" height="450px"></iframe><br>
+	登录状态：<div id ="loginStatus"></div><br>
+  </body>
+   <script>
+   
+   $(document).ready(function(){
+     $("button").click(function(){
+       var ticket = $("#ticket").val();
+       alert(ticket);
+       $("#scanpic").attr("src",'https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket=' + ticket);
+     });
+   });
+   
+   var timestamp = new Date().getTime() + "";
+   timestamp = timestamp.substring(0, timestamp.length-3);   
+   var websocket = null;
+   //判断当前浏览器是否支持WebSocket
+   if ('WebSocket' in window) {
+      // websocket = new WebSocket("ws://127.0.0.1:3780/websocket/1001");
+       websocket = new WebSocket("ws://ms-wallet.jrmf360.com/websocket/" + timestamp);
+      // websocket = new WebSocket("ws://wxtest.jrmf360.com/websocket/" + timestamp);
+
+   }
+   else {
+      alert('当前浏览器  Not support websocket');
+   }
+
+   //连接发生错误的回调方法
+   websocket.onerror = function () {
+      console.log("WebSocket连接发生错误");
+   };
+
+   //连接成功建立的回调方法
+   websocket.onopen = function () {
+      
+      console.log("WebSocket连接成功");
+  }
+
+  //接收到消息的回调方法
+  websocket.onmessage = function (event) {
+              jQuery("#loginStatus").html(event.data);
+  }
+
+  //连接关闭的回调方法
+  websocket.onclose = function () {
+
+      console.log("WebSocket连接关闭");
+  }
+
+  //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+  window.onbeforeunload = function () {
+      closeWebSocket();
+  }
+
+  //关闭WebSocket连接
+  function closeWebSocket() {
+      websocket.close();
+  }
+   </script>
+</html>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.ChannelDao">
+	<insert id="addChannel" parameterType="com.jrmf.domain.Channel"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qb_channel (
+		merchantId, 
+		originalId, 
+		originalName,
+		appSecret, 
+		phoneNo,
+		createTime)
+		VALUES (
+		#{merchantId},
+		#{originalId},
+		#{originalName},
+		#{appSecret},
+		#{phoneNo},
+		now())
+	</insert>
+	
+	<select id="getChannelList" resultType="com.jrmf.domain.Channel">
+		SELECT * FROM qb_channel  WHERE  1=1 
+		<if test="originalId !=null and originalId !=''">
+				and  originalId = #{originalId}
+		</if>
+		<if test="originalName !=null and originalName !=''">
+				and  originalName like concat('%', #{originalName}, '%')
+		</if>
+		<if test="startTime !=null and startTime !=''">
+				and date(createTime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+				and date(createTime) &lt;= #{endTime}
+		</if>
+		order by createTime desc 
+		<if test="start !=null and limit !=null">
+				 limit #{start},#{limit} 
+		</if>
+	</select>
+	
+	<select id="getChannelListCount" resultType="int">
+		SELECT count(id) FROM qb_channel  WHERE  1=1 
+		<if test="originalId !=null and originalId !=''">
+				and  originalId = #{originalId}
+		</if>
+		<if test="originalName !=null and originalName !=''">
+				and  originalName like concat('%', #{originalName}, '%')
+		</if>
+		<if test="startTime !=null and startTime !=''">
+				and date(createTime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+				and date(createTime) &lt;= #{endTime}
+		</if>
+		order by createTime desc 
+		<if test="start !=null and limit !=null">
+				 limit #{start},#{limit} 
+		</if>
+	</select>
+	
+	
+	<update id="updateChannel"  parameterType="com.jrmf.domain.Channel">
+		update qb_channel
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="originalId !=null and originalId !=''">
+				originalId = #{originalId},
+			</if>
+			<if test="originalName !=null and originalName !=''">
+				originalName = #{originalName},
+			</if>
+			updateTime = now()
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<select id="getChannelHistoryById" resultType="com.jrmf.domain.Channel">
+		SELECT * FROM qb_channel  WHERE  id = #{id} LIMIT 1
+	</select>
+	
+	<select id="getChannelByOriginalId" resultType="com.jrmf.domain.Channel">
+		SELECT * FROM qb_channel  WHERE  originalId = #{originalId} LIMIT 1
+	</select>
+	 
+</mapper>

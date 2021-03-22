@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.AgreementTemplateDao">
+    <insert id="addAgreementTemplate" useGeneratedKeys="true" keyProperty="id" parameterType="com.jrmf.domain.AgreementTemplate">
+        INSERT INTO agreement_template (
+        templateName,
+        agreementName,
+        regType,
+        originalId,
+        merchantId,
+        companyId,
+        thirdMerchId,
+        thirdTemplateId,
+        thirdTemplateDes,
+        agreementType,
+        agreementPayment,
+        agreementTemplateURL,
+        agreementTemplateParamsA,
+        agreementTemplateParamsB,
+        agreementTemplateParamsC,
+        create_time,
+        last_update_time,
+        htmlTemplate,
+        preparedA,
+        preparedB,
+        channelType,
+        uploadIdCard
+        )
+        VALUES
+        (
+        #{templateName},
+        #{agreementName},
+        #{regType},
+        #{originalId},
+        #{merchantId},
+        #{companyId},
+        #{thirdMerchId},
+        #{thirdTemplateId},
+        #{thirdTemplateDes},
+        #{agreementType},
+        #{agreementPayment},
+        #{agreementTemplateURL},
+        #{agreementTemplateParamsA},
+        #{agreementTemplateParamsB},
+        #{agreementTemplateParamsC},
+        now(),
+        now(),
+        #{htmlTemplate},
+        #{preparedA},
+        #{preparedB},
+        #{channelType},
+        #{uploadIdCard}
+        )
+    </insert>
+    <update id="updateAgreementTemplate">
+        UPDATE agreement_template SET templateName=#{templateName}, agreementName=#{agreementName},
+        regType=#{regType}, originalId=#{originalId}, merchantId=#{merchantId}, companyId=#{companyId},
+        thirdMerchId=#{thirdMerchId}, thirdTemplateId=#{thirdTemplateId}, thirdTemplateDes=#{thirdTemplateDes},
+        agreementType=#{agreementType}, agreementPayment=#{agreementPayment}, agreementTemplateURL=#{agreementTemplateURL},
+        agreementTemplateParamsA=#{agreementTemplateParamsA}, agreementTemplateParamsB=#{agreementTemplateParamsB},
+        agreementTemplateParamsC=#{agreementTemplateParamsC}, create_time=#{createTime}, last_update_time=now(),
+        htmlTemplate = #{htmlTemplate},channelType=#{channelType},
+        preparedA=#{preparedA}, preparedB=#{preparedB},uploadIdCard = #{uploadIdCard} WHERE id=#{id}
+    </update>
+    <delete id="deleteAgreementTemplate">
+        DELETE FROM agreement_template WHERE id=#{id}
+    </delete>
+
+    <select id="getNotUploadIdCardTemplateInfoByParam" resultType="com.jrmf.domain.AgreementTemplate">
+        SELECT
+        t.*,
+        c.companyName customName,
+        cc.companyName companyName
+        FROM
+        agreement_template t
+        LEFT JOIN channel_custom c ON c.customkey = t.originalId
+        LEFT JOIN channel_custom cc ON cc.customkey = t.companyId
+        where 1=1 and t.uploadIdCard = '0'
+        <if test="id !=null and id !=''">
+            and t.id = #{id}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and FIND_IN_SET(t.originalId, #{originalId})
+        </if>
+        <if test="companyId !=null and companyId !=''">
+            and t.companyId = #{companyId}
+        </if>
+        <if test="agreementPayment !=null and agreementPayment !=''">
+            and t.agreementPayment = #{agreementPayment}
+        </if>
+        <if test="customName !=null and customName !=''">
+            and c.companyName like concat('%',#{customName},'%')
+        </if>
+        <if test="agreementName !=null and agreementName !=''">
+            and t.agreementName = #{agreementName}
+        </if>
+        <if test="templateName !=null and templateName !=''">
+            and t.templateName = #{templateName}
+        </if>
+        <if test="createTimeStart != null and createTimeStart != ''">
+            and date(t.create_time) &gt;= #{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            and date(t.create_time) &lt;= #{createTimeEnd}
+        </if>
+        ORDER BY
+        t.create_time DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getAgreementTemplateByParam" resultType="com.jrmf.domain.AgreementTemplate">
+        SELECT
+        t.*,
+        c.companyName customName,
+        cc.companyName companyName
+        FROM
+        agreement_template t
+        LEFT JOIN channel_custom c ON c.customkey = t.originalId
+        LEFT JOIN channel_custom cc ON cc.customkey = t.companyId
+        where 1=1
+        <if test="id !=null and id !=''">
+            and t.id = #{id}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and FIND_IN_SET(t.originalId, #{originalId})
+        </if>
+         <if test="companyId !=null and companyId !=''">
+            and t.companyId = #{companyId}
+        </if>
+         <if test="agreementPayment !=null and agreementPayment !=''">
+            and t.agreementPayment = #{agreementPayment}
+        </if>
+         <if test="customName !=null and customName !=''">
+            and c.companyName like concat('%',#{customName},'%')
+        </if>
+         <if test="agreementName !=null and agreementName !=''">
+            and t.agreementName = #{agreementName}
+        </if>
+         <if test="templateName !=null and templateName !=''">
+            and t.templateName = #{templateName}
+        </if>
+        <if test="createTimeStart != null and createTimeStart != ''">
+            and date(t.create_time) &gt;= #{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            and date(t.create_time) &lt;= #{createTimeEnd}
+        </if>
+        ORDER BY
+        t.create_time DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getAgreementTemplateById" resultType="com.jrmf.domain.AgreementTemplate">
+        SELECT * FROM agreement_template WHERE id = #{id}
+    </select>
+
+    <select id="getAgreementTemplateByParamCount" resultType="int">
+        SELECT
+        count(1)
+        FROM
+        agreement_template t
+        LEFT JOIN channel_custom c ON c.customkey = t.originalId
+        LEFT JOIN channel_custom cc ON cc.customkey = t.companyId
+        where 1=1
+        <if test="id !=null and id !=''">
+            and t.id = #{id}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and FIND_IN_SET(t.originalId, #{originalId})
+        </if>
+        <if test="companyId !=null and companyId !=''">
+            and t.companyId = #{companyId}
+        </if>
+        <if test="agreementPayment !=null and agreementPayment !=''">
+            and t.agreementPayment = #{agreementPayment}
+        </if>
+        <if test="customName !=null and customName !=''">
+            and c.companyName like concat('%',#{customName},'%')
+        </if>
+        <if test="agreementName !=null and agreementName !=''">
+            and t.agreementName = #{agreementName}
+        </if>
+        <if test="templateName !=null and templateName !=''">
+            and t.templateName = #{templateName}
+        </if>
+        <if test="createTimeStart != null and createTimeStart != ''">
+            and date(t.create_time) &gt;= #{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            and date(t.create_time) &lt;= #{createTimeEnd}
+        </if>
+    </select>
+
+    <select id="getAgreementPaymentTemplate" resultType="com.jrmf.domain.AgreementTemplate">
+        SELECT
+        *
+        FROM
+        agreement_template
+        WHERE
+        originalId = #{customKey}
+        AND companyId = #{companyId}
+        AND agreementPayment = 1 limit 1
+    </select>
+</mapper>

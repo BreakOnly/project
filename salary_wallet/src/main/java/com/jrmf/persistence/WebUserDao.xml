@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.WebUserDao">
+	<sql id="userColumn">
+		id,
+		customkey,
+		username,
+		customName,
+		enabled,
+		companyName,
+		phoneNo,
+		createtime,
+		status,
+		fatherCustomkey,
+		password,
+		email,
+		activeEmail,
+		position,
+		expectedProduct,
+		activeMobiletelno,
+		last_login 	
+	</sql>
+	<select id="countUserNumByParam" resultType="int" parameterType="string">
+		SELECT COUNT(0) FROM channel_custom t WHERE t.username=#{param} OR t.phoneNo=#{param} OR t.email=#{param} 
+	</select>
+	<select id="getUserByColumn" parameterType="string" resultType="com.jrmf.domain.User">
+		select <include refid="userColumn" /> from channel_custom t WHERE t.username=#{param} OR t.phoneNo=#{param} OR t.email=#{param} 
+	</select>
+	<select id="getUserByName" parameterType="string" resultType="com.jrmf.domain.User">
+		select <include refid="userColumn" /> from channel_custom t WHERE t.username=#{param}
+	</select>
+	<select id="getUserByEmail" parameterType="string" resultType="com.jrmf.domain.User">
+		select <include refid="userColumn" /> from channel_custom t WHERE t.email=#{param}
+	</select>
+	<insert id="insertUser" parameterType="com.jrmf.domain.User" keyProperty="id"
+            useGeneratedKeys="true">
+		INSERT INTO channel_custom (
+		  customkey,
+		  username,
+		  enabled,
+		  companyName,
+		  phoneNo,
+		  createtime,
+		  PASSWORD,
+		  email
+		) 
+		VALUES
+		  (
+		    #{customkey},
+		    #{username},
+		    0,
+		    #{companyName},
+		    #{phoneNo},
+		    now(),
+		    #{password},
+		    #{email}
+		  ) 	
+	</insert>
+	<update id="updateUserInfo" parameterType="com.jrmf.domain.User">
+		UPDATE 
+		  channel_custom 
+		SET
+		  customkey = #{customkey},
+		  username = #{username},
+		  enabled = #{enabled},
+		  companyName = #{companyName},
+		  phoneNo = #{phoneNo},
+		  PASSWORD = #{password},
+		  email = #{email}
+		WHERE id = #{id}	
+	</update>
+	<insert id="insertAccount" parameterType="java.util.Map">
+		INSERT INTO channel_custom_account (
+		  customid,
+		  createtime,
+		  email
+		) 
+		VALUES
+		  (
+		    #{customid},
+		    now(),
+		    #{email}
+		  )	
+	</insert>
+</mapper>

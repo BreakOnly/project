@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbInvoiceReserveDao" >
+
+  
+  <select id="getInvoiceReserveByPage" parameterType="com.jrmf.domain.Page" resultType="map">
+  	select * from (
+		select 
+		    qir.*,cc.companyName,
+			IFNULL(qiv.approvlCount,0) approvlCount,
+			IFNULL(qiv.disCount,0) disCount,
+			(qir.invoiceTotalNum-IFNULL(qiv.approvlCount,0)) hasNum 
+		from qb_invoice_reserve qir 
+		left join qb_company cc on qir.companyId = cc.userId 
+		left join (
+			select invoiceType,
+			companyId,DATE_FORMAT(invoiceDate,'%Y-%m') month,
+			invoiceLimitAmout,sum(if(approvalFlag=1,1,0)) approvlCount,
+			sum(if(`status`=2,1,0)) disCount 
+			from qb_invoice_voucher where isDelete=0 
+			GROUP BY invoiceType,companyId,DATE_FORMAT(invoiceDate,'%Y-%m'),invoiceLimitAmout
+		) qiv 
+		on qir.companyId = qiv.companyId 
+		and qir.invoiceType = qiv.invoiceType 
+		and qir.month=qiv.`month`
+		and qir.invoiceLimitAmout=qiv.invoiceLimitAmout
+	)temp where 1=1
+	<if test="params.companyName!=null and params.companyName!=''">
+		and companyName like concat('%',#{params.companyName},'%')
+	</if>
+	<if test="params.invoiceType!=null and params.invoiceType!=''">
+		and invoiceType=#{params.invoiceType}
+	</if>
+	<if test="params.startMonth!=null and params.startMonth!=''">
+		and month &gt;= #{params.startMonth}
+    </if>
+    <if test="params.endMonth!=null and params.endMonth!=''">
+		and month &lt;= #{params.endMonth}
+    </if>
+    <if test="params.companyId!=null and params.companyId!=''">
+    	and companyId = #{params.companyId}
+	</if>
+	<if test="params.startInvoiceTotalNum!=null and params.startInvoiceTotalNum!=''">
+		and invoiceTotalNum &gt;= #{params.startInvoiceTotalNum}
+	</if>
+	<if test="params.endInvoiceTotalNum!=null and params.endInvoiceTotalNum!=''">
+		and invoiceTotalNum &lt;= #{params.endInvoiceTotalNum}
+	</if>
+	<if test="params.startDisCount!=null and params.startDisCount!=''">
+		and disCount &gt;= #{params.startDisCount}
+	</if>
+	<if test="params.endDisCount!=null and params.endDisCount!=''">
+		and disCount &lt;= #{params.endDisCount}
+	</if>
+	<if test="params.startHasNum!=null and params.startHasNum!=''">
+		and approvlCount &gt;= #{params.startHasNum}
+	</if>
+	<if test="params.endHasNum!=null and params.endHasNum!=''">
+		and approvlCount &lt;= #{params.endHasNum}
+	</if>
+		order by id desc
+	<if test="pageSize !=null and offset !=null">
+       limit #{offset},#{pageSize}
+     </if>
+  </select>
+ 
+  <select id="getInvoiceReserveCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  	select count(1) from (
+	  	select * from (		
+	  		select 
+			    qir.*,cc.companyName,
+				IFNULL(qiv.approvlCount,0) approvlCount,
+				IFNULL(qiv.disCount,0) disCount,
+				(qir.invoiceTotalNum-IFNULL(qiv.approvlCount,0)) hasNum 
+			from qb_invoice_reserve qir 
+			left join qb_company cc on qir.companyId = cc.userId 
+			left join (
+				select invoiceType,
+				companyId,DATE_FORMAT(invoiceDate,'%Y-%m') month,
+				invoiceLimitAmout,sum(if(approvalFlag=1,1,0)) approvlCount,
+				sum(if(`status`=2,1,0)) disCount 
+				from qb_invoice_voucher where isDelete=0 
+				GROUP BY invoiceType,companyId,DATE_FORMAT(invoiceDate,'%Y-%m'),invoiceLimitAmout
+			) qiv 
+			on qir.companyId = qiv.companyId 
+			and qir.invoiceType = qiv.invoiceType 
+			and qir.month=qiv.`month`
+			and qir.invoiceLimitAmout=qiv.invoiceLimitAmout
+		)temp 
+	where 1=1
+	<if test="params.companyName!=null and params.companyName!=''">
+		and companyName like concat('%',#{params.companyName},'%')
+	</if>
+	<if test="params.invoiceType!=null and params.invoiceType!=''">
+		and invoiceType=#{params.invoiceType}
+	</if>
+	<if test="params.startMonth!=null and params.startMonth!=''">
+		and month &gt;= #{params.startMonth}
+    </if>
+    <if test="params.endMonth!=null and params.endMonth!=''">
+		and month &lt;= #{params.endMonth}
+    </if>
+    <if test="params.companyId!=null and params.companyId!=''">
+    	and companyId = #{params.companyId}
+	</if>
+	<if test="params.startInvoiceTotalNum!=null and params.startInvoiceTotalNum!=''">
+		and invoiceTotalNum &gt;= #{params.startInvoiceTotalNum}
+	</if>
+	<if test="params.endInvoiceTotalNum!=null and params.endInvoiceTotalNum!=''">
+		and invoiceTotalNum &lt;= #{params.endInvoiceTotalNum}
+	</if>
+	<if test="params.startDisCount!=null and params.startDisCount!=''">
+		and disCount &gt;= #{params.startDisCount}
+	</if>
+	<if test="params.endDisCount!=null and params.endDisCount!=''">
+		and disCount &lt;= #{params.endDisCount}
+	</if>
+	<if test="params.startHasNum!=null and params.startHasNum!=''">
+		and approvlCount &gt;= #{params.startHasNum}
+	</if>
+	<if test="params.endHasNum!=null and params.endHasNum!=''">
+		and approvlCount &lt;= #{params.endHasNum}
+	</if>
+		order by id desc
+  	)temap
+  </select>
+  
+  <select id="selectByPrimaryKey" parameterType="int" resultType="com.jrmf.domain.QbInvoiceReserve">
+  	select * from qb_invoice_reserve where id =#{id}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from qb_invoice_reserve
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.jrmf.domain.QbInvoiceReserve" >
+    insert into qb_invoice_reserve (id, companyId, invoiceType, 
+      invoiceLimitAmout, invoiceTotalNum, month, 
+      createTime, updateTime, addUser
+      )
+    values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=VARCHAR}, #{invoiceType,jdbcType=INTEGER}, 
+      #{invoiceLimitAmout,jdbcType=VARCHAR}, #{invoiceTotalNum,jdbcType=INTEGER}, #{month,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{addUser,jdbcType=VARCHAR}
+      )
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.QbInvoiceReserve" >
+    update qb_invoice_reserve
+    <set >
+      <if test="invoiceTotalNum != null and invoiceTotalNum!=''" >
+        invoiceTotalNum = #{invoiceTotalNum,jdbcType=INTEGER},
+      </if>
+      
+      <if test="invoiceLimitAmout != null and invoiceLimitAmout!=''" >
+        invoiceLimitAmout = #{invoiceLimitAmout,jdbcType=VARCHAR},
+      </if>
+      
+      <if test="updateTime != null and updateTime!=''" >
+        updateTime = #{updateTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbInvoiceReserve" >
+    update qb_invoice_reserve
+    set companyId = #{companyId,jdbcType=VARCHAR},
+      invoiceType = #{invoiceType,jdbcType=INTEGER},
+      invoiceLimitAmout = #{invoiceLimitAmout,jdbcType=VARCHAR},
+      invoiceTotalNum = #{invoiceTotalNum,jdbcType=INTEGER},
+      month = #{month,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      addUser = #{addUser,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="checkIsExist" parameterType="com.jrmf.domain.QbInvoiceReserve" resultType="int">
+  	select count(1) from qb_invoice_reserve where companyId = #{companyId} and invoiceType=#{invoiceType} and month=#{month}
+  </select>
+  
+  <select id="getReserveByParams" parameterType="com.jrmf.domain.QbInvoiceRecord" resultType="com.jrmf.domain.QbInvoiceReserve">
+  	select * from qb_invoice_reserve
+  	where companyId = #{companyId} and invoiceType = #{invoiceType} 
+  	and month = date_format(#{invoiceTime},'%Y-%m')
+  </select>
+</mapper>

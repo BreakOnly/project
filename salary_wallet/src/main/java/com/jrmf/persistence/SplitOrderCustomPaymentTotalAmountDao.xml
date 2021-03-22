@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SplitOrderCustomPaymentTotalAmountDao">
+
+    <insert id="initCustomPaymentTotalAmount" parameterType="com.jrmf.domain.CustomPaymentTotalAmount">
+		INSERT INTO custom_payment_totalamount (
+		`companyId`,
+		`originalId`,
+		`identityNo`,
+		`lastDayTotal`,
+		`todayTotal`,
+		`lastMonthTotal`,
+		`currentMonthTotal`,
+		`createTime`
+		)
+		VALUES
+			(
+				#{companyId},
+				#{originalId},
+				#{identityNo},
+				#{lastDayTotal},
+				#{todayTotal},
+				#{lastMonthTotal},
+				#{currentMonthTotal},
+				now()
+			);
+	</insert>
+    <select id="queryCustomPaymentTotalAmount" resultType="com.jrmf.domain.CustomPaymentTotalAmount">
+        select
+        cpt.id,
+        cpt.companyId,
+        cpt.originalId,
+        cpt.identityNo,
+        cpt.lastDayTotal,
+        cpt.todayTotal,
+        cpt.lastMonthTotal,
+        cpt.currentMonthTotal,
+        ROUND(cpt.lastDayTotal/100, 2) 'lastDayTotalStr',
+        ROUND(cpt.todayTotal/100, 2) 'todayTotalStr',
+        ROUND(cpt.lastMonthTotal/100, 2) 'lastMonthTotalStr',
+        ROUND(cpt.currentMonthTotal/100, 2) 'currentMonthTotalStr'
+        from custom_payment_totalamount cpt
+        <trim prefix="where" suffixOverrides="and">
+            <if test="originalId != null and originalId != ''">
+                originalId = #{originalId} and
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId} and
+            </if>
+            <if test="identityNo != null and identityNo != ''">
+                identityNo = #{identityNo} and
+            </if>
+        </trim>
+        limit 1
+    </select>
+
+</mapper>

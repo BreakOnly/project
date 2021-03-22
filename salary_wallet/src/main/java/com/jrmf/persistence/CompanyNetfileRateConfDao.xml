@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.CompanyNetfileRateConfDao">
+
+    <select id="queryNetfileGearPosition" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT
+	        qc.companyName,
+	        cnrc.id,
+	        cnrc.merchantId,
+	        cnrc.companyId,
+	        cnrc.businessType,
+	        cnrc.gearPosition,
+	        cnrc.amountStart,
+	        cnrc.amountEnd,
+	        cnrc.operator,
+	        cnrc.gearPositionShorthand,
+	        cnrc.gearPositionDesc,
+	        cnrc.mfkjCostRate,
+	        cnrc.createTime,
+	        cnrc.updateTime,
+	        cnrc.gearLabel,
+	        cnrc.costRate
+        FROM
+	        company_netfile_rate_conf cnrc
+        LEFT JOIN qb_company qc ON cnrc.companyId = qc.userId
+        WHERE cnrc.companyId = #{companyId}
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCompanyNetfileRateConfById" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * FROM company_netfile_rate_conf cc WHERE cc.id = #{id}
+    </select>
+
+    <update id="updateNetfileGearPosition" parameterType="com.jrmf.domain.CompanyNetfileRateConf">
+        UPDATE company_netfile_rate_conf
+        <trim prefix="set" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                merchantId =  #{merchantId},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId},
+            </if>
+            <if test="businessType != null and businessType != ''">
+                businessType = #{businessType},
+            </if>
+            <if test="gearPosition != null and gearPosition != ''">
+                gearPosition = #{gearPosition},
+            </if>
+            <if test="amountStart != null and amountStart != ''">
+                amountStart = #{amountStart},
+            </if>
+            <if test="amountEnd != null and amountEnd != ''">
+                amountEnd = #{amountEnd},
+            </if>
+            <if test="operator != null and operator != ''">
+                operator = #{operator},
+            </if>
+            <if test="gearPositionShorthand != null and gearPositionShorthand != ''">
+                gearPositionShorthand = #{gearPositionShorthand},
+            </if>
+            <if test="gearPositionDesc != null and gearPositionDesc != ''">
+                gearPositionDesc = #{gearPositionDesc},
+            </if>
+            <if test="costRate != null and costRate != ''">
+                costRate = #{costRate},
+            </if>
+            <if test="mfkjCostRate != null and mfkjCostRate != ''">
+                mfkjCostRate = #{mfkjCostRate},
+            </if>
+            <if test="updateTime != null and updateTime != ''">
+                updateTime = #{updateTime},
+            </if>
+            <if test="gearLabel != null and gearLabel != ''">
+                gearLabel = #{gearLabel},
+            </if>
+        </trim>
+        WHERE
+        id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateCompanyNetfileRateConfByCompanyId">
+        UPDATE company_netfile_rate_conf SET merchantId =  #{merchantId} WHERE companyId = #{userId}
+    </update>
+
+    <insert id="insertNetfileGearPosition"  useGeneratedKeys="true" keyProperty="id"  parameterType="com.jrmf.domain.CompanyNetfileRateConf">
+        insert into company_netfile_rate_conf
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                merchantId,
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId,
+            </if>
+            <if test="businessType != null and businessType != ''">
+                businessType,
+            </if>
+            <if test="gearPosition != null and gearPosition != ''">
+                gearPosition,
+            </if>
+            <if test="amountStart != null and amountStart != ''">
+                amountStart,
+            </if>
+            <if test="amountEnd != null and amountEnd != ''">
+                amountEnd,
+            </if>
+            <if test="operator != null and operator != ''">
+                operator,
+            </if>
+            <if test="gearPositionShorthand != null and gearPositionShorthand != ''">
+                gearPositionShorthand,
+            </if>
+            <if test="gearPositionDesc != null and gearPositionDesc != ''">
+                gearPositionDesc,
+            </if>
+            <if test="costRate != null and costRate != ''">
+                costRate,
+            </if>
+            <if test="mfkjCostRate != null and mfkjCostRate != ''">
+                mfkjCostRate,
+            </if>
+            <if test="gearLabel != null and gearLabel != ''">
+                gearLabel,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="merchantId != null and merchantId != ''">
+                #{merchantId},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="businessType != null and businessType != ''">
+                1,
+            </if>
+            <if test="gearPosition != null and gearPosition != ''">
+                #{gearPosition},
+            </if>
+            <if test="amountStart != null and amountStart != ''">
+                #{amountStart},
+            </if>
+            <if test="amountEnd != null and amountEnd != ''">
+                #{amountEnd},
+            </if>
+            <if test="operator != null and operator != ''">
+                #{operator},
+            </if>
+            <if test="gearPositionShorthand != null and gearPositionShorthand != ''">
+                #{gearPositionShorthand},
+            </if>
+            <if test="gearPositionDesc != null and gearPositionDesc != ''">
+                #{gearPositionDesc},
+            </if>
+            <if test="costRate != null and costRate != ''">
+                #{costRate},
+            </if>
+            <if test="mfkjCostRate != null and mfkjCostRate != ''">
+                #{mfkjCostRate},
+            </if>
+            <if test="gearLabel != null and gearLabel != ''">
+                #{gearLabel},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <select id="queryCustomCompanyConfig" resultType="int">
+        SELECT
+	        COUNT(1)
+        FROM
+	        (
+		SELECT
+			cc.username,
+			cc.companyName,
+			cc.businessPlatform,
+			cc.customType,
+			crc.id,
+			crc.gearPosition,
+			crc.amountStart,
+			crc.amountEnd,
+			qbc.companyName serviceName
+		FROM
+			channel_custom cc
+		LEFT JOIN custom_company_rate_conf ccrc ON cc.customkey = ccrc.customkey
+		LEFT JOIN company_rate_conf crc ON ccrc.rateConfId = crc.id
+		LEFT JOIN company_netfile_rate_conf cnrc ON cnrc.id = crc.netfileId
+		LEFT JOIN qb_company qbc ON qbc.userId = crc.companyId
+		WHERE
+			cnrc.id = #{id}
+	        ) temp
+    </select>
+
+    <delete id="removeGeraByGearId">
+        DELETE FROM company_netfile_rate_conf WHERE id = #{id}
+    </delete>
+
+    <select id="getCompanyNetfileRateConfByCompanyIdAndGearPosition" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * FROM company_netfile_rate_conf WHERE gearPosition = #{gearPosition} AND companyId = #{companyId}
+    </select>
+
+    <select id="getNoGearPositionByCompanyIdAndGearPosition" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * from company_netfile_rate_conf WHERE companyId = #{companyId} AND gearPosition != #{gearPosition}
+    </select>
+
+    <select id="getCompanyNetfileRateConfByNoIdAndCompanyId"  resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * FROM company_netfile_rate_conf WHERE id != #{id} AND companyId = #{companyId}
+    </select>
+
+    <select id="queryNetfileGearPositionByMin" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * FROM company_netfile_rate_conf WHERE gearLabel = '1' AND companyId = #{companyId}
+    </select>
+
+    <select id="queryNetfileGearPositionByMax" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * FROM company_netfile_rate_conf WHERE gearLabel = '2' AND companyId = #{companyId}
+    </select>
+
+    <select id="getMinAmountStartByCompanyId" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        select MIN(CAST(amountStart AS DECIMAL(16,2))) amountStart,MAX(CAST(amountEnd AS DECIMAL(16,2))) amountEnd FROM company_netfile_rate_conf WHERE companyId = #{companyId} AND gearLabel = 1
+    </select>
+
+    <select id="getMaxAmountStartByCompanyId" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        select MIN(CAST(amountStart AS DECIMAL(16,2))) amountStart,MAX(CAST(amountEnd AS DECIMAL(16,2))) amountEnd FROM company_netfile_rate_conf WHERE companyId = #{companyId} AND gearLabel = 2
+    </select>
+
+    <select id="getJudgeAmountStartAndAmountEnd" resultType="map">
+        select COUNT(1) count,gearLabel from (select * from company_netfile_rate_conf where #{amountStart} gt;= #{minAmountStart} and #{amountEnd} lt;= #{maxAmountEnd} and companyId = #{companyId}) temp GROUP BY gearLabel
+    </select>
+
+    <select id="queryNetfileGearPositionCount" resultType="int">
+        SELECT count(1)
+        FROM
+        company_netfile_rate_conf cnrc
+        LEFT JOIN qb_company qc ON cnrc.companyId = qc.userId
+        WHERE cnrc.companyId = #{companyId}
+    </select>
+
+    <select id="getCompanyNetfileRateConfByCompanyId" resultType="com.jrmf.domain.CompanyNetfileRateConf">
+        SELECT * FROM company_netfile_rate_conf WHERE companyId = #{userId}
+    </select>
+</mapper>

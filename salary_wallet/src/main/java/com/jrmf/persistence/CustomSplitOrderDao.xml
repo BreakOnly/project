@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomSplitOrderDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.splitorder.domain.CustomSplitOrder">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="splitOrderNo" jdbcType="VARCHAR" property="splitOrderNo" />
+    <result column="splitOrderName" jdbcType="VARCHAR" property="splitOrderName" />
+    <result column="customKey" jdbcType="VARCHAR" property="customKey" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="statusDesc" jdbcType="VARCHAR" property="statusDesc" />
+    <result column="payType" jdbcType="INTEGER" property="payType" />
+    <result column="totalNumber" jdbcType="INTEGER" property="totalNumber" />
+    <result column="totalAmount" jdbcType="VARCHAR" property="totalAmount" />
+    <result column="successNumber" jdbcType="INTEGER" property="successNumber" />
+    <result column="successAmount" jdbcType="VARCHAR" property="successAmount" />
+    <result column="failNumber" jdbcType="INTEGER" property="failNumber" />
+    <result column="failAmount" jdbcType="VARCHAR" property="failAmount" />
+    <result column="failFileName" jdbcType="VARCHAR" property="failFileName" />
+    <result column="failFileUrl" jdbcType="VARCHAR" property="failFileUrl" />
+    <result column="laveNumber" jdbcType="INTEGER" property="laveNumber" />
+    <result column="laveAmount" jdbcType="VARCHAR" property="laveAmount" />
+    <result column="laveFileName" jdbcType="VARCHAR" property="laveFileName" />
+    <result column="laveFileUrl" jdbcType="VARCHAR" property="laveFileUrl" />
+    <result column="sourceFileName" jdbcType="VARCHAR" property="sourceFileName" />
+    <result column="sourceFileUrl" jdbcType="VARCHAR" property="sourceFileUrl" />
+    <result column="operatorName" jdbcType="VARCHAR" property="operatorName" />
+    <result column="createTime" jdbcType="VARCHAR" property="createTime" />
+    <result column="updateTime" jdbcType="VARCHAR" property="updateTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, splitOrderNo, splitOrderName, customKey, status, statusDesc, payType, totalNumber,
+    totalAmount, successNumber, successAmount, failNumber, failAmount, failFileName,
+    failFileUrl, laveNumber, laveAmount, laveFileName, laveFileUrl, sourceFileName, sourceFileUrl,
+    operatorName, createTime, updateTime
+  </sql>
+  <select id="selectBySplitOrderNo"  resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from custom_split_order
+    where splitOrderNo = #{splitOrderNo}
+  </select>
+
+  <insert id="insert" parameterType="com.jrmf.splitorder.domain.CustomSplitOrder">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into custom_split_order (splitOrderNo, splitOrderName, customKey,
+    status, statusDesc, payType,
+    totalNumber, totalAmount, successNumber,
+    successAmount, failNumber, failAmount,
+    failFileName, failFileUrl, laveNumber,
+    laveAmount, laveFileName, laveFileUrl,
+    sourceFileName, sourceFileUrl, operatorName,
+    createTime, updateTime)
+    values (#{splitOrderNo,jdbcType=VARCHAR}, #{splitOrderName,jdbcType=VARCHAR}, #{customKey,jdbcType=VARCHAR},
+    #{status,jdbcType=INTEGER}, #{statusDesc,jdbcType=VARCHAR}, #{payType,jdbcType=INTEGER},
+    #{totalNumber,jdbcType=INTEGER}, #{totalAmount,jdbcType=VARCHAR}, #{successNumber,jdbcType=INTEGER},
+    #{successAmount,jdbcType=VARCHAR}, #{failNumber,jdbcType=INTEGER}, #{failAmount,jdbcType=VARCHAR},
+    #{failFileName,jdbcType=VARCHAR}, #{failFileUrl,jdbcType=VARCHAR}, #{laveNumber,jdbcType=INTEGER},
+    #{laveAmount,jdbcType=VARCHAR}, #{laveFileName,jdbcType=VARCHAR}, #{laveFileUrl,jdbcType=VARCHAR},
+    #{sourceFileName,jdbcType=VARCHAR}, #{sourceFileUrl,jdbcType=VARCHAR}, #{operatorName,jdbcType=VARCHAR},
+    now(), now())
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.splitorder.domain.CustomSplitOrder">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into custom_split_order
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="splitOrderNo != null">
+        splitOrderNo,
+      </if>
+      <if test="splitOrderName != null">
+        splitOrderName,
+      </if>
+      <if test="customKey != null">
+        customKey,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="statusDesc != null">
+        statusDesc,
+      </if>
+      <if test="payType != null">
+        payType,
+      </if>
+      <if test="totalNumber != null">
+        totalNumber,
+      </if>
+      <if test="totalAmount != null">
+        totalAmount,
+      </if>
+      <if test="successNumber != null">
+        successNumber,
+      </if>
+      <if test="successAmount != null">
+        successAmount,
+      </if>
+      <if test="failNumber != null">
+        failNumber,
+      </if>
+      <if test="failAmount != null">
+        failAmount,
+      </if>
+      <if test="failFileName != null">
+        failFileName,
+      </if>
+      <if test="failFileUrl != null">
+        failFileUrl,
+      </if>
+      <if test="laveNumber != null">
+        laveNumber,
+      </if>
+      <if test="laveAmount != null">
+        laveAmount,
+      </if>
+      <if test="laveFileName != null">
+        laveFileName,
+      </if>
+      <if test="laveFileUrl != null">
+        laveFileUrl,
+      </if>
+      <if test="sourceFileName != null">
+        sourceFileName,
+      </if>
+      <if test="sourceFileUrl != null">
+        sourceFileUrl,
+      </if>
+      <if test="operatorName != null">
+        operatorName,
+      </if>
+      <if test="createTime != null">
+        createTime,
+      </if>
+      <if test="updateTime != null">
+        updateTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="splitOrderNo != null">
+        #{splitOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="splitOrderName != null">
+        #{splitOrderName,jdbcType=VARCHAR},
+      </if>
+      <if test="customKey != null">
+        #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="statusDesc != null">
+        #{statusDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null">
+        #{payType,jdbcType=INTEGER},
+      </if>
+      <if test="totalNumber != null">
+        #{totalNumber,jdbcType=INTEGER},
+      </if>
+      <if test="totalAmount != null">
+        #{totalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="successNumber != null">
+        #{successNumber,jdbcType=INTEGER},
+      </if>
+      <if test="successAmount != null">
+        #{successAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="failNumber != null">
+        #{failNumber,jdbcType=INTEGER},
+      </if>
+      <if test="failAmount != null">
+        #{failAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="failFileName != null">
+        #{failFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="failFileUrl != null">
+        #{failFileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="laveNumber != null">
+        #{laveNumber,jdbcType=INTEGER},
+      </if>
+      <if test="laveAmount != null">
+        #{laveAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="laveFileName != null">
+        #{laveFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="laveFileUrl != null">
+        #{laveFileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceFileName != null">
+        #{sourceFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceFileUrl != null">
+        #{sourceFileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorName != null">
+        #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.splitorder.domain.CustomSplitOrder">
+    update custom_split_order
+    <set>
+      <if test="splitOrderNo != null">
+        splitOrderNo = #{splitOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="splitOrderName != null">
+        splitOrderName = #{splitOrderName,jdbcType=VARCHAR},
+      </if>
+      <if test="customKey != null">
+        customKey = #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="statusDesc != null">
+        statusDesc = #{statusDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="payType != null">
+        payType = #{payType,jdbcType=INTEGER},
+      </if>
+      <if test="totalNumber != null">
+        totalNumber = #{totalNumber,jdbcType=INTEGER},
+      </if>
+      <if test="totalAmount != null">
+        totalAmount = #{totalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="successNumber != null">
+        successNumber = #{successNumber,jdbcType=INTEGER},
+      </if>
+      <if test="successAmount != null">
+        successAmount = #{successAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="failNumber != null">
+        failNumber = #{failNumber,jdbcType=INTEGER},
+      </if>
+      <if test="failAmount != null">
+        failAmount = #{failAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="failFileName != null">
+        failFileName = #{failFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="failFileUrl != null">
+        failFileUrl = #{failFileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="laveNumber != null">
+        laveNumber = #{laveNumber,jdbcType=INTEGER},
+      </if>
+      <if test="laveAmount != null">
+        laveAmount = #{laveAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="laveFileName != null">
+        laveFileName = #{laveFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="laveFileUrl != null">
+        laveFileUrl = #{laveFileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceFileName != null">
+        sourceFileName = #{sourceFileName,jdbcType=VARCHAR},
+      </if>
+      <if test="sourceFileUrl != null">
+        sourceFileUrl = #{sourceFileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="operatorName != null">
+        operatorName = #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        createTime = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        updateTime = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateBySplitOrderNo" parameterType="com.jrmf.splitorder.domain.CustomSplitOrder">
+    update custom_split_order
+    set splitOrderNo = #{splitOrderNo,jdbcType=VARCHAR},
+      splitOrderName = #{splitOrderName,jdbcType=VARCHAR},
+      customKey = #{customKey,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      statusDesc = #{statusDesc,jdbcType=VARCHAR},
+      payType = #{payType,jdbcType=INTEGER},
+      totalNumber = #{totalNumber,jdbcType=INTEGER},
+      totalAmount = #{totalAmount,jdbcType=VARCHAR},
+      successNumber = #{successNumber,jdbcType=INTEGER},
+      successAmount = #{successAmount,jdbcType=VARCHAR},
+      failNumber = #{failNumber,jdbcType=INTEGER},
+      failAmount = #{failAmount,jdbcType=VARCHAR},
+      failFileName = #{failFileName,jdbcType=VARCHAR},
+      failFileUrl = #{failFileUrl,jdbcType=VARCHAR},
+      laveNumber = #{laveNumber,jdbcType=INTEGER},
+      laveAmount = #{laveAmount,jdbcType=VARCHAR},
+      laveFileName = #{laveFileName,jdbcType=VARCHAR},
+      laveFileUrl = #{laveFileUrl,jdbcType=VARCHAR},
+      sourceFileName = #{sourceFileName,jdbcType=VARCHAR},
+      sourceFileUrl = #{sourceFileUrl,jdbcType=VARCHAR},
+      operatorName = #{operatorName,jdbcType=VARCHAR},
+      updateTime = now()
+    where splitOrderNo = #{splitOrderNo,jdbcType=VARCHAR}
+  </update>
+
+  <select id="selectToDayAmountByCustomKey" resultType="java.lang.String">
+    select cast(COALESCE(SUM(successAmount),0) as decimal(15,2)) from custom_split_order where customKey = #{customKey} and to_days(createTime) = to_days(now()) and status!=2;
+  </select>
+
+  <select id="selectSplitOrder" resultType="com.jrmf.splitorder.domain.CustomSplitOrder">
+    select cc.companyName as customName,so.* from custom_split_order so left join channel_custom cc on so.customKey=cc.customkey
+    <trim prefix="where" suffixOverrides="and">
+      <if test="customKey != null and customKey != ''">
+        FIND_IN_SET(cc.customKey,#{customKey}) and
+      </if>
+      <if test="operatorName != null and operatorName != ''">
+         so.operatorName = #{operatorName} and
+      </if>
+      <if test="customName != null and customName != ''">
+        cc.companyName like concat('%', #{customName},'%') and
+      </if>
+      <if test="splitOrderName != null and splitOrderName != ''">
+        so.splitOrderName like concat('%', #{splitOrderName},'%') and
+      </if>
+      <if test="fileName != null and fileName != ''">
+        so.sourceFileName like concat('%', #{fileName},'%') and
+      </if>
+      <if test="timeStart != null and timeStart != ''">
+        date(so.createTime) &gt;= #{timeStart} and
+      </if>
+      <if test="timeEnd != null and timeEnd != ''">
+        date(so.createTime) &lt;= #{timeEnd} and
+      </if>
+      <if test="timeStart != null and timeStart != ''">
+        date(so.createTime) &gt;= #{timeStart} and
+      </if>
+      <if test="status != null">
+        so.status = #{status} and
+      </if>
+      <if test="notDelete != null">
+        so.status != 4 and
+      </if>
+    </trim>
+    order by so.updateTime DESC
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+  </select>
+</mapper>

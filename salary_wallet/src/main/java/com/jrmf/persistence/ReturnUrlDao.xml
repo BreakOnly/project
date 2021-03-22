@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ReturnUrlDao">
+	<insert id="addPasswordSetReturnUrl" parameterType="com.jrmf.domain.ReturnUrl">
+		INSERT INTO qb_returnUrl (user_id, passwordSetReturnUrl,passwordResetUrl,passwordChangeUrl
+		 ) VALUES (#{user_id}, #{passwordSetReturnUrl},#{passwordResetUrl},#{passwordChangeUrl})
+	</insert>
+	
+	<select id="getUrlReturn" resultType="com.jrmf.domain.ReturnUrl">
+		SELECT * FROM qb_returnUrl where user_id = #{id}  limit 1
+	</select>
+	
+	<update id="addResetUrl" parameterType="com.jrmf.domain.ReturnUrl">
+		UPDATE qb_returnUrl SET passwordResetUrl=#{passwordResetUrl} WHERE (user_id=#{user_id}) LIMIT 1
+	</update>
+	
+	<update id="updateReturnUrl" parameterType="com.jrmf.domain.ReturnUrl">
+		UPDATE qb_returnUrl SET passwordSetReturnUrl=#{passwordSetReturnUrl},
+		passwordResetUrl=#{passwordResetUrl}, passwordChangeUrl=#{passwordChangeUrl} WHERE (user_id=#{user_id}) LIMIT 1
+	</update>
+</mapper>

@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ReceiptDao">
+
+    <insert id="addReceipt">
+        insert into qb_receipt_commission
+        (userId,
+        amount,
+        phoneNo,
+        sumFee,
+        supplementFee,
+        supplementAmount,
+        calculationRates,
+        originalId,
+        merchantId,
+        companyId,
+        userType,
+        statusDesc,
+        status,
+        receiptChecked,
+        receiptUrl,
+        batchId,
+        aygOrderNo,
+        orderNo,
+        operatorName,
+        accountDate,
+        receiptNo,
+        remark,
+        feeRuleType,
+        serviceRatesFree,
+        profiltFree,
+        serviceRates,
+        profilt,
+        payType,
+        account,
+        invoiceStatus,
+        invoiceBatchNo,
+        menuId,
+        contentName,
+        paymentTime,
+        userNo,
+        companyName,
+        certId,
+        documentType,
+        userName,
+        customName,
+        batchFileName,
+        bankName,
+        description,
+        batchName,
+        batchDesc,
+        bankNo,
+        repeatcheck,
+        createtime
+        )
+        select
+        qc.userId,
+        qc.amount,
+        qc.phoneNo,
+        qc.sumFee,
+        qc.supplementFee,
+        qc.supplementAmount,
+        qc.calculationRates,
+        qc.originalId,
+        qc.merchantId,
+        qc.companyId,
+        qc.userType,
+        qc.statusDesc,
+        qc.status,
+        '0' as  'receiptChecked',
+        '' as 'receiptUrl',
+        qc.batchId,
+        qc.aygOrderNo,
+        qc.orderNo,
+        qc.operatorName,
+        qc.accountDate,
+        qc.receiptNo,
+        qc.remark,
+        qc.feeRuleType,
+        qc.serviceRatesFree,
+        qc.profiltFree,
+        qc.serviceRates,
+        qc.profilt,
+        qc.payType,
+        qc.account,
+        qc.invoiceStatus,
+        qc.invoiceBatchNo,
+        qc.menuId,
+        qc.contentName,
+        qc.paymentTime,
+        qc.userNo,
+        qc.companyName,
+        qc.certId,
+        qc.documentType,
+        qc.userName,
+        qc.customName,
+        qc.batchFileName,
+        qc.bankName,
+        qc.description,
+        qc.batchName,
+        qc.batchDesc,
+        qc.bankNo,
+        qc.repeatcheck,
+        now()
+         from qb_usercommission qc
+         where
+         qc.merchantId = #{merchantId}
+         and qc.payType = #{payType}
+         and qc.status = #{status}
+         and qc.accountDate = #{receiptTime}
+         <if test="companyId != null and companyId != ''">
+            and qc.companyId = #{companyId}
+         </if>
+    </insert>
+
+    <update id="updateReceiptCommission">
+        update qb_receipt_commission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="receiptUrl !=null and receiptUrl !=''">
+                receiptUrl = #{receiptUrl},
+            </if>
+            <if test="receiptChecked !=null and receiptChecked !=''">
+                receiptChecked = #{receiptChecked},
+            </if>
+            updatetime = now(),
+        </trim>
+        where accountDate = #{receiptTime}
+        	  and merchantId = #{merchantId}
+       		  and payType = #{payType}
+         	  and companyId = #{companyId}
+    </update>
+
+    <update id="updateReceiptCommissionById">
+        update qb_receipt_commission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="receiptUrl !=null and receiptUrl !=''">
+                receiptUrl = #{receiptUrl},
+            </if>
+            <if test="receiptChecked !=null and receiptChecked !=''">
+                receiptChecked = #{receiptChecked},
+            </if>
+            <if test="aygRreceiptStatus !=null and aygRreceiptStatus !=''">
+                aygRreceiptStatus = #{aygRreceiptStatus},
+            </if>
+            updatetime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateReceiptCommissionByReceiptNo">
+        update qb_receipt_commission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="receiptUrl !=null and receiptUrl !=''">
+                receiptUrl = #{receiptUrl},
+            </if>
+            <if test="receiptChecked !=null and receiptChecked !=''">
+                receiptChecked = #{receiptChecked},
+            </if>
+            <if test="aygRreceiptStatus !=null and aygRreceiptStatus !=''">
+                aygRreceiptStatus = #{aygRreceiptStatus},
+            </if>
+            updatetime = now(),
+        </trim>
+        where receiptNo = #{receiptNo} and accountDate = #{accountDate}
+    </update>
+
+     <update id="updateReceiptBatch" parameterType="com.jrmf.domain.ReceiptBatch">
+         update qb_receipt_batch set updatetime = now()
+         <if test="receiptNum !=null ">
+             ,receiptNum = #{receiptNum}
+         </if>
+         <if test="receiptMatchNum !=null">
+             ,receiptMatchNum = #{receiptMatchNum}
+         </if>
+         <if test="status !=null and status !=''">
+             ,status = #{status}
+         </if>
+         <if test="receiptImportType !=null">
+             ,receiptImportType = #{receiptImportType}
+         </if>
+         <if test="receiptType !=null">
+             ,receiptType = #{receiptType}
+         </if>
+         where id = #{id}
+    </update>
+
+    <update id="updateStatusReceiptDownloadById">
+        update qb_receipt_download
+        set status = #{status}, statusDesc = #{statusDesc}
+        where id = #{id}
+    </update>
+
+    <select id="getReceiptCommissionByReceiptNo" resultType="com.jrmf.domain.ReceiptCommission">
+	    select
+        qrc.*
+        from qb_receipt_commission qrc
+        where 1=1
+		and receiptNo = #{receiptNo} and accountDate = #{accountDate}
+	 </select>
+
+    <select id="listReceiptCommission" resultType="com.jrmf.domain.ReceiptCommission">
+        select
+        qrc.*
+        from qb_receipt_commission qrc
+        left join channel_custom cc on qrc.originalId = cc.customkey
+        where 1=1
+        <if test="customName != null and customName != ''">
+            and qrc.customName like concat('%', #{customName},'%')
+        </if>
+        <if test="merchantId != null and merchantId != ''">
+            and qrc.merchantId = #{merchantId}
+        </if>
+       <if test="receiptTime != null and receiptTime != ''">
+            and qrc.accountDate = #{receiptTime}
+        </if>
+        <if test="customKey != null and customKey != ''">
+            and FIND_IN_SET(qrc.originalId,#{customKey})
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and qrc.contentName = #{contentName}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and qrc.companyId = #{companyId}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and qrc.batchName = #{batchName}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and qrc.batchDesc = #{batchDesc}
+        </if>
+        <if test="payType != null and payType != ''">
+            and qrc.payType = #{payType}
+        </if>
+        <if test="userName != null and userName != ''">
+            and qrc.userName = #{userName}
+        </if>
+        <if test="certId != null and certId != ''">
+            and qrc.certId = #{certId}
+        </if>
+        <if test="account != null and account != ''">
+            and qrc.account = #{account}
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            and CAST(qrc.amount as SIGNED) &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and CAST(qrc.amount as SIGNED) &lt;= #{amountEnd}
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+            and date(qrc.paymentTime) &gt;= #{timeStart}
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+            and date(qrc.paymentTime) &lt;= #{timeEnd}
+        </if>
+        order by qrc.updateTime desc
+        <if test="start != null and limit != nul">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getReceiptBatchById" resultType="com.jrmf.domain.ReceiptBatch">
+        select *
+        from qb_receipt_batch qrc
+        where 1=1
+        <if test="id != null and id != '0'">
+            and qrc.id = #{id}
+        </if>
+         limit 1
+    </select>
+
+    <select id="listReceiptBatch" resultType="com.jrmf.domain.ReceiptBatch">
+        select qrc.*,qc.companyName
+        from qb_receipt_batch qrc
+        left join qb_company qc on qrc.companyId = qc.userId
+        where 1=1
+        <if test="companyId != null and companyId != ''">
+            and qrc.companyId = #{companyId}
+        </if>
+        <if test="payType != null and payType != ''">
+            and qrc.payType = #{payType}
+        </if>
+        <if test="receiptOrgType != null and receiptOrgType != ''">
+            and qrc.receiptOrgType = #{receiptOrgType}
+        </if>
+         <if test="receiptOrgName != null and receiptOrgName != ''">
+            and qrc.receiptOrgName = #{receiptOrgName}
+        </if>
+         <if test="status != null and status != ''">
+            and qrc.status = #{status}
+        </if>
+
+        <if test="receiptTimeStart != null and receiptTimeStart != ''">
+            and date(qrc.receiptTime) &gt;= #{receiptTimeStart}
+        </if>
+        <if test="receiptTimeEnd != null and receiptTimeEnd != ''">
+            and date(qrc.receiptTime) &lt;= #{receiptTimeEnd}
+        </if>
+        <if test="receiptTime != null and receiptTime != ''">
+            and qrc.receiptTime = #{receiptTime}
+        </if>
+
+        <if test="createtimeStart != null and createtimeStart != ''">
+            and date(qrc.createtime) &gt;= #{createtimeStart}
+        </if>
+        <if test="createtimeEnd != null and createtimeEnd != ''">
+            and date(qrc.createtime) &lt;= #{createtimeEnd}
+        </if>
+        <if test="receiptType != null and receiptType != ''">
+            and qrc.receiptType = #{receiptType}
+        </if>
+        order by qrc.updateTime desc
+        <if test="start != null and limit != nul">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+
+    <select id="listReceiptBatchGroup" resultType="com.jrmf.domain.ReceiptBatch">
+        select count(*) commissionNum,
+				qu.merchantId,
+				qu.companyId,
+				qu.payType,
+				qu.accountDate  as 'receiptTime'
+		from  qb_usercommission qu
+			left join qb_custom_info qci
+			on qu.merchantId = qci.customkey
+		where 1 = 1
+		<if test="status != null and status != ''">
+			and qu.status = 1
+		</if>
+		<if test="payType != null and payType != ''">
+            and qu.payType = #{payType}
+        </if>
+       <if test="merchantId != null and merchantId != ''">
+            and qu.merchantId = #{merchantId}
+        </if>
+       <if test="companyId != null and companyId != ''">
+            and qu.companyId = #{companyId}
+        </if>
+		<if test="receiptTime != null and receiptTime != ''">
+            and qu.accountDate = #{receiptTime}
+        </if>
+			group by qu.merchantId,
+				qu.companyId,
+				qu.payType
+    </select>
+
+
+    <select id="listReceiptCommissionPath" resultType="java.lang.String">
+        select
+        qrc.receiptUrl
+        from qb_receipt_commission qrc
+        left join channel_custom cc on cc.customkey = qrc.originalId
+        where receiptChecked=1
+        <if test="customName != null and customName != ''">
+            and qrc.customName like concat('%', #{customName},'%')
+        </if>
+        <if test="customKey != null and customKey != ''">
+            and FIND_IN_SET(cc.customkey,#{customKey})
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and qrc.contentName = #{contentName}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and qrc.companyId = #{companyId}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and qrc.batchName = #{batchName}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and qrc.batchDesc = #{batchDesc}
+        </if>
+        <if test="payType != null and payType != ''">
+            and qrc.payType = #{payType}
+        </if>
+        <if test="userName != null and userName != ''">
+            and qrc.userName = #{userName}
+        </if>
+        <if test="certId != null and certId != ''">
+            and qrc.certId = #{certId}
+        </if>
+        <if test="account != null and account != ''">
+            and qrc.account = #{account}
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            and CAST(qrc.amount as SIGNED) &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and CAST(qrc.amount as SIGNED) &lt;= #{amountEnd}
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+            and date(qrc.paymentTime) &gt;= #{timeStart}
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+            and date(qrc.paymentTime) &lt;= #{timeEnd}
+        </if>
+        order by qrc.createtime
+    </select>
+
+    <select id="listDownloadHistory" resultType="com.jrmf.domain.ReceiptDownLoad">
+        select qrd.* from qb_receipt_download qrd
+        left join channel_custom cc on qrd.orgAccount = cc.username
+        where 1=1
+        <if test="receivingMail != null and receivingMail != ''">
+            and qrd.receivingMail = #{receivingMail}
+        </if>
+        <if test="status != null and status != ''">
+            and qrd.status = #{status}
+        </if>
+        <if test="orgName != null and orgName != ''">
+            and qrd.orgName = #{orgName}
+        </if>
+        <if test="orgAccount != null and orgAccount != ''">
+            and qrd.orgAccount = #{orgAccount}
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+            and date(qrd.createTime) &gt;= #{timeStart}
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+            and date(qrd.createTime) &lt;= #{timeEnd}
+        </if>
+        order by qrd.updateTime desc
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <insert id="saveReceiptBatch" parameterType="com.jrmf.domain.ReceiptBatch" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qb_receipt_batch (
+		receiptTime,
+		status,
+		merchantId,
+		companyId,
+		payType,
+		receiptOrgType,
+		receiptOrgName,
+		commissionNum,
+		receiptNum,
+		receiptMatchNum,
+		receiptType,
+		createTime)
+		VALUES (
+		#{receiptTime},
+		#{status},
+		#{merchantId},
+		#{companyId},
+		#{payType},
+		#{receiptOrgType},
+		#{receiptOrgName},
+		#{commissionNum},
+		#{receiptNum},
+		#{receiptMatchNum},
+		#{receiptType},
+		now()
+		)
+	</insert>
+    <insert id="addReceiptDownload" useGeneratedKeys="true" keyProperty="id" parameterType="com.jrmf.domain.ReceiptDownLoad">
+        INSERT INTO qb_receipt_download
+        (`receivingMail`,
+         `status`,
+         `statusDesc`,
+         `orgName`,
+         `orgAccount`,
+         `customType`,
+         `fileName`,
+         `createTime`,
+         `updateTime`)
+        VALUES (
+            #{receivingMail},
+            #{status},
+            #{statusDesc},
+            #{orgName},
+            #{orgAccount},
+            #{customType},
+            #{fileName},
+            now(),
+            now());
+    </insert>
+
+    <select id="listReceiptCommissionCount" resultType="int">
+        select
+        count(1)
+        from qb_receipt_commission qrc
+        left join channel_custom cc on qrc.originalId = cc.customkey
+        where 1=1
+        <if test="customName != null and customName != ''">
+            and qrc.customName like concat('%', #{customName},'%')
+        </if>
+        <if test="merchantId != null and merchantId != ''">
+            and qrc.merchantId = #{merchantId}
+        </if>
+        <if test="receiptTime != null and receiptTime != ''">
+            and qrc.accountDate = #{receiptTime}
+        </if>
+        <if test="customKey != null and customKey != ''">
+            and FIND_IN_SET(qrc.originalId,#{customKey})
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and qrc.contentName = #{contentName}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and qrc.companyId = #{companyId}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and qrc.batchName = #{batchName}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and qrc.batchDesc = #{batchDesc}
+        </if>
+        <if test="payType != null and payType != ''">
+            and qrc.payType = #{payType}
+        </if>
+        <if test="userName != null and userName != ''">
+            and qrc.userName = #{userName}
+        </if>
+        <if test="certId != null and certId != ''">
+            and qrc.certId = #{certId}
+        </if>
+        <if test="account != null and account != ''">
+            and qrc.account = #{account}
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            and CAST(qrc.amount as SIGNED) &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and CAST(qrc.amount as SIGNED) &lt;= #{amountEnd}
+        </if>
+        <if test="timeStart != null and timeStart != ''">
+            and date(qrc.paymentTime) &gt;= #{timeStart}
+        </if>
+        <if test="timeEnd != null and timeEnd != ''">
+            and date(qrc.paymentTime) &lt;= #{timeEnd}
+        </if>
+    </select>
+
+    <select id="getReceiptCommissionByOrderNo" resultType="java.lang.String">
+        SELECT receiptUrl FROM qb_receipt_commission WHERE orderNo = #{orderNo}
+    </select>
+</mapper>

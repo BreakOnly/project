@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomInvoiceInfoDao">
+	<insert id="insertCustomInvoiceInfo" useGeneratedKeys="true" keyProperty="id" parameterType="com.jrmf.domain.CustomInvoiceInfoDO">
+			insert into custom_invoice_info(
+				customkey,
+				addressTitle,
+				fixedTelephone,
+				invoicePhone,
+				invoiceUserName,
+				invoiceAddress,
+				status,
+				email,
+				isDefault,
+				createTime,
+				updateTime,
+				addUser
+			)
+			values (
+				#{customkey},
+				#{addressTitle},
+				#{fixedTelephone},
+				#{invoicePhone},
+				#{invoiceUserName},
+				#{invoiceAddress},
+				#{status},
+				#{email},
+				#{isDefault},
+				now(),
+				now(),
+				#{addUser}
+			)
+	</insert>
+	<select id="listCustomInvoiceInfo" resultType="com.jrmf.domain.CustomInvoiceInfoDO">
+		select * from custom_invoice_info where status = 1 and customkey = #{customkey} order by isDefault DESC,createTime DESC
+	</select>
+	<select id="getCustomInvoiceInfoById" resultType="com.jrmf.domain.CustomInvoiceInfoDO">
+		select * from custom_invoice_info where status = 1 and id = #{id}
+	</select>
+
+	<update id="deleteCustomInvoiceInfo" parameterType="Integer">
+		update custom_invoice_info set status = -1 ,updateTime = now() where id = #{id}
+	</update>
+	<update id="setCurrentDefault" parameterType="Integer">
+		update custom_invoice_info set isDefault = 1 ,updateTime = now() where id = #{id}
+	</update>
+	<update id="setOtherNotDefault">
+		update custom_invoice_info set isDefault = -1 ,updateTime = now() where customkey = #{customkey} and id != #{id}
+	</update>
+	<select id="listCustomInvoiceInfoByParams" resultType="com.jrmf.domain.CustomInvoiceInfoDO" parameterType="java.util.HashMap">
+		select * from custom_invoice_info
+		<trim prefix=" where " suffixOverrides="AND">
+			<if test="customkey != null and customkey != ''">
+				customkey = #{customkey} AND
+			</if>
+			<if test="addressTitle != null and addressTitle != ''">
+				addressTitle = #{addressTitle} AND
+			</if>
+			<if test="fixedTelephone != null and fixedTelephone != ''">
+				fixedTelephone = #{fixedTelephone} AND
+			</if>
+			<if test="email != null and email != ''">
+				email = #{email} AND
+			</if>
+			<if test="invoicePhone != null and invoicePhone != ''">
+				invoicePhone = #{invoicePhone} AND
+			</if>
+			<if test="invoiceUserName != null and invoiceUserName != ''">
+				invoiceUserName = #{invoiceUserName} AND
+			</if>
+			<if test="status != null">
+				status = #{status} AND
+			</if>
+		</trim>
+		order by createTime desc
+		<if test="start !=null and limit !=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+	<update id="updateCustomInvoiceByParam" parameterType="com.jrmf.domain.CustomInvoiceInfoDO">
+		update custom_invoice_info set
+		<if test="invoicePhone != null and invoicePhone != ''">
+			invoicePhone = #{invoicePhone},
+		</if>
+		<if test="email != null and email != ''">
+			email = #{email},
+		</if>
+		<if test="fixedTelephone != null and fixedTelephone != ''">
+			fixedTelephone = #{fixedTelephone},
+		</if>
+		<if test="invoiceUserName != null and invoiceUserName != ''">
+			invoiceUserName = #{invoiceUserName},
+		</if>
+		<if test="invoiceAddress != null and invoiceAddress != ''">
+			invoiceAddress = #{invoiceAddress},
+		</if>
+		updateTime = now()
+		where id = #{id}
+	</update>
+	
+	<select id="listCustomInvoiceInfoByPage" resultType="com.jrmf.domain.CustomInvoiceInfoDO" parameterType="com.jrmf.domain.Page">
+		select * from custom_invoice_info where status = 1 and customkey = #{params.customkey}
+		<if test="params.userName != '' and params.userName != null">
+			and (
+					invoiceUserName like CONCAT('%',#{params.userName},'%' ) or
+					invoicePhone like CONCAT('%',#{params.userName},'%')
+			) 
+		</if>
+		 order by isDefault DESC,createTime DESC
+		<if test="pageSize !=null and offset !=null">
+       	limit #{offset},#{pageSize}
+        </if>
+	</select>
+	
+	<select id="listCustomInvoiceInfoCountByPage" resultType="int" parameterType="com.jrmf.domain.Page">
+		select count(1) from (
+			select * from custom_invoice_info where status = 1 and customkey = #{params.customkey}
+			<if test="params.userName != '' and params.userName != null">
+				and (
+						invoiceUserName like CONCAT('%',#{params.userName},'%' ) or
+						invoicePhone like CONCAT('%',#{params.userName},'%')
+				) 
+			</if>
+			 order by isDefault DESC,createTime DESC
+		 )temp
+	</select>
+	
+	<!-- 发票地址分页查询（新版） -->
+	<select id="getMerchantInvoiceAddressByPage" resultType="map" parameterType="com.jrmf.domain.Page">
+	select cii.id,cii.customkey,cii.addressTitle,cii.fixedTelephone,cii.invoicePhone,cii.invoiceUserName,cii.invoiceAddress,cii.status,cii.email,
+	cii.isDefault,date_format(cii.createTime,'%Y-%m-%d %H:%i:%s') createTime,date_format(cii.updateTime,'%Y-%m-%d %H:%i:%s') updateTime,cii.addUser,cc.companyName merchantName
+	from custom_invoice_info cii
+	left join channel_custom cc on cii.customkey=cc.customkey
+	where cii.status = 1
+	<if test="params.customkey!=null and params.customkey!=''">
+		and FIND_IN_SET(cii.customKey,#{params.customkey})
+	</if>
+	<if test="params.customKey!=null and params.customKey!=''">
+		and FIND_IN_SET(cii.customKey,#{params.customKey})
+	</if>
+	<if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like CONCAT('%',#{params.merchantName},'%' )
+	</if>
+	<if test="params.invoiceUserName!=null and params.invoiceUserName!=''">
+		and cii.invoiceUserName like CONCAT('%',#{params.invoiceUserName},'%' )
+	</if>
+	<if test="params.invoicePhone!=null and params.invoicePhone!=''">
+		and cii.invoicePhone like CONCAT('%',#{params.invoicePhone},'%' )
+	</if>
+	<if test="params.invoiceAddress!=null and params.invoiceAddress!=''">
+		and cii.invoiceAddress like CONCAT('%',#{params.invoiceAddress},'%' )
+	</if>
+    <if test="params.isDefault!=null and params.isDefault!=''">
+		and cii.isDefault =#{params.isDefault}
+	</if>
+	<if test="params.userName != '' and params.userName != null">
+		and (
+				cii.invoiceUserName like CONCAT('%',#{params.userName},'%' ) or
+				cii.invoicePhone like CONCAT('%',#{params.userName},'%')
+		) 
+	</if>
+	order by IFNULL(cii.updateTime,cii.createTime) desc
+    <if test="pageSize !=null and offset !=null">
+    	limit #{offset},#{pageSize}
+    </if>
+	</select>
+	
+	<!-- 发票地址分页查询（新版） -->
+	<select id="getMerchantInvoiceAddressCount" resultType="int" parameterType="com.jrmf.domain.Page">
+	select count(1) from (select cii.id,cii.customkey,cii.addressTitle,cii.fixedTelephone,cii.invoicePhone,cii.invoiceUserName,cii.invoiceAddress,cii.status,cii.email,
+	cii.isDefault,date_format(cii.createTime,'%Y-%m-%d %H:%i:%s') createTime,date_format(cii.updateTime,'%Y-%m-%d %H:%i:%s') updateTime,cii.addUser,cc.companyName merchantName
+	from custom_invoice_info cii
+	left join channel_custom cc on cii.customkey=cc.customkey
+	where cii.status = 1
+	<if test="params.customkey!=null and params.customkey!=''">
+		and FIND_IN_SET(cii.customKey,#{params.customkey})
+	</if>
+	<if test="params.customKey!=null and params.customKey!=''">
+		and FIND_IN_SET(cii.customKey,#{params.customKey})
+	</if>
+	<if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like CONCAT('%',#{params.merchantName},'%' )
+	</if>
+	<if test="params.invoiceUserName!=null and params.invoiceUserName!=''">
+		and cii.invoiceUserName like CONCAT('%',#{params.invoiceUserName},'%' )
+	</if>
+	<if test="params.invoicePhone!=null and params.invoicePhone!=''">
+		and cii.invoicePhone like CONCAT('%',#{params.invoicePhone},'%' )
+	</if>
+	<if test="params.invoiceAddress!=null and params.invoiceAddress!=''">
+		and cii.invoiceAddress like CONCAT('%',#{params.invoiceAddress},'%' )
+	</if>
+	<if test="params.isDefault!=null and params.isDefault!=''">
+		and cii.isDefault =#{params.isDefault}
+	</if>
+	<if test="params.userName != '' and params.userName != null">
+		and (
+				cii.invoiceUserName like CONCAT('%',#{params.userName},'%' ) or
+				cii.invoicePhone like CONCAT('%',#{params.userName},'%')
+		) 
+	</if>
+		order by IFNULL(cii.updateTime,cii.createTime) desc)temp
+	</select>
+	
+	<!-- 发票地址分页查询-->
+	<select id="getMerchantInvoiceAddressNoPage" resultType="map" parameterType="com.jrmf.domain.Page">
+	select cii.id,cii.customkey,cii.addressTitle,cii.fixedTelephone,cii.invoicePhone,cii.invoiceUserName,cii.invoiceAddress,cii.status,cii.email,
+	cii.isDefault,date_format(cii.createTime,'%Y-%m-%d %H:%i:%s') createTime,date_format(cii.updateTime,'%Y-%m-%d %H:%i:%s') updateTime,cii.addUser,cc.companyName merchantName
+	from custom_invoice_info cii
+	left join channel_custom cc on cii.customkey=cc.customkey
+	where cii.status = 1
+	<if test="params.customkey!=null and params.customkey!=''">
+		and FIND_IN_SET(cii.customKey,#{params.customkey})
+	</if>
+	<if test="params.customKey!=null and params.customKey!=''">
+		and FIND_IN_SET(cii.customKey,#{params.customKey})
+	</if>
+	<if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like CONCAT('%',#{params.merchantName},'%' )
+	</if>
+	<if test="params.invoiceUserName!=null and params.invoiceUserName!=''">
+		and cii.invoiceUserName like CONCAT('%',#{params.invoiceUserName},'%' )
+	</if>
+	<if test="params.invoicePhone!=null and params.invoicePhone!=''">
+		and cii.invoicePhone like CONCAT('%',#{params.invoicePhone},'%' )
+	</if>
+	<if test="params.invoiceAddress!=null and params.invoiceAddress!=''">
+		and cii.invoiceAddress like CONCAT('%',#{params.invoiceAddress},'%' )
+	</if>
+	<if test="params.isDefault!=null and params.isDefault!=''">
+		and cii.isDefault =#{params.isDefault}
+	</if>
+	<if test="params.userName != '' and params.userName != null">
+		and (
+				cii.invoiceUserName like CONCAT('%',#{params.userName},'%' ) or
+				cii.invoicePhone like CONCAT('%',#{params.userName},'%')
+		)
+	</if>
+	order by IFNULL(cii.updateTime,cii.createTime) desc
+	</select>
+
+	<select id="getInvoicedAmountByParam" resultType="java.lang.String">
+		SELECT
+			cast(sum(invoiceAmount) AS DECIMAL (16,2)) invoicedAmount
+		FROM
+			qb_invoice_record
+		WHERE
+			STATUS = '4' AND customkey = #{customKey}
+		<if test="companyIds != null and companyIds != ''">
+				and FIND_IN_SET(companyId, #{companyIds})
+		</if>
+		<if test="startDate != null and startDate != ''">
+				AND date(createTime) &gt;= #{startDate}
+		</if>
+		<if test="endDate != null and endDate != ''">
+			AND date(createTime) &lt;= #{endDate}
+		</if>
+	</select>
+</mapper>

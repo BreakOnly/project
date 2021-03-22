@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.FundTransactionDao">
+
+
+  <select id="listCommissionByCustomKeys" resultType="com.jrmf.domain.UserCommission">
+    SELECT
+    cc.companyName merchantName,
+    qu.companyName,
+    c.companyName agentName,
+    qu.regType,
+    qu.createtime,
+    qu.sourceAmount,
+    qu.amount,
+    qu.sumFee,
+    qu.userName,
+    qu.documentType,
+    qu.certId,
+    qu.account,
+    qu.remark,
+    qu.contentName,
+    qu.batchName,
+    qu.batchDesc
+    FROM
+    qb_usercommission qu
+    LEFT JOIN channel_custom cc
+    ON cc.customkey = qu.originalId
+    LEFT JOIN channel_custom c
+    ON c.customkey = qu.businessChannelKey
+    WHERE qu.STATUS = '1' AND qu.regType = '00'
+    <if test="merchantName != null and merchantName != ''">
+      and cc.companyName like concat('%',#{merchantName},'%')
+    </if>
+    <if test="companyId != null and companyId != ''">
+      and qu.companyId = #{companyId}
+    </if>
+    <if test="agentName != null and agentName != ''">
+      and c.companyName like concat('%',#{agentName},'%')
+    </if>
+    <if test="startTime != null and startTime != ''">
+      and date(qu.createtime) &gt;= #{startTime}
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and date(qu.createtime) &lt;= #{endTime}
+    </if>
+    <if test="originalIds != null and originalIds != ''">
+      and FIND_IN_SET(qu.originalId, #{originalIds})
+    </if>
+    <if test="platform != null and platform != ''">
+      and qu.businessPlatform = #{platform}
+    </if>
+    <if test="companyIds != null and companyIds != ''">
+      and FIND_IN_SET(qu.companyId, #{companyIds})
+    </if>
+    order by qu.createTime desc
+  </select>
+
+  <select id="getSumRecharge" resultType="java.util.Map">
+    SELECT
+    cast(
+    sum( qc.rechargeAmount ) AS DECIMAL ( 16, 2 )) rechargeaMount,
+    COUNT( 1 ) AS rechargeCount
+    FROM
+    qb_channelhistory qc
+    LEFT JOIN channel_custom cc ON qc.customkey = cc.customkey
+    LEFT JOIN channel_custom c ON c.customkey = cc.businessChannel
+    WHERE
+    qc.transfertype = '1' and qc.status = '1'
+    <if test="merchantName != null and merchantName != ''">
+      and cc.companyName like concat('%',#{merchantName},'%')
+    </if>
+    <if test="companyId != null and companyId != ''">
+      and qc.recCustomkey = #{companyId}
+    </if>
+    <if test="companyIds != null and companyIds != ''">
+      and FIND_IN_SET(qc.recCustomkey, #{companyIds})
+    </if>
+    <if test="startTime != null and startTime != ''">
+      and date(qc.createtime) &gt;= #{startTime}
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and date(qc.createtime) &lt;= #{endTime}
+    </if>
+    <if test="originalIds != null and originalIds != ''">
+      and FIND_IN_SET(qc.customkey, #{originalIds})
+    </if>
+    <if test="platform!=null and platform!=''">
+      and cc.businessPlatform like CONCAT('%',#{platform},'%')
+    </if>
+    <if test="agentName != null and agentName != ''">
+      and c.companyName like concat('%',#{agentName},'%')
+    </if>
+  </select>
+
+  <select id="getSumTransaction" resultType="java.util.Map">
+    SELECT
+    cast(
+    sum( qu.amount ) AS DECIMAL ( 16, 2 )) transactionAmount,
+    COUNT( 1 ) AS transactionCount
+    FROM
+    qb_usercommission qu
+    LEFT JOIN channel_custom cc ON qu.originalId = cc.customkey
+    LEFT JOIN channel_custom c ON qu.businessChannelKey = c.customkey
+    WHERE
+    qu.STATUS = '1' AND qu.regType = '00'
+    <if test="merchantName != null and merchantName != ''">
+      and cc.companyName like concat('%',#{merchantName},'%')
+    </if>
+    <if test="companyId != null and companyId != ''">
+      and qu.companyId = #{companyId}
+    </if>
+    <if test="companyIds != null and companyIds != ''">
+      and FIND_IN_SET(qu.companyId, #{companyIds})
+    </if>
+    <if test="startTime != null and startTime != ''">
+      and date(qu.createtime) &gt;= #{startTime}
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and date(qu.createtime) &lt;= #{endTime}
+    </if>
+    <if test="originalIds != null and originalIds != ''">
+      and FIND_IN_SET(qu.originalId, #{originalIds})
+    </if>
+    <if test="agentName != null and agentName != ''">
+      and c.companyName like concat('%',#{agentName},'%')
+    </if>
+    <if test="platform != null and platform != ''">
+      and qu.businessPlatform = #{platform}
+    </if>
+  </select>
+
+  <select id="listFundSummary" resultType="com.jrmf.domain.vo.FundSummaryVO">
+    select
+    cc.companyName as customName,qc.companyName as companyName,
+    cast(ifnull(sum(d.rechargeAmount),0) as DECIMAL ( 16, 2 )) as rechargeAmount,sum(d.rechargeTimes) as rechargeTimes,
+    cast(ifnull(sum(d.commissionAmount),0) as DECIMAL ( 16, 2 )) as commissionAmount,sum(d.commissionTimes) as commissionTimes,ifnull(sum(d.fee),0) as fee
+    from qb_channelrelated as cr left join channel_custom as cc on cc.customkey=cr.originalId left join qb_company as qc on qc.userId=cr.companyId
+
+    right join   (
+
+    select customkey,recCustomkey as companyId,0 as commissionAmount,0 as commissionTimes,cast(sum(serviceFee) as DECIMAL ( 16, 2 )) as fee, cast(sum(rechargeAmount) as DECIMAL ( 16, 2 )) as rechargeAmount,count(1) as rechargeTimes from qb_channelhistory where 1=1
+
+    <if test="startTime != null">
+      AND createtime &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND createtime &lt; #{endTime}
+    </if>
+    <if test="companyId != null">
+      AND recCustomkey = #{companyId}
+    </if>
+     and transfertype=1 and status=1  and FIND_IN_SET(customkey,#{customList}) group by companyId,customkey
+    union all
+    select originalId as customkey,companyId,cast(sum(amount) as DECIMAL ( 16, 2 ))  as commissionAmount,count(1) as commissionTimes, cast(sum(sumfee) as DECIMAL ( 16, 2 )) as fee,0 as rechargeAmount,0 as rechargeTimes from qb_usercommission where 1=1
+
+    <if test="startTime != null">
+      AND createtime &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND createtime &lt; #{endTime}
+    </if>
+    <if test="companyId != null">
+      AND companyId = #{companyId}
+    </if>
+    and status=1 and  FIND_IN_SET(originalId,#{customList}) group by companyId,customkey
+
+    )d on d.companyId=cr.companyId and d.customkey=cr.originalId where
+    FIND_IN_SET(cr.originalId,#{customList})
+
+    <if test="customName != null">
+      AND cc.companyName like #{customName}
+    </if>
+
+    group by d.customkey,d.companyId
+  </select>
+
+  <select id="getRechargeSumInfo" resultType="com.jrmf.domain.vo.FundSummaryVO">
+    select cast(sum(rechargeAmount) as DECIMAL ( 16, 2 )) as rechargeAmount,count(1) as rechargeTimes from qb_channelhistory as his
+    left join channel_custom as cc on his.customkey=cc.customkey where 1=1
+    <if test="startTime != null">
+      AND his.createtime &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND his.createtime &lt; #{endTime}
+    </if>
+
+    <if test="companyId != null">
+      AND his.recCustomkey = #{companyId}
+    </if>
+    <if test="customName != null">
+      AND cc.companyName like #{customName}
+    </if>
+    <if test="customList != null">
+      and FIND_IN_SET(his.customkey,#{customList})
+    </if>
+
+    and his.transfertype=1 and his.status=1
+  </select>
+
+
+  <select id="getCommissionSumInfo" resultType="com.jrmf.domain.vo.FundSummaryVO">
+    select cast(sum(amount) as DECIMAL ( 16, 2 )) as commissionAmount,count(1) as commissionTimes from qb_usercommission as uc
+
+    left join channel_custom as cc on uc.originalId=cc.customkey where 1=1
+    <if test="startTime != null">
+      AND uc.createtime &gt;= #{startTime}
+    </if>
+    <if test="endTime != null">
+      AND uc.createtime &lt; #{endTime}
+    </if>
+
+    <if test="companyId != null">
+      AND uc.companyId = #{companyId}
+    </if>
+    <if test="customName != null">
+      AND cc.companyName like #{customName}
+    </if>
+    <if test="customList != null">
+      and FIND_IN_SET(uc.originalId,#{customList})
+    </if>
+
+    and uc.status=1
+  </select>
+
+</mapper>

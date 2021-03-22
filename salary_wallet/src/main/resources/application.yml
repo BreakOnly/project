@@ -1,0 +1,109 @@
+
+server:
+  port: ${server_port}
+
+spring:
+  cloud:
+    loadbalancer:
+      ribbon:
+        enabled: true
+      retry:
+        enabled: true
+  main:
+    allow-bean-definition-overriding: true
+    thymeleaf:
+      prefix: classpath:/templates/
+  redis:
+    cluster:
+      nodes: ${jediscluster.server_ip1}:${jediscluster.server_port1},${jediscluster.server_ip2}:${jediscluster.server_port2},${jediscluster.server_ip3}:${jediscluster.server_port3},${jediscluster.server_ip4}:${jediscluster.server_port4},${jediscluster.server_ip5}:${jediscluster.server_port5},${jediscluster.server_ip6}:${jediscluster.server_port6}
+  session:
+    store-type: redis
+  application:
+    name: salary-cloud-wallet
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka_default_zone}
+    enabled: true
+
+
+lifetime: 120
+warning:
+  time: 600000
+sign:
+  share:
+    time: 120000
+receipt:
+  wait:
+    time: 120000
+  tmp:
+    path: ${receipt_tmp_path}
+alibaba:
+  appcode: 967b8ae4f53a4ff0b44541f501eb095c
+splitexeclpath: ${split_execl_path}
+ftppath: ${ftp_path}
+os.id: ${os_id}
+
+
+#  分布式任务调度框架
+xxl:
+  job:
+    admin:
+      addresses: ${xxl_address}
+    accessToken:
+    executor:
+      appname: ${xxl_app_name}
+      address:
+      ### xxl-job executor server-info
+      ip: ${xxl_ip}
+      port: ${xxl_port}
+      ### xxl-job executor log-path
+      logpath: /data/applogs/xxl-job/jobhandler
+      ### xxl-job executor log-retention-days
+      logretentiondays: 30
+
+
+feign:
+  client:
+    config:
+      feignName:
+        connectTimeout: 3000
+        readTimeout: 20000
+ribbon:
+  okhttp:
+    enabled: true
+  restclient:
+    enabled: true
+  ReadTimeout: 20000 # 请求处理的超时时间
+  ConnectTimeout: 3000 # 请求连接的超时时间
+  #MaxAutoRetries: 0
+  #OkToRetryOnAllOperations: false #Whether all operations can be retried for this client
+  OkToRetryOnAllOperations: true
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 1
+
+
+platformCompanyId: ${platform_company_id}
+
+company:
+  agreement:
+    file:
+      domain: ${company_agreement_file_domain}
+
+payLockTime: ${pay_lock_time}
+jrmfMonthAmountLimit: ${jrmf_month_amount_limit}
+jrmfLimitState: 1
+
+fileRepositoryRootPath: ${file.repository_root_path}
+filePublishUrlContext: ${file.publish_url_context}
+
+recharge:
+  letter:
+    tmp:
+      path: ${recharge.letter.tmp.path}
+fonts:
+  path: ${fonts.path}
+
+companyId: ${company_id}
+receiptUrl: ${receipt_url}

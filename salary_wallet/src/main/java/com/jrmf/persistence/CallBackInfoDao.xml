@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CallBackInfoDao">
+
+    <insert id="addCallBackInfo">
+        INSERT INTO callback_info (create_time, last_update_time,notify_url,
+        notify_count, notify_content, http_status, http_result,serial_no,third_no,status,customkey,
+        prepare_a,prepare_b) VALUES (now(), now(), #{notifyUrl},0, #{notifyContent},
+        #{httpStatus}, #{httpResult}, #{serialNo},#{thirdNo}, #{status},#{customkey},#{prepareA},#{prepareB})
+    </insert>
+    <update id="updateCallBackInfo">
+        UPDATE callback_info SET  last_update_time=#{lastUpdateTime}, notify_url=#{notifyUrl},
+        notify_count=#{notifyCount}, notify_content=#{notifyContent}, http_status=#{httpStatus},
+        http_result=#{httpResult}, third_no=#{thirdNo}, serial_no=#{serialNo}, status=#{status}
+        WHERE (id=#{id}) LIMIT 1
+    </update>
+    <select id="getCallBackInfoBySerialNo" resultType="com.jrmf.domain.CallBackInfo">
+        SELECT * FROM callback_info where serial_no = #{serialNo} LIMIT 1
+    </select>
+    <select id="getNotifyCallBackInfos" resultType="com.jrmf.domain.CallBackInfo">
+        SELECT * FROM callback_info where status != 1 and notify_count &lt; 10
+
+    </select>
+    <select id="getCallBackInfoByParams" resultType="com.jrmf.domain.CallBackInfo">
+        SELECT * FROM callback_info where 1=1
+        <if test="customkey !=null and customkey !=''">
+            and  customkey = #{customkey}
+        </if>
+        <if test="thirdNo !=null and thirdNo !=''">
+            and  third_no = #{thirdNo}
+        </if>
+    </select>
+</mapper>

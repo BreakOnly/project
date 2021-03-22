@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.TPolicyDao" >
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.TPolicy" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="contentTitle" property="contentTitle" jdbcType="VARCHAR" />
+    <result column="contentDesc" property="contentDesc" jdbcType="VARCHAR" />
+    <result column="contentType" property="contentType" jdbcType="INTEGER" />
+    <result column="contentChildType" property="contentChildType" jdbcType="INTEGER" />
+    <result column="contentUrl" property="contentUrl" jdbcType="VARCHAR" />
+    <result column="contentOrder" property="contentOrder" jdbcType="VARCHAR" />
+    <result column="publishArea" property="publishArea" jdbcType="VARCHAR" />
+    <result column="repostsCount" property="repostsCount" jdbcType="INTEGER" />
+    <result column="visitsCount" property="visitsCount" jdbcType="INTEGER" />
+    <result column="attitudesCount" property="attitudesCount" jdbcType="INTEGER" />
+    <result column="collectCount" property="collectCount" jdbcType="INTEGER" />
+    <result column="createTime" property="createTime" jdbcType="VARCHAR" />
+    <result column="updateTime" property="updateTime" jdbcType="VARCHAR" />
+    <result column="publishTime" property="publishTime" jdbcType="VARCHAR" />
+    <result column="auditStatus" property="auditStatus" jdbcType="INTEGER" />
+    <result column="publishStatus" property="publishStatus" jdbcType="INTEGER" />
+    <result column="operatorName" property="operatorName" jdbcType="VARCHAR" />
+    <result column="checkName" property="checkName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, contentTitle, contentDesc, contentType, contentChildType, contentUrl, contentOrder,
+    publishArea, repostsCount, visitsCount, attitudesCount, collectCount, createTime,
+    updateTime, publishTime, auditStatus, publishStatus, operatorName, checkName
+  </sql>
+
+  <sql id="Manage_Column_List" >
+    id, contentTitle,contentDesc,contentType,contentChildType,auditStatus,publishTime,publishArea,contentOrder,visitsCount,createTime,updateTime
+  </sql>
+
+  <select id="selectByExample" parameterType="com.jrmf.domain.TPolicy" resultType="java.util.Map">
+    SELECT
+    tp.id,
+    tp.contentTitle,
+    tp.contentDesc,
+    tp.contentType,
+    tp.contentUrl,
+    tpt1.typeName contentTypeName,
+    tp.contentChildType,
+    tpt2.typeName contentChildTypeName,
+    tp.auditStatus,
+    tp.publishTime,
+    tp.publishArea,
+    ca.regionName publishAreaName,
+    tp.contentOrder,
+    tp.visitsCount,
+    tp.createTime,
+    tp.updateTime
+    FROM
+    t_policy tp
+    LEFT JOIN t_policy_type tpt1 ON tpt1.id = tp.contentType
+    LEFT JOIN t_policy_type tpt2 ON tpt2.id = tp.contentChildType
+    LEFT JOIN channel_areas ca ON ca.regionCode = tp.publishArea
+    <trim prefix=" where " suffixOverrides="and">
+      tp.publishStatus = 0 and
+      <if test="auditStatus !=null">
+        tp.auditStatus = #{auditStatus} and
+      </if>
+      <if test="contentType !=null">
+        tp.contentType = #{contentType} and
+      </if>
+      <if test="contentChildType !=null">
+        tp.contentChildType = #{contentChildType} and
+      </if>
+      <if test="startVisitsCount !=null">
+        tp.visitsCount &gt;= #{startVisitsCount} and
+      </if>
+      <if test="endVisitsCount !=null">
+        tp.visitsCount &lt;= #{endVisitsCount} and
+      </if>
+      <if test="startOrder !=null and startOrder !=''">
+        tp.contentOrder &gt;= #{startOrder} and
+      </if>
+      <if test="endOrder !=null and endOrder !=''">
+        tp.contentOrder &lt;= #{endOrder} and
+      </if>
+      <if test="publishArea !=null and publishArea !=''">
+        tp.publishArea = #{publishArea} and
+      </if>
+      <if test="startCreateTime !=null and startCreateTime !=''">
+        date(tp.createTime) &gt;= #{startCreateTime} and
+      </if>
+      <if test="endCreateTime !=null and endCreateTime !=''">
+        date(tp.createTime) &lt;= #{endCreateTime} and
+      </if>
+      <if test="startPublishTime !=null and startPublishTime !=''">
+        date(tp.publishTime) &gt;= #{startCreateTime} and
+      </if>
+      <if test="endPublishTime !=null and endPublishTime !=''">
+        date(tp.publishTime) &lt;= #{endCreateTime} and
+      </if>
+      <if test="contentTitle !=null and contentTitle !=''">
+        tp.contentTitle like concat('%', #{contentTitle}, '%') and
+      </if>
+      <if test="contentDesc !=null and contentDesc !=''">
+        tp.contentDesc like concat('%', #{contentDesc}, '%') and
+      </if>
+    </trim>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_policy
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    update t_policy
+    set
+      updateTime = now(),
+      publishStatus = 1
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.jrmf.domain.TPolicy" >
+    insert into t_policy (id, contentTitle, contentDesc, 
+      contentType, contentChildType, contentUrl, 
+      contentOrder, publishArea, repostsCount, 
+      visitsCount, attitudesCount, collectCount, 
+      createTime, updateTime, publishTime, 
+      auditStatus, publishStatus, operatorName, 
+      checkName)
+    values (#{id,jdbcType=INTEGER}, #{contentTitle,jdbcType=VARCHAR}, #{contentDesc,jdbcType=VARCHAR}, 
+      #{contentType,jdbcType=INTEGER}, #{contentChildType,jdbcType=INTEGER}, #{contentUrl,jdbcType=VARCHAR}, 
+      #{contentOrder,jdbcType=VARCHAR}, #{publishArea,jdbcType=VARCHAR}, #{repostsCount,jdbcType=INTEGER},
+      #{visitsCount,jdbcType=INTEGER}, #{attitudesCount,jdbcType=INTEGER}, #{collectCount,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{publishTime,jdbcType=VARCHAR},
+      #{auditStatus,jdbcType=INTEGER}, #{publishStatus,jdbcType=INTEGER}, #{operatorName,jdbcType=VARCHAR}, 
+      #{checkName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.domain.TPolicy" >
+    insert into t_policy
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="contentTitle != null" >
+        contentTitle,
+      </if>
+      <if test="contentDesc != null" >
+        contentDesc,
+      </if>
+      <if test="contentType != null" >
+        contentType,
+      </if>
+      <if test="contentChildType != null" >
+        contentChildType,
+      </if>
+      <if test="contentUrl != null" >
+        contentUrl,
+      </if>
+      <if test="contentOrder != null" >
+        contentOrder,
+      </if>
+      <if test="publishArea != null" >
+        publishArea,
+      </if>
+      <if test="repostsCount != null" >
+        repostsCount,
+      </if>
+      <if test="visitsCount != null" >
+        visitsCount,
+      </if>
+      <if test="attitudesCount != null" >
+        attitudesCount,
+      </if>
+      <if test="collectCount != null" >
+        collectCount,
+      </if>
+        createTime,
+        updateTime,
+      <if test="publishTime != null" >
+        publishTime,
+      </if>
+      <if test="auditStatus != null" >
+        auditStatus,
+      </if>
+      <if test="publishStatus != null" >
+        publishStatus,
+      </if>
+      <if test="operatorName != null" >
+        operatorName,
+      </if>
+      <if test="checkName != null" >
+        checkName,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="contentTitle != null" >
+        #{contentTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="contentDesc != null" >
+        #{contentDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="contentType != null" >
+        #{contentType,jdbcType=INTEGER},
+      </if>
+      <if test="contentChildType != null" >
+        #{contentChildType,jdbcType=INTEGER},
+      </if>
+      <if test="contentUrl != null" >
+        #{contentUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="contentOrder != null" >
+        #{contentOrder,jdbcType=VARCHAR},
+      </if>
+      <if test="publishArea != null" >
+        #{publishArea,jdbcType=VARCHAR},
+      </if>
+      <if test="repostsCount != null" >
+        #{repostsCount,jdbcType=INTEGER},
+      </if>
+      <if test="visitsCount != null" >
+        #{visitsCount,jdbcType=INTEGER},
+      </if>
+      <if test="attitudesCount != null" >
+        #{attitudesCount,jdbcType=INTEGER},
+      </if>
+      <if test="collectCount != null" >
+        #{collectCount,jdbcType=INTEGER},
+      </if>
+        now(),
+        now(),
+      <if test="publishTime != null" >
+        #{publishTime,jdbcType=VARCHAR},
+      </if>
+      <if test="auditStatus != null" >
+        #{auditStatus,jdbcType=INTEGER},
+      </if>
+      <if test="publishStatus != null" >
+        #{publishStatus,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="checkName != null" >
+        #{checkName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.TPolicy" >
+    update t_policy
+    <set >
+      <if test="contentTitle != null" >
+        contentTitle = #{contentTitle,jdbcType=VARCHAR},
+      </if>
+      <if test="contentDesc != null" >
+        contentDesc = #{contentDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="contentType != null" >
+        contentType = #{contentType,jdbcType=INTEGER},
+      </if>
+      <if test="contentChildType != null" >
+        contentChildType = #{contentChildType,jdbcType=INTEGER},
+      </if>
+      <if test="contentUrl != null" >
+        contentUrl = #{contentUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="contentOrder != null" >
+        contentOrder = #{contentOrder,jdbcType=VARCHAR},
+      </if>
+      <if test="publishArea != null" >
+        publishArea = #{publishArea,jdbcType=VARCHAR},
+      </if>
+      <if test="repostsCount != null" >
+        repostsCount = #{repostsCount,jdbcType=INTEGER},
+      </if>
+      <if test="visitsCount != null" >
+        visitsCount = #{visitsCount,jdbcType=INTEGER},
+      </if>
+      <if test="attitudesCount != null" >
+        attitudesCount = #{attitudesCount,jdbcType=INTEGER},
+      </if>
+      <if test="collectCount != null" >
+        collectCount = #{collectCount,jdbcType=INTEGER},
+      </if>
+        updateTime = now(),
+      <if test="publishTime != null" >
+        publishTime = #{publishTime,jdbcType=VARCHAR},
+      </if>
+      <if test="auditStatus != null" >
+        auditStatus = #{auditStatus,jdbcType=INTEGER},
+      </if>
+      <if test="publishStatus != null" >
+        publishStatus = #{publishStatus,jdbcType=INTEGER},
+      </if>
+      <if test="operatorName != null" >
+        operatorName = #{operatorName,jdbcType=VARCHAR},
+      </if>
+      <if test="checkName != null" >
+        checkName = #{checkName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.TPolicy" >
+    update t_policy
+    set contentTitle = #{contentTitle,jdbcType=VARCHAR},
+      contentDesc = #{contentDesc,jdbcType=VARCHAR},
+      contentType = #{contentType,jdbcType=INTEGER},
+      contentChildType = #{contentChildType,jdbcType=INTEGER},
+      contentUrl = #{contentUrl,jdbcType=VARCHAR},
+      contentOrder = #{contentOrder,jdbcType=VARCHAR},
+      publishArea = #{publishArea,jdbcType=VARCHAR},
+      repostsCount = #{repostsCount,jdbcType=INTEGER},
+      visitsCount = #{visitsCount,jdbcType=INTEGER},
+      attitudesCount = #{attitudesCount,jdbcType=INTEGER},
+      collectCount = #{collectCount,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      publishTime = #{publishTime,jdbcType=VARCHAR},
+      auditStatus = #{auditStatus,jdbcType=INTEGER},
+      publishStatus = #{publishStatus,jdbcType=INTEGER},
+      operatorName = #{operatorName,jdbcType=VARCHAR},
+      checkName = #{checkName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectAreaByRootCode" resultType="com.jrmf.domain.ChannelAreas">
+        select regionCode code,regionName name from channel_areas
+        where parentRegionCode &lt;= #{parentCode} order by regionCode
+    </select>
+
+  <select id="selectPolicyTypeByCode" resultType="java.util.Map">
+        select id typeId,typeName typeName from t_policy_type where parentId = #{parentCode}
+    </select>
+
+  <select id="selectH5ListByType" resultType="java.util.Map">
+        select id,contentTitle,contentUrl from t_policy
+        <trim prefix=" where " suffixOverrides="and">
+          publishStatus=0 and auditStatus=2 and TIMESTAMPDIFF(SECOND,publishTime,NOW( )) &gt; 0 and
+          <if test="type !=null">
+            (contentType = #{type} or contentChildType = #{type}) and
+          </if>
+          <if test="keyword !=null and keyword !=''">
+            (contentTitle like concat('%', #{keyword}, '%') or contentDesc like concat('%', #{keyword}, '%')) and
+          </if>
+        </trim>
+    </select>
+
+  <resultMap id="policyGroup" type="com.jrmf.domain.TPolicyGroup">
+    <id property="typeName" column="typeName" />
+    <collection property="policyList" ofType="com.jrmf.domain.TPolicyList">
+      <result property="id" column="id" />
+      <result property="contentTitle" column="contentTitle" />
+      <result property="contentUrl" column="contentUrl" />
+    </collection>
+  </resultMap>
+
+  <select id="selectH5ListByArea" resultMap="policyGroup">
+    select tpt.typeName,tp.id,tp.contentTitle,tp.contentUrl from t_policy tp left join t_policy_type tpt on tpt.parentId=tp.contentType and tpt.id=tp.contentChildType
+    <trim prefix=" where " suffixOverrides="and">
+      tpt.parentId = #{parentId} and tp.publishStatus=0 and tp.auditStatus=2 and TIMESTAMPDIFF(SECOND,tp.publishTime,NOW( )) &gt; 0 and
+      <if test="areaCode !=null and areaCode !=''">
+        tp.publishArea = #{areaCode} and
+      </if>
+      <if test="keyword !=null and keyword !=''">
+        (tp.contentTitle like concat('%', #{keyword}, '%') or tp.contentDesc like concat('%', #{keyword}, '%')) and
+      </if>
+    </trim>
+    order by tp.contentOrder asc
+  </select>
+
+    <delete id="updateVisitsCount" parameterType="java.lang.Integer" >
+        update t_policy
+        set
+          visitsCount = visitsCount + 1
+        where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+    <select id="selectPolicyTypeStr" resultType="java.lang.String">
+        select typeName from t_policy_type where parentId = #{parentCode}
+    </select>
+</mapper>

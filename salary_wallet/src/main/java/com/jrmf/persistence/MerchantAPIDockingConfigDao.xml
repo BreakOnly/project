@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.taxsettlement.api.MerchantAPIDockingConfigDao">
+
+	<resultMap type="com.jrmf.taxsettlement.api.MerchantAPIDockingProfileDO" id="DOCKING_PROFILE">
+		<id column="MERCHANT_ID" property="merchantId" jdbcType="VARCHAR" />
+		<result column="companyId" property="companyId" jdbcType="VARCHAR" />
+		<result column="API_DOCKING_MODE" property="apiDockingMode" jdbcType="INTEGER" />
+		<result column="SIGN_TYPE" property="signType" jdbcType="VARCHAR" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+		<result column="customName" property="customName" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap type="com.jrmf.taxsettlement.api.MerchantAPIDockingConfigDO" id="DOCKING_CONFIG">
+		<id column="MERCHANT_ID" property="merchantId" jdbcType="VARCHAR" />
+		<result column="API_DOCKING_MODE" property="apiDockingMode" jdbcType="INTEGER" />
+		<result column="SIGN_TYPE" property="signType" jdbcType="VARCHAR" />
+		<result column="SIGN_VERIFICATION_KEY" property="signVerificationKey" jdbcType="VARCHAR" />
+		<result column="SIGN_GENERATION_KEY" property="signGenerationKey" jdbcType="VARCHAR" />
+		<result column="NOTIFY_URL" property="notifyUrl" jdbcType="VARCHAR" />
+		<result column="ACCESS_IP_WHITE_LIST_MODE" property="accessIPWhiteListMode" jdbcType="VARCHAR" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap type="com.jrmf.taxsettlement.api.MerchantAccessableAPIConfigDO" id="ACCESSABLE_API_CONFIG">
+		<result column="MERCHANT_ID" property="merchantId" jdbcType="VARCHAR" />
+		<result column="API_KEY" property="apiKey" jdbcType="VARCHAR" />
+		<result column="CONCURRENT_FLUX" property="concurrentFlux" jdbcType="INTEGER" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="countMerchantAPIDockingProfile" parameterType="map" resultType="int">
+			SELECT
+			COUNT( tdc.MERCHANT_ID )
+			FROM
+			t_merchant_docking_config tdc
+			LEFT JOIN channel_custom cc ON cc.customkey = tdc.MERCHANT_ID
+			WHERE
+			1 = 1
+			<if test="merchantId != null and merchantId != ''">
+				AND tdc.MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+			</if>
+			<if test="apiDockingMode != null">
+				AND tdc.API_DOCKING_MODE = #{apiDockingMode, jdbcType=INTEGER}
+			</if>
+			<if test="signType != null and signType != ''">
+				AND tdc.SIGN_TYPE = #{signType, jdbcType=VARCHAR}
+			</if>
+			<if test="customName != null and customName != ''">
+				AND  cc.companyName like concat('%', #{customName}, '%')
+			</if>
+	</select>
+	
+	<select id="listMerchantAPIDockingProfile" parameterType="map" resultMap="DOCKING_PROFILE">
+		SELECT
+			tdc.MERCHANT_ID, tdc.API_DOCKING_MODE, tdc.SIGN_TYPE, tdc.UPDATE_TIME, tdc.CREATE_TIME, cc.companyName customName
+		FROM
+			t_merchant_docking_config tdc
+			LEFT JOIN channel_custom cc ON cc.customkey = tdc.MERCHANT_ID
+			WHERE
+			1 = 1
+			<if test="merchantId != null and merchantId != ''">
+				AND tdc.MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+			</if>
+			<if test="apiDockingMode != null">
+				AND tdc.API_DOCKING_MODE = #{apiDockingMode, jdbcType=INTEGER}
+			</if>
+			<if test="apiDockingModes != null">
+				AND tdc.API_DOCKING_MODE in
+				<foreach collection="apiDockingModes" item="apiDockingMode" index="index"
+             		open="(" close=")" separator=",">
+      			#{apiDockingMode, jdbcType=INTEGER}
+    			</foreach> 
+			</if>
+			<if test="signType != null and signType != ''">
+				AND tdc.SIGN_TYPE = #{signType, jdbcType=VARCHAR}
+			</if>
+			<if test="customName != null and customName != ''">
+				AND  cc.companyName like concat('%', #{customName}, '%')
+			</if>
+	        <if test="recordIndex !=null and pageSize != null">
+            	limit #{recordIndex}, #{pageSize}
+        	</if>
+	</select>
+
+	<insert id="addMerchantApiDockingConfig" parameterType="String">
+		INSERT INTO t_merchant_docking_config (
+			MERCHANT_ID, 
+			API_DOCKING_MODE, 
+			SIGN_TYPE,
+			ACCESS_IP_WHITE_LIST_MODE,
+			CREATE_TIME
+		) VALUES (
+			#{merchantId, jdbcType=VARCHAR},
+			0,
+			'SHA256',
+			'*',
+			now()
+		)
+	</insert>
+		
+	<select id="getMerchantAPIDockingConfig" resultMap="DOCKING_CONFIG">
+		SELECT * FROM t_merchant_docking_config
+		WHERE
+			MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+	</select>
+
+	<update id="updateMerchantApiDockingConfig" parameterType="map">
+		UPDATE t_merchant_docking_config
+		SET
+			MERCHANT_ID = MERCHANT_ID
+			<if test="apiDockingMode != null">
+				,API_DOCKING_MODE = #{apiDockingMode, jdbcType=INTEGER}
+			</if>
+			<if test="signType != null and signType != ''">
+				,SIGN_TYPE = #{signType, jdbcType=VARCHAR}
+			</if>
+			<if test="signVerificationKey != null and signVerificationKey != ''">
+				,SIGN_VERIFICATION_KEY = #{signVerificationKey, jdbcType=VARCHAR}
+			</if>
+			<if test="signGenerationKey != null and signGenerationKey != ''">
+				,SIGN_GENERATION_KEY = #{signGenerationKey, jdbcType=VARCHAR}
+			</if>
+			<if test="notifyUrl != null and notifyUrl != ''">
+				,NOTIFY_URL = #{notifyUrl, jdbcType=VARCHAR}
+			</if>
+			<if test="accessIPWhiteListMode != null and accessIPWhiteListMode != ''">
+				,ACCESS_IP_WHITE_LIST_MODE = #{accessIPWhiteListMode, jdbcType=VARCHAR}
+			</if>
+		WHERE
+			MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+	</update>	
+
+	<select id="listMerchantAccessableAPIKey" resultMap="ACCESSABLE_API_CONFIG">
+		SELECT MERCHANT_ID, API_KEY, CONCURRENT_FLUX, UPDATE_TIME FROM t_merchant_accessable_api
+		WHERE
+			MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="removeMerchantAccessableAPIKeys" parameterType="map">
+		DELETE FROM t_merchant_accessable_api 
+		WHERE
+			MERCHANT_ID = #{merchantId, jdbcType=VARCHAR};	
+	</delete>
+	
+	<update id="addMerchantAccessableAPIKeys" parameterType="map">		
+		INSERT INTO t_merchant_accessable_api(
+			MERCHANT_ID,
+			API_KEY,
+			CONCURRENT_FLUX,
+			UPDATE_TIME
+		) VALUES  
+		<foreach collection ="accessableAPIKeys.entrySet()" item="value" index= "key" separator =",">
+		(
+		    #{merchantId, jdbcType=VARCHAR}, 
+        	#{key, jdbcType=VARCHAR},
+        	#{value, jdbcType=INTEGER},
+        	now()
+		)
+        </foreach >	
+	</update>
+
+	<select id="listMerchantCompanyAPIDockingProfile" parameterType="map" resultMap="DOCKING_PROFILE">
+		SELECT
+		tdc.MERCHANT_ID,
+		qc.companyId,
+		tdc.API_DOCKING_MODE,
+		tdc.SIGN_TYPE,
+		tdc.UPDATE_TIME,
+		tdc.CREATE_TIME
+		FROM
+		t_merchant_docking_config tdc
+		LEFT JOIN qb_channelrelated qc ON qc.originalId = tdc.MERCHANT_ID
+		WHERE
+		qc.companyId IS NOT NULL
+		and tdc.API_DOCKING_MODE != 0
+		<if test="merchantId != null and merchantId != ''">
+			AND tdc.MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+		</if>
+		<if test="apiDockingMode != null">
+			AND tdc.API_DOCKING_MODE = #{apiDockingMode, jdbcType=INTEGER}
+		</if>
+		<if test="apiDockingModes != null">
+			AND tdc.API_DOCKING_MODE in
+			<foreach collection="apiDockingModes" item="apiDockingMode" index="index"
+				open="(" close=")" separator=",">
+				#{apiDockingMode, jdbcType=INTEGER}
+			</foreach>
+		</if>
+		<if test="signType != null and signType != ''">
+			AND tdc.SIGN_TYPE = #{signType, jdbcType=VARCHAR}
+		</if>
+		GROUP BY
+		tdc.MERCHANT_ID,
+		qc.companyId
+	</select>
+	
+</mapper>

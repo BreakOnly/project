@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.ChannelRouteDao">
+
+    <insert id="insertChannel" parameterType="com.jrmf.domain.PaymentChannel">
+        INSERT INTO business_payment_channel
+        <trim prefix="(" suffixOverrides="," suffix=")">
+            <if test="pathNo != null and pathNo != ''">
+                pathNo,
+            </if>
+            <if test="pathName != null and pathName != ''">
+                pathName,
+            </if>
+            <if test="pathDesc != null and pathDesc != ''">
+                pathDesc,
+            </if>
+            <if test="pathType != null">
+                pathType,
+            </if>
+            <if test="pathKeyType != null">
+                pathKeyType,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="values(" suffix=")" suffixOverrides=",">
+            <if test="pathNo != null and pathNo != ''">
+                #{pathNo},
+            </if>
+            <if test="pathName != null and pathName != ''">
+                #{pathName},
+            </if>
+            <if test="pathDesc != null and pathDesc != ''">
+                #{pathDesc},
+            </if>
+            <if test="pathType != null">
+                #{pathType},
+            </if>
+            <if test="pathKeyType != null">
+                #{pathKeyType},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <insert id="insertBusinessPaymentRoute" parameterType="com.jrmf.domain.PaymentChannelRoute">
+        INSERT INTO business_payment_route
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                companyId,
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                paymentType,
+            </if>
+            <if test="pathNo != null and pathNo != ''">
+                pathNo,
+            </if>
+            <if test="customKey != null and customKey != ''">
+                customKey,
+            </if>
+            <if test="isDefault != null">
+                `default`,
+            </if>
+            <if test="isSubAccount != null">
+                isSubAccount,
+            </if>
+            <if test="keyWords != null and keyWords != ''">
+                keyWords,
+            </if>
+            <if test="containKeyWords != null and containKeyWords != ''">
+                containKeyWords,
+            </if>
+            <if test="shadowAcctNo != null and shadowAcctNo != ''">
+                shadowAcctNo,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                #{paymentType},
+            </if>
+            <if test="pathNo != null and pathNo != ''">
+                #{pathNo},
+            </if>
+            <if test="customKey != null and customKey != ''">
+                #{customKey},
+            </if>
+            <if test="isDefault != null">
+                #{isDefault},
+            </if>
+            <if test="isSubAccount != null">
+                #{isSubAccount},
+            </if>
+            <if test="keyWords != null and keyWords != ''">
+                #{keyWords},
+            </if>
+            <if test="containKeyWords != null and containKeyWords != ''">
+                #{containKeyWords},
+            </if>
+            <if test="shadowAcctNo != null and shadowAcctNo != ''">
+                #{shadowAcctNo},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <insert id="insertCompanyPaymentRelation" parameterType="com.jrmf.domain.PaymentChannelRoute">
+        INSERT INTO company_payment_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                companyId,
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                paymentType,
+            </if>
+            <if test="implementor != null and implementor != ''">
+                implementor,
+            </if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                #{paymentType},
+            </if>
+            <if test="implementor != null and implementor != ''">
+                #{implementor},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="insertCompanyPaychannelRelation" parameterType="com.jrmf.domain.PaymentChannelRoute">
+        INSERT INTO company_paychannel_relation
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                companyId,
+            </if>
+            <if test="pathNo != null and pathNo != ''">
+                pathNo,
+            </if>
+            <if test="corporationAccount != null and corporationAccount != ''">
+                corporationAccount,
+            </if>
+            <if test="corporationAccountName != null and corporationAccountName != ''">
+                corporationAccountName,
+            </if>
+            <if test="corpToBankStandardCode != null and corpToBankStandardCode != ''">
+                corpToBankStandardCode,
+            </if>
+            <if test="corporationName != null and corporationName != ''">
+                corporationName,
+            </if>
+            <if test="preHost != null and preHost != ''">
+                preHost,
+            </if>
+            <if test="remotePort != null and remotePort != ''">
+                remotePort,
+            </if>
+            <if test="readTimeOut != null and readTimeOut != ''">
+                readTimeOut,
+            </if>
+            <if test="apiKey != null and apiKey != ''">
+                apiKey,
+            </if>
+            <if test="connectTimeOut != null and connectTimeOut != ''">
+                connectTimeOut,
+            </if>
+            <if test="status != null and status != ''">
+                status,
+            </if>
+            <if test="payPublicKey != null and payPublicKey != ''">
+                payPublicKey,
+            </if>
+            <if test="payPrivateKey != null and payPrivateKey != ''">
+                payPrivateKey,
+            </if>
+            <if test="parameter1 != null">
+                parameter1,
+            </if>
+            <if test="parameter2 != null">
+                parameter2,
+            </if>
+            <if test="parameter3 != null">
+                parameter3,
+            </if>
+            <if test="parameter4 != null">
+                parameter4,
+            </if>
+            <if test="parameter5 != null">
+                parameter5,
+            </if>
+            <if test="parameter6 != null">
+                parameter6,
+            </if>
+            <if test="parameter7 != null">
+                parameter7,
+            </if>
+            <if test="parameter8 != null">
+                parameter8,
+            </if>
+            <if test="parameter9 != null">
+                parameter9,
+            </if>
+            createTime,
+            updateTime,
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="pathNo != null and pathNo != ''">
+                #{pathNo},
+            </if>
+            <if test="corporationAccount != null and corporationAccount != ''">
+                #{corporationAccount},
+            </if>
+            <if test="corporationAccountName != null and corporationAccountName != ''">
+                #{corporationAccountName},
+            </if>
+            <if test="corpToBankStandardCode != null and corpToBankStandardCode != ''">
+                #{corpToBankStandardCode},
+            </if>
+            <if test="corporationName != null and corporationName != ''">
+                #{corporationName},
+            </if>
+            <if test="preHost != null and preHost != ''">
+                #{preHost},
+            </if>
+            <if test="remotePort != null and remotePort != ''">
+                #{remotePort},
+            </if>
+            <if test="readTimeOut != null and readTimeOut != ''">
+                #{readTimeOut},
+            </if>
+            <if test="apiKey != null and apiKey != ''">
+                #{apiKey},
+            </if>
+            <if test="connectTimeOut != null and connectTimeOut != ''">
+                #{connectTimeOut},
+            </if>
+            <if test="status != null and status != ''">
+                #{status},
+            </if>
+            <if test="payPublicKey != null and payPublicKey != ''">
+                #{payPublicKey},
+            </if>
+            <if test="payPrivateKey != null and payPrivateKey != ''">
+                #{payPrivateKey},
+            </if>
+            <if test="parameter1 != null">
+                #{parameter1},
+            </if>
+            <if test="parameter2 != null">
+                #{parameter2},
+            </if>
+            <if test="parameter3 != null">
+                #{parameter3},
+            </if>
+            <if test="parameter4 != null">
+                #{parameter4},
+            </if>
+            <if test="parameter5 != null">
+                #{parameter5},
+            </if>
+            <if test="parameter6 != null">
+                #{parameter6},
+            </if>
+            <if test="parameter7 != null">
+                #{parameter7},
+            </if>
+            <if test="parameter8 != null">
+                #{parameter8},
+            </if>
+            <if test="parameter9 != null">
+                #{parameter9},
+            </if>
+            now(),
+            now(),
+        </trim>
+    </insert>
+
+    <delete id="deleteCompanyPaychannelRelation">
+        DELETE FROM company_paychannel_relation WHERE companyId = #{companyId} AND pathNo = #{pathNo}
+    </delete>
+
+    <delete id="deleteBusinessPaymentRoute">
+        DELETE FROM business_payment_route WHERE companyId = #{companyId} AND paymentType = #{paymentType} AND pathNo = #{pathNo} AND `default` = #{isDefault}
+        <choose>
+            <when test="customKey != null and customKey != ''">
+                AND customKey = #{customKey}
+            </when>
+            <otherwise>
+                AND (customKey = '' OR customKey is null)
+            </otherwise>
+        </choose>
+    </delete>
+
+    <delete id="deleteCompanyPaymentRelation">
+        DELETE FROM company_payment_relation WHERE companyId = #{companyId} AND paymentType = #{paymentType}
+    </delete>
+
+    <update id="updateBusinessPaymentRoute" parameterType="com.jrmf.domain.PaymentChannelRoute">
+        UPDATE business_payment_route
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId},
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                paymentType = #{paymentType},
+            </if>
+            <if test="pathNo != null and pathNo != ''">
+                pathNo = #{pathNo},
+            </if>
+            <if test="customKey != null and customKey != ''">
+                customKey = #{customKey},
+            </if>
+            <if test="isDefault != null">
+                `default` = #{isDefault},
+            </if>
+            <if test="isSubAccount != null">
+                isSubAccount = #{isSubAccount},
+            </if>
+            <if test="keyWords != null and keyWords != ''">
+                keyWords = #{keyWords},
+            </if>
+            <if test="containKeyWords != null and containKeyWords != ''">
+                containKeyWords = #{containKeyWords},
+            </if>
+            <if test="shadowAcctNo != null and shadowAcctNo != ''">
+                shadowAcctNo = #{shadowAcctNo},
+            </if>
+            updateTime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateCompanyPaychannelRelation" parameterType="com.jrmf.domain.PaymentChannelRoute">
+        UPDATE company_paychannel_relation
+        <trim prefix="set" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId},
+            </if>
+            <if test="pathNo != null and pathNo != ''">
+                pathNo = #{pathNo},
+            </if>
+            <if test="corporationAccount != null and corporationAccount != ''">
+                corporationAccount = #{corporationAccount},
+            </if>
+            <if test="corporationAccountName != null and corporationAccountName != ''">
+                corporationAccountName = #{corporationAccountName},
+            </if>
+            <if test="corpToBankStandardCode != null and corpToBankStandardCode != ''">
+                corpToBankStandardCode = #{corpToBankStandardCode},
+            </if>
+            <if test="corporationName != null and corporationName != ''">
+                corporationName = #{corporationName},
+            </if>
+            <if test="preHost != null and preHost != ''">
+                preHost = #{preHost},
+            </if>
+            <if test="remotePort != null and remotePort != ''">
+                remotePort = #{remotePort},
+            </if>
+            <if test="readTimeOut != null and readTimeOut != ''">
+                readTimeOut = #{readTimeOut},
+            </if>
+            <if test="apiKey != null and apiKey != ''">
+                apiKey = #{apiKey},
+            </if>
+            <if test="connectTimeOut != null and connectTimeOut != ''">
+                connectTimeOut = #{connectTimeOut},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="payPublicKey != null and payPublicKey != ''">
+                payPublicKey = #{payPublicKey},
+            </if>
+            <if test="payPrivateKey != null and payPrivateKey != ''">
+                payPrivateKey = #{payPrivateKey},
+            </if>
+            <if test="parameter1 != null">
+                parameter1 = #{parameter1},
+            </if>
+            <if test="parameter2 != null">
+                parameter2 = #{parameter2},
+            </if>
+            <if test="parameter3 != null">
+                parameter3 = #{parameter3},
+            </if>
+            <if test="parameter4 != null">
+                parameter4 = #{parameter4},
+            </if>
+            <if test="parameter5 != null">
+                parameter5 = #{parameter5},
+            </if>
+            <if test="parameter6 != null">
+                parameter6 = #{parameter6},
+            </if>
+            <if test="parameter7 != null">
+                parameter7 = #{parameter7},
+            </if>
+            <if test="parameter8 != null">
+                parameter8 = #{parameter8},
+            </if>
+            <if test="parameter9 != null">
+                parameter9 = #{parameter9},
+            </if>
+            updateTime = now(),
+        </trim>
+        WHERE id = #{payChannelId}
+    </update>
+
+    <update id="updateCompanyPaymentRelation" parameterType="com.jrmf.domain.PaymentChannelRoute">
+        UPDATE company_payment_relation
+        <trim prefix="set" suffixOverrides=",">
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId},
+            </if>
+            <if test="paymentType != null and paymentType != ''">
+                paymentType = #{type},
+            </if>
+            <if test="implementor != null and implementor != ''">
+                implementor = #{implementor},
+            </if>
+            <if test="merchantId != null and merchantId != ''">
+                merchantId = #{merchantId},
+            </if>
+        </trim>
+        WHERE companyId = #{companyId} AND paymentType = #{type}
+    </update>
+
+    <update id="updateChannel">
+        UPDATE business_payment_channel
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="pathNo != null and pathNo != ''">
+                pathNo = #{pathNo},
+            </if>
+            <if test="pathName != null and pathName != ''">
+                pathName = #{pathName},
+            </if>
+            <if test="pathDesc != null and pathDesc != ''">
+                pathDesc = #{pathDesc},
+            </if>
+            <if test="pathType != null and pathType != ''">
+                pathType = #{pathType},
+            </if>
+            <if test="pathKeyType != null and pathKeyType != ''">
+                pathKeyType = #{pathKeyType},
+            </if>
+            updateTime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteChannel">
+        DELETE from business_payment_channel WHERE id = #{id}
+    </delete>
+
+    <select id="getChannelRouteBaseQuery" resultType="com.jrmf.domain.PaymentChannel">
+        SELECT * FROM business_payment_channel where 1 = 1
+        <if test="pathNo != null and pathNo !=''">
+            AND pathNo = #{pathNo}
+        </if>
+        <if test="pathName != null and pathName !=''">
+            AND pathName like CONCAT('%', #{pathName}, '%')
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND date(createTime) &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND date(createTime) &lt;= #{endDate}
+        </if>
+        ORDER BY id desc
+        <if test="start !=null and limit !=''">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getchannelRouteByPathNo" resultType="java.lang.String">
+        SELECT pathNo FROM business_payment_channel WHERE pathNo = #{pathNo}
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+
+    <select id="getChannelRouteByPathName" resultType="java.lang.String">
+        SELECT pathName FROM business_payment_channel WHERE pathName = #{pathName}
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+
+    <select id="getChannelRouteAndLinkageBaseByPathNo" resultType="java.util.Map">
+        SELECT * FROM linkage_base_config lbc
+        LEFT JOIN business_payment_channel bpc
+        ON lbc.pathNo = bpc.pathNo
+        WHERE bpc.pathNo = #{pathNo}
+    </select>
+
+    <select id="getChannelRouteRelationByPathNo" resultType="java.util.Map">
+        SELECT * FROM business_payment_channel bpc
+        LEFT JOIN business_payment_route bpr
+        ON bpc.pathNo = bpr.pathNo
+        LEFT JOIN company_paychannel_relation cpr
+        ON bpc.pathNo = cpr.pathNo
+        WHERE bpc.pathNo = #{pathNo} AND (bpr.pathNo = #{pathNo} OR cpr.pathNo = #{pathNo})
+    </select>
+
+    <select id="getServiceCompanyChannelRoute" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT
+        GROUP_CONCAT(bpr.id) ids,
+        cpr.id payChannelId,
+        bpr.companyId,
+        qc.companyName,
+        bpr.pathNo,
+        bpc.pathName,
+        bpr.customKey,
+        cc.companyName customName,
+        bpr.`default` isDefault,
+        bpr.isSubAccount,
+        group_concat(
+            CASE bpr.paymentType
+            WHEN 1 THEN
+                 '银行电子户'
+            WHEN 2 THEN
+                '支付宝'
+             WHEN 3 THEN
+                '微信'
+            WHEN 4 THEN
+                '银行卡'
+             END
+        ) AS paymentName,
+        GROUP_CONCAT(bpr.paymentType) paymentType,
+        bpr.createTime,
+        bpr.updateTime,
+        bpr.keyWords,
+        cpr.apiKey,
+        cpr.connectTimeOut,
+        bpr.containKeyWords,
+        cpr.corporationAccount,
+        cpr.corporationAccountName,
+        cpr.corpToBankStandardCode,
+        cpr.corporationName,
+        cpr.preHost,
+        cpr.remotePort,
+        cpr.readTimeOut,
+        cpr2.implementor,
+        bpr.shadowAcctNo,
+        cpr.parameter1,
+        cpr.parameter2,
+        cpr.parameter3,
+        cpr.parameter4,
+        cpr.parameter5,
+        cpr.parameter6,
+        cpr.parameter7,
+        cpr.parameter8,
+        cpr.parameter9,
+        cpr.payPublicKey,
+        cpr.payPrivateKey,
+        bpc.pathType,
+        bpc.pathKeyType
+        FROM
+        business_payment_route bpr
+        LEFT JOIN business_payment_channel bpc ON bpr.pathNo = bpc.pathNo
+        LEFT JOIN channel_custom cc ON bpr.customkey = cc.customkey
+        LEFT JOIN qb_company qc ON bpr.companyId = qc.userId
+        LEFT JOIN company_paychannel_relation cpr ON bpr.pathNo = cpr.pathNo
+        AND bpr.companyId = cpr.companyId
+        LEFT JOIN company_payment_relation cpr2 ON cpr2.companyId = bpr.companyId
+        AND cpr2.paymentType = bpr.paymentType
+        WHERE
+        1 = 1
+        <if test="pathNo != null and pathNo !=''">
+            AND bpr.pathNo = #{pathNo}
+        </if>
+        <if test="pathName != null and pathName != ''">
+            AND bpc.pathName LIKE CONCAT('%',#{pathName},'%')
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND date(bpr.createTime) &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND date(bpr.createTime) &lt;= #{endDate}
+        </if>
+        <if test="companyName != null and companyName != ''">
+            AND qc.companyName LIKE CONCAT('%',#{companyName},'%')
+        </if>
+        <if test="paymentType != null and paymentType != ''">
+            AND bpr.paymentType = #{paymentType}
+        </if>
+        <if test="isSubAccount != null and isSubAccount != ''">
+            AND bpr.isSubAccount = #{isSubAccount}
+        </if>
+        GROUP BY
+            bpr.customKey,bpr.companyId,bpr.pathNo,bpr.default
+        ORDER BY bpr.createTime desc
+        <if test="start !=null and limit !=''">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCompanyPaychannelRelationByCompanyIdAndPathNo"
+            resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM company_paychannel_relation WHERE companyId = #{companyId} AND pathNo = #{pathNo}
+    </select>
+
+    <select id="getCompanyPaychannelRelationByCompanyIdAndPathNoAndId" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM company_paychannel_relation WHERE companyId = #{companyId} AND pathNo = #{pathNo} AND id != #{payChannelId}
+    </select>
+
+    <select id="getPaymentRouteByParam" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM business_payment_route
+        WHERE companyId = #{companyId}
+        AND paymentType = #{paymentType}
+        AND `default` = #{isDefault}
+        <if test="pathNo != null and pathNo != ''">
+            AND pathNo = #{pathNo}
+        </if>
+        <choose>
+            <when test="customKey != null and customKey != ''">
+                AND customKey = #{customKey}
+            </when>
+            <otherwise>
+                AND (customKey = '' OR customKey is null)
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="getCompanyPaymentRelationByCompanyIdAndType" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM company_payment_relation WHERE companyId = #{companyId} AND paymentType = #{type}
+    </select>
+
+    <select id="getBusinessPaymentRouteByCompanyIdAndPathNo" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM business_payment_route WHERE companyId = #{companyId} AND pathNo = #{pathNo}
+    </select>
+
+    <select id="getBusinessPaymentRouteByCompanyIdAndType" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM business_payment_route WHERE companyId = #{companyId} AND paymentType = #{paymentType}
+    </select>
+
+    <select id="getBusinessPaymentRouteById" resultType="com.jrmf.domain.PaymentChannelRoute">
+        SELECT * FROM business_payment_route WHERE id = #{id}
+    </select>
+
+    <select id="getChannelRouteById" resultType="com.jrmf.domain.PaymentChannel">
+        SELECT * FROM business_payment_channel WHERE id = #{id}
+    </select>
+</mapper>

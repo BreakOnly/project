@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.oldsalarywallet.dao.ChannelInterimBatchDao">
+	<insert id="addChannelInterimBatch" parameterType="com.jrmf.domain.ChannelInterimBatch"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qb_channelInterimBatch (
+		createtime, 
+		amount,
+		ordername, 
+		orderno,
+		originalBeachNo,
+		accountNo,
+		accountName,
+        customkey, 
+        recCustomkey, 
+        updatetime,
+		providetime, 
+		serviceFee,
+		supplementServiceFee,
+		payType, 
+		status, 
+		operatorName,
+		mfkjServiceFee, 
+		remark,
+		passNum,
+		failedNum,
+		failedAmount,
+		batchNum,
+		batchAmount,
+		handleAmount,
+		menuId,
+		batchName,
+		batchDesc,
+		fileName
+		 )
+		VALUES (
+		now(),
+		#{amount},
+		#{ordername},
+		#{orderno},
+		#{originalBeachNo},
+		#{accountNo},
+		#{accountName},
+		#{customkey},
+		#{recCustomkey},
+		now(),
+		#{providetime},
+		#{serviceFee},
+		#{supplementServiceFee},
+		#{payType},
+		#{status},
+		#{operatorName},
+		#{mfkjServiceFee},
+		#{remark},
+		#{passNum},
+		#{failedNum},
+		#{failedAmount},
+		#{batchNum},
+		#{batchAmount},
+		#{handleAmount},
+		#{menuId},
+		#{batchName},
+		#{batchDesc},
+		#{fileName}
+		)
+	</insert>
+	
+	<select id="getChannelInterimBatchById" resultType="com.jrmf.domain.ChannelInterimBatch">
+		SELECT * FROM qb_channelInterimBatch  WHERE  id = #{id} and customkey = #{originalId} AND status not in (4,5)
+	</select>
+	
+	<select id="getChannelInterimBatchByOrderno" resultType="com.jrmf.domain.ChannelInterimBatch">
+		SELECT b.*, n.contentName menuName , c.companyName agentName
+		FROM
+			qb_channelInterimBatch b
+		LEFT JOIN custom_menu n ON b.menuId = n.id
+		LEFT JOIN channel_custom c ON b.recCustomkey = c.customkey 
+		WHERE  b.orderno = #{orderno} AND b.customkey =  #{originalId} AND b.status not in (4,5)
+	</select>
+	
+	<select id="getChannelInterimBatchByParam" resultType="com.jrmf.domain.ChannelInterimBatch">
+		SELECT i.*,m.contentName as menuName FROM qb_channelinterimbatch i LEFT JOIN custom_menu m ON
+		i.menuId = m.id WHERE 1=1 and i.status not in (4,5)
+		<if test="customkey !=null and customkey !=''">
+				and  i.customkey = #{customkey}
+		</if>
+		<if test="recCustomkey !=null and recCustomkey !=''">
+				and  i.recCustomkey = #{recCustomkey}
+		</if>
+		<if test="payType !=null and payType !=''">
+				and  i.payType = #{payType}
+		</if>
+		<if test="status !=null and status !=''">
+				and  i.status = #{status}
+		</if>
+		<if test="menuName !=null and menuName !=''">
+				and  m.contentName = #{menuName}
+		</if>
+		<if test="orderno !=null and orderno !=''">
+				and  i.orderno like concat('%', #{orderno}, '%')
+		</if>
+		<if test="originalBeachNo !=null and originalBeachNo !=''">
+				and  i.originalBeachNo =  #{originalBeachNo}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+				and date(i.createtime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+				and date(i.createtime) &lt;= #{endTime}
+		</if>
+		<if test="batchName !=null and batchName !=''">
+				and i.batchName = #{batchName}
+		</if>
+		<if test="fileName !=null and fileName !=''">
+				and i.fileName = #{fileName}
+		</if>
+		<if test="menuIds !=null and menuIds !=''">
+				and  FIND_IN_SET(i.menuId,#{menuIds})
+		</if>
+		<if test="batchDesc !=null and batchDesc !=''">
+				and i.batchDesc like concat('%', #{batchDesc}, '%')
+		</if>
+		order by i.createtime desc 
+		<if test="start !=null and limit !=null">
+				 limit #{start},#{limit} 
+		</if>
+	</select>
+	<select id="queryReviewedBatch" resultType="com.jrmf.domain.ChannelInterimBatch">
+		SELECT
+			i.*, m.contentName AS menuName,
+			c.companyName agentName
+		FROM
+			qb_channelinterimbatch i
+		LEFT JOIN custom_menu m ON i.menuId = m.id
+		LEFT JOIN channel_custom c ON c.customkey = i.recCustomkey
+		WHERE i.status IN (6, 7, 8)
+		<if test="customkey !=null and customkey !=''">
+				and  i.customkey = #{customkey}
+		</if>
+		<if test="recCustomkey !=null and recCustomkey !=''">
+				and  i.recCustomkey = #{recCustomkey}
+		</if>
+		<if test="payType !=null and payType !=''">
+				and  i.payType = #{payType}
+		</if>
+		<if test="status !=null and status !=''">
+				and  i.status = #{status}
+		</if>
+		<if test="orderno !=null and orderno !=''">
+				and  i.orderno like concat('%', #{orderno}, '%')
+		</if>
+		<if test="originalBeachNo !=null and originalBeachNo !=''">
+				and  i.originalBeachNo =  #{originalBeachNo}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+				and date(i.createtime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+				and date(i.createtime) &lt;= #{endTime}
+		</if>
+		<if test="batchName !=null and batchName !=''">
+				and i.batchName = #{batchName}
+		</if>
+		<if test="fileName !=null and fileName !=''">
+				and i.fileName = #{fileName}
+		</if>
+		<if test="menuIds !=null and menuIds !=''">
+				and  FIND_IN_SET(i.menuId,#{menuIds})
+		</if>
+		<if test="batchDesc !=null and batchDesc !=''">
+				and i.batchDesc like concat('%', #{batchDesc}, '%')
+		</if>
+		order by i.createtime desc 
+		<if test="start !=null and limit !=null">
+				 limit #{start},#{limit} 
+		</if>
+	</select>
+	
+	<update id="updateChannelInterimBatch"  parameterType="com.jrmf.domain.ChannelInterimBatch">
+		update qb_channelInterimBatch 
+			<trim prefix="SET" suffixOverrides=",">
+				updatetime = now(),
+				<if test="serviceFee !=null and serviceFee !=''">
+					serviceFee = #{serviceFee},
+				</if>
+				<if test="supplementServiceFee !=null and supplementServiceFee !=''">
+					supplementServiceFee = #{supplementServiceFee},
+				</if>
+				<if test="mfkjServiceFee !=null and mfkjServiceFee !=''">
+					mfkjServiceFee = #{mfkjServiceFee},
+				</if>
+				<if test="amount !=null and amount !=''">
+					amount = #{amount},
+				</if>
+				<if test="orderno !=null and orderno !=''">
+					orderno = #{orderno},
+				</if>
+				<if test="status !=null">
+					status = #{status},
+				</if>
+				<if test="accountName !=null and accountName !=''">
+					accountName = #{accountName},
+				</if>
+				<if test="operatorName !=null and operatorName !=''">
+					operatorName = #{operatorName},
+				</if>
+				<if test="remark !=null and remark !=''">
+					remark = #{remark},
+				</if>
+				<if test="ordername !=null and ordername !=''">
+					ordername = #{ordername},
+				</if>
+				<if test="passNum !=null">
+					passNum = #{passNum},
+				</if>
+				<if test="failedNum !=null">
+					failedNum = #{failedNum},
+				</if>
+				<if test="failedAmount !=null and failedAmount !=''">
+					failedAmount = #{failedAmount},
+				</if>
+				<if test="batchNum !=null">
+					batchNum = #{batchNum},
+				</if>
+				<if test="batchAmount !=null and batchAmount !=''">
+					batchAmount = #{batchAmount},
+				</if>
+				<if test="handleAmount !=null and handleAmount !=''">
+					handleAmount = #{handleAmount},
+				</if>
+				<if test="ymReqId !=null and ymReqId !=''">
+					ymReqId = #{ymReqId},
+				</if>
+				<if test="ymBatchNo !=null and ymBatchNo !=''">
+					ymBatchNo = #{ymBatchNo},
+				</if>
+			</trim>
+		where id = #{id}
+	</update>
+	
+	<update id="deleteByIds"  parameterType="String">
+		UPDATE qb_channelInterimBatch
+		SET status = 5 ,updatetime = now()
+		WHERE FIND_IN_SET(orderno,#{ids}) and customkey = #{customkey}
+	</update>
+	
+		
+	<update id="deleteByOrderno"  parameterType="String">
+		UPDATE qb_channelInterimBatch
+		SET status = 5 ,updatetime = now()
+		WHERE orderno = #{orderno}
+	</update>
+	
+	<update id="updateInterimBatchStatus" parameterType="String">
+		update qb_channelInterimBatch Set status = 4
+		where orderno = #{orderno} 
+	</update>
+	
+	<update id="submitReview" parameterType="String">
+		update qb_channelInterimBatch Set status = 6
+		where orderno = #{orderNo} 
+	</update>
+	<update id="batchReview" parameterType="java.util.Map">
+		update qb_channelInterimBatch 
+		SET
+		status = #{status},
+		reviewor = #{reviewor},
+		reviewDesc = #{reviewDesc}
+		WHERE
+		orderno = #{orderNo} 
+	</update>
+	
+	<!-- 更新批次信息，同步溢美批次信息 -->
+	<update id="updateYmInfoByBatch" parameterType="com.jrmf.domain.ChannelInterimBatch">
+		update qb_channelInterimBatch set ymReqId = #{ymReqId},ymBatchNo=#{ymBatchNo} where id = #{id}
+	</update>
+	
+   <select id="getChannelInterimBatchBySuccess" resultType="com.jrmf.domain.ChannelInterimBatch">
+		SELECT b.*, n.contentName menuName ,
+		  c.companyName agentName,
+		  c2.companyName merchantName
+		FROM
+			qb_channelInterimBatch b
+		LEFT JOIN custom_menu n ON b.menuId = n.id
+		LEFT JOIN channel_custom c ON b.recCustomkey = c.customkey 
+		LEFT JOIN channel_custom c2 ON b.customkey = c2.customkey
+		WHERE  b.orderno = #{orderno}
+		<if test="originalId !=null and originalId !=''">
+			AND b.customkey =  #{originalId}
+		</if>
+		 AND b.status=4
+	</select>
+</mapper>

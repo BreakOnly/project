@@ -1,0 +1,5 @@
+.idea/*
+*/*.iml
+*/target
+log
+logback.loghome_IS_UNDEFINED/

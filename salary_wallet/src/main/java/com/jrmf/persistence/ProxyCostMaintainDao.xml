@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.ProxyCostMaintainDao" >
+
+    <select id="getProxyCostMaintainList" resultType="com.jrmf.domain.ProxyCostMaintain">
+        SELECT
+        pcm.id,
+        pcm.customkey,
+        cc.companyName proxyName,
+        cc.businessPlatform,
+        pcm.proxyLevel,
+        pcm.companyId,
+        pcm.companyName,
+        pcm.proxyFeeRate,
+        pcm.proxyType,
+        pcm.countType,
+        pcm.masterName,
+        pcm.createTime,
+        pcm.updateTime,
+        cnrc.gearLabel,
+        cnrc.amountStart,
+        cnrc.amountEnd,
+        cnrc.operator,
+        cnrc.gearPosition,
+        cnrc.id netfileId,
+        cc.phoneNo,
+        cp.contentLevel,
+        cp.parentId,
+        qci.customname,
+        qu.merchantId
+        FROM
+        proxy_cost_maintain pcm
+        LEFT JOIN company_netfile_rate_conf cnrc ON pcm.netfileId = cnrc.id
+        LEFT JOIN channel_custom cc ON cc.customkey = pcm.customkey
+        LEFT JOIN custom_proxy cp ON pcm.customkey = cp.customkey
+        LEFT JOIN qb_users qu ON qu.id = cnrc.companyId
+        LEFT JOIN qb_custom_info qci ON qci.customkey = qu.merchantId
+        WHERE 1 = 1 AND cc.customType = 3
+        <if test="proxyName != null and proxyName != ''">
+            AND cc.companyName LIKE concat('%',#{proxyName},'%')
+        </if>
+        <if test="companyId != null and companyId!= ''">
+            AND pcm.companyId = #{companyId}
+        </if>
+        <if test="startTime != null and startTime !='' and startTime != 'null'">
+            AND date(pcm.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != '' and endTime != 'null'">
+            AND date(pcm.createTime) &lt;= #{endTime}
+        </if>
+        <if test="phoneNo != null and phoneNo != ''">
+            AND cc.phoneNo = #{phoneNo}
+        </if>
+        <if test="businessPlatformId != null">
+            AND cc.businessPlatformId = #{businessPlatformId}
+        </if>
+        <if test="gearLabel != null and gearLabel != ''">
+            AND cnrc.gearLabel = #{gearLabel}
+        </if>
+        <if test="proxyFeeRateStart != null and proxyFeeRateStart != ''">
+            AND pcm.proxyFeeRate &gt;= #{proxyFeeRateStart}
+        </if>
+        <if test="proxyFeeRateEnd != null and proxyFeeRateEnd != ''">
+            AND pcm.proxyFeeRate &lt;= #{proxyFeeRateEnd}
+        </if>
+        <if test="customkey != null and customkey != ''">
+            AND pcm.customkey = #{customkey}
+        </if>
+        <if test="netfileId != null and netfileId != ''">
+            AND pcm.netfileId = #{netfileId}
+        </if>
+        order by pcm.createTime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <insert id="insertProxyCostMaintain"  parameterType="com.jrmf.domain.ProxyCostMaintain">
+        INSERT INTO proxy_cost_maintain
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customkey != null and customkey != ''">
+                customkey,
+            </if>
+            <if test="proxyLevel != null and proxyLevel != ''">
+                proxyLevel,
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId,
+            </if>
+            <if test="companyName != null and companyName != ''">
+                companyName,
+            </if>
+            <if test="proxyFeeRate != null and proxyFeeRate != ''">
+                proxyFeeRate,
+            </if>
+            <if test="proxyType != null and proxyType != ''">
+                proxyType,
+            </if>
+            <if test="countType != null and countType != ''">
+                countType,
+            </if>
+            <if test="netfileId != null and netfileId != ''">
+                netfileId,
+            </if>
+            <if test="masterCustomkey != null and masterCustomkey != ''">
+                masterCustomkey,
+            </if>
+            <if test="masterName != null and masterName != ''">
+                masterName,
+            </if>
+            createTime,
+            updateTime,
+            status,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customkey != null and customkey != ''">
+                #{customkey},
+            </if>
+            <if test="proxyLevel != null and proxyLevel != ''">
+                #{proxyLevel},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                #{companyId},
+            </if>
+            <if test="companyName != null and companyName != ''">
+                #{companyName},
+            </if>
+            <if test="proxyFeeRate != null and proxyFeeRate != ''">
+                #{proxyFeeRate},
+            </if>
+            <if test="proxyType != null and proxyType != ''">
+                #{proxyType},
+            </if>
+            <if test="countType != null and countType != ''">
+                #{countType},
+            </if>
+            <if test="netfileId != null and netfileId != ''">
+                #{netfileId},
+            </if>
+            <if test="masterCustomkey != null and masterCustomkey != ''">
+                #{masterCustomkey},
+            </if>
+            <if test="masterName != null and masterName != ''">
+                #{masterName},
+            </if>
+            now(),
+            now(),
+            1,
+        </trim>
+    </insert>
+
+    <update id="updateProxyCostMaintain" parameterType="com.jrmf.domain.ProxyCostMaintain">
+        UPDATE proxy_cost_maintain
+        <trim prefix="set" suffixOverrides=",">
+            <if test="customkey != null and customkey!= ''">
+                customkey = #{customkey},
+            </if>
+            <if test="proxyLevel != null and proxyLevel!= ''">
+                proxyLevel = #{proxyLevel},
+            </if>
+            <if test="companyId != null and companyId != ''">
+                companyId = #{companyId},
+            </if>
+            <if test="companyName != null and companyName != ''">
+                companyName = #{companyName},
+            </if>
+            <if test="proxyFeeRate != null and proxyFeeRate != ''">
+                proxyFeeRate = #{proxyFeeRate},
+            </if>
+            <if test="proxyType != null">
+                proxyType = #{proxyType},
+            </if>
+            <if test="countType != null">
+                countType = #{countType},
+            </if>
+            <if test="netfileId != null and netfileId != ''">
+                netfileId = #{netfileId},
+            </if>
+            <if test="masterCustomkey != null and masterCustomkey != ''">
+                masterCustomkey = #{masterCustomkey},
+            </if>
+            <if test="masterName != null and masterName != ''">
+                masterName = #{masterName},
+            </if>
+            <if test="updateTime != null and updateTime != ''">
+                updateTime = #{updateTime},
+            </if>
+        </trim>
+        WHERE
+        id = #{id}
+    </update>
+
+    <select id="queryProxyCostMaintainById" resultType="com.jrmf.domain.ProxyCostMaintain">
+        SELECT * FROM proxy_cost_maintain WHERE id = #{id}
+    </select>
+
+    <delete id="deleteProxyCostMaintainById">
+        DELETE FROM proxy_cost_maintain WHERE id = #{id}
+    </delete>
+
+    <select id="getProxyCostMaintainByCustomkeyCompanyIdGearLabel" resultType="int">
+        SELECT count(1) FROM proxy_cost_maintain pcm
+        LEFT JOIN company_netfile_rate_conf cnrc
+        ON pcm.netfileId = cnrc.id
+        WHERE pcm.customkey = #{customkey} AND pcm.companyId = #{companyId} AND pcm.netfileId = #{netfileId} AND cnrc.gearLabel = #{gearLabel}
+    </select>
+
+    <select id="getProxyCostMaintainById" resultType="com.jrmf.domain.ProxyCostMaintain">
+        SELECT * FROM proxy_cost_maintain WHERE id = #{id}
+    </select>
+
+    <select id="getProxyCostMaintainByCustomkeyCompanyIdNetfileId" resultType="com.jrmf.domain.ProxyCostMaintain">
+        SELECT * FROM proxy_cost_maintain pcm
+        LEFT JOIN company_netfile_rate_conf cnrc ON pcm.netfileId = cnrc.id
+        WHERE pcm.customkey = #{customkey} AND pcm.companyId = #{companyId} AND cnrc.gearLabel = #{gearLabel}
+    </select>
+
+    <select id="getProxyCostMaintainByNetfileId" resultType="int">
+        SELECT COUNT(1) FROM proxy_cost_maintain WHERE netfileId = #{netfileId}
+    </select>
+
+    <select id="getNoProxyCostMaintainByCustomkeyCompanyIdGearLabel" resultType="com.jrmf.domain.ProxyCostMaintain">
+        SELECT * FROM proxy_cost_maintain pcm
+        LEFT JOIN company_netfile_rate_conf cnrc ON pcm.netfileId = cnrc.id
+        WHERE pcm.customkey = #{customkey} AND pcm.companyId = #{companyId} AND pcm.netfileId != #{netfileId} AND cnrc.gearLabel = #{gearLabel}
+    </select>
+</mapper>

@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.QbInvoiceApprovalRecordDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.QbInvoiceApprovalRecord">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="invoiceSerialNo" jdbcType="VARCHAR" property="invoiceSerialNo" />
+    <result column="rechargeOrderNo" jdbcType="VARCHAR" property="rechargeOrderNo" />
+    <result column="invoiceAmount" jdbcType="VARCHAR" property="invoiceAmount" />
+    <result column="approvalAmount" jdbcType="VARCHAR" property="approvalAmount" />
+    <result column="unApprovalAmount" jdbcType="VARCHAR" property="unApprovalAmount" />
+    <result column="createTime" jdbcType="VARCHAR" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, invoiceSerialNo, rechargeOrderNo, invoiceAmount, approvalAmount, unApprovalAmount, 
+    createTime
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from qb_invoice_approval_record
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from qb_invoice_approval_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.jrmf.domain.QbInvoiceApprovalRecord">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into qb_invoice_approval_record (invoiceSerialNo, rechargeOrderNo, 
+      invoiceAmount, approvalAmount, unApprovalAmount, 
+      createTime)
+    values (#{invoiceSerialNo,jdbcType=VARCHAR}, #{rechargeOrderNo,jdbcType=VARCHAR}, 
+      #{invoiceAmount,jdbcType=VARCHAR}, #{approvalAmount,jdbcType=VARCHAR}, #{unApprovalAmount,jdbcType=VARCHAR},
+      now())
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.domain.QbInvoiceApprovalRecord">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into qb_invoice_approval_record
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="invoiceSerialNo != null">
+        invoiceSerialNo,
+      </if>
+      <if test="rechargeOrderNo != null">
+        rechargeOrderNo,
+      </if>
+      <if test="invoiceAmount != null">
+        invoiceAmount,
+      </if>
+      <if test="approvalAmount != null">
+        approvalAmount,
+      </if>
+      <if test="unApprovalAmount != null">
+        unApprovalAmount,
+      </if>
+      <if test="createTime != null">
+        createTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="invoiceSerialNo != null">
+        #{invoiceSerialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="rechargeOrderNo != null">
+        #{rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceAmount != null">
+        #{invoiceAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="approvalAmount != null">
+        #{approvalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="unApprovalAmount != null">
+        #{unApprovalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.QbInvoiceApprovalRecord">
+    update qb_invoice_approval_record
+    <set>
+      <if test="invoiceSerialNo != null">
+        invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="rechargeOrderNo != null">
+        rechargeOrderNo = #{rechargeOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceAmount != null">
+        invoiceAmount = #{invoiceAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="approvalAmount != null">
+        approvalAmount = #{approvalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="unApprovalAmount != null">
+        unApprovalAmount = #{unApprovalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        createTime = #{createTime,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbInvoiceApprovalRecord">
+    update qb_invoice_approval_record
+    set invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      rechargeOrderNo = #{rechargeOrderNo,jdbcType=VARCHAR},
+      invoiceAmount = #{invoiceAmount,jdbcType=VARCHAR},
+      approvalAmount = #{approvalAmount,jdbcType=VARCHAR},
+      unApprovalAmount = #{unApprovalAmount,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomLimitConfDao">
+
+    <!--添加配置-->
+    <insert id="insertCustomLimitConf" parameterType="com.jrmf.domain.CustomLimitConf">
+        insert into custom_limit_conf
+        (
+        customkey,
+        companyId,
+        singleOrderLimit,
+        singleDayLimit,
+        singleMonthLimit,
+        singleQuarterLimit,
+        createTime,
+        updateTime,
+        unAutoCompensatable,
+        reserved1,
+        reserved2
+        )
+        values
+        (
+        #{customkey},
+        #{companyId},
+        #{singleOrderLimit},
+        #{singleDayLimit},
+        #{singleMonthLimit},
+        #{singleQuarterLimit},
+        now(),
+        now(),
+        #{unAutoCompensatable},
+        #{reserved1},
+        #{reserved2}
+        )
+    </insert>
+    
+    <select id="getCustomLimitConf" resultType="com.jrmf.domain.CustomLimitConf">
+		select * from custom_limit_conf t where  1 = 1
+		<if test="customkey != null and customkey != ''">
+            and t.customkey = #{customkey}
+        </if>  
+        <if test="companyId != null and companyId != ''">
+            and t.companyId = #{companyId}
+        </if> 
+    </select>
+    
+
+    <!--修改配置-->
+    <update id="updateConfig">
+
+        UPDATE custom_limit_conf SET customkey=#{customkey},
+        companyId=#{companyId}, singleOrderLimit=#{singleOrderLimit}, singleDayLimit=#{singleDayLimit},
+        singleMonthLimit=#{singleMonthLimit}, singleQuarterLimit = #{singleQuarterLimit},
+        unAutoCompensatable = #{unAutoCompensatable},
+        createTime=#{createTime}, updateTime=now(), reserved1=#{reserved1}, reserved2=#{reserved2}
+        WHERE (id=#{id}) LIMIT 1
+    </update>
+
+    <!--删除配置-->
+    <delete id="deleteConfig">
+        DELETE FROM custom_limit_conf where id = #{id}
+    </delete>
+
+    <!--获取商户配置限额列表-->
+    <select id="listLimitConfByParams" resultType="com.jrmf.domain.CustomLimitConf">
+        SELECT
+        a.id,a.customkey,a.companyId,d.companyName,a.singleDayLimit,a.singleMonthLimit,a.singleOrderLimit,a.singleQuarterLimit,
+        a.createTime,a.updateTime,a.unAutoCompensatable,b.companyName reserved1,qc.merchantId reserved2,qc.realCompanyOperate
+        FROM custom_limit_conf a LEFT JOIN channel_custom b ON a.customkey = b.customkey
+        LEFT JOIN channel_custom d on a.companyId = d.customkey
+        LEFT JOIN  qb_channelrelated qc on a.companyId=qc.companyId and qc.originalId = a.customkey 
+        where 1=1
+        <if test="id != null and id != ''">
+            and a.id = #{id}
+        </if>
+        <if test="customkey != null and customkey != ''">
+            and a.customkey = #{customkey}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and a.companyId = #{companyId}
+        </if>
+        <if test="start !=null and limit !=''">
+            limit #{start},#{limit}
+        </if>
+
+    </select>
+
+</mapper>

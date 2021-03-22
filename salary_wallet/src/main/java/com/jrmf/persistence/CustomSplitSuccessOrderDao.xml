@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomSplitSuccessOrderDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="splitOrderNo" jdbcType="VARCHAR" property="splitOrderNo" />
+    <result column="splitOrderName" jdbcType="VARCHAR" property="splitOrderName" />
+    <result column="customKey" jdbcType="VARCHAR" property="customKey" />
+    <result column="companyId" jdbcType="VARCHAR" property="companyId" />
+    <result column="totalNumber" jdbcType="INTEGER" property="totalNumber" />
+    <result column="totalAmount" jdbcType="VARCHAR" property="totalAmount" />
+    <result column="fileName" jdbcType="VARCHAR" property="fileName" />
+    <result column="fileUrl" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="hasSubmitPay" jdbcType="INTEGER" property="hasSubmitPay" />
+    <result column="hasSynchrodata" jdbcType="INTEGER" property="hasSynchrodata" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, splitOrderNo, splitOrderName, customKey, companyId, totalNumber, totalAmount,
+    fileName, fileUrl, hasSubmitPay, hasSynchrodata
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from custom_split_success_order
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from custom_split_success_order
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into custom_split_success_order (splitOrderNo, splitOrderName, customKey,
+    companyId, totalNumber, totalAmount,
+    fileName, fileUrl, hasSubmitPay,
+    hasSynchrodata)
+    values (#{splitOrderNo,jdbcType=VARCHAR}, #{splitOrderName,jdbcType=VARCHAR}, #{customKey,jdbcType=VARCHAR},
+    #{companyId,jdbcType=VARCHAR}, #{totalNumber,jdbcType=INTEGER}, #{totalAmount,jdbcType=VARCHAR},
+    #{fileName,jdbcType=VARCHAR}, #{fileUrl,jdbcType=VARCHAR}, #{hasSubmitPay,jdbcType=INTEGER},
+    #{hasSynchrodata,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into custom_split_success_order
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="splitOrderNo != null">
+        splitOrderNo,
+      </if>
+      <if test="splitOrderName != null">
+        splitOrderName,
+      </if>
+      <if test="customKey != null">
+        customKey,
+      </if>
+      <if test="companyId != null">
+        companyId,
+      </if>
+      <if test="totalNumber != null">
+        totalNumber,
+      </if>
+      <if test="totalAmount != null">
+        totalAmount,
+      </if>
+      <if test="fileName != null">
+        fileName,
+      </if>
+      <if test="fileUrl != null">
+        fileUrl,
+      </if>
+      <if test="hasSubmitPay != null">
+        hasSubmitPay,
+      </if>
+      <if test="hasSynchrodata != null">
+        hasSynchrodata,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="splitOrderNo != null">
+        #{splitOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="splitOrderName != null">
+        #{splitOrderName,jdbcType=VARCHAR},
+      </if>
+      <if test="customKey != null">
+        #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null">
+        #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="totalNumber != null">
+        #{totalNumber,jdbcType=INTEGER},
+      </if>
+      <if test="totalAmount != null">
+        #{totalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="fileName != null">
+        #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="hasSubmitPay != null">
+        #{hasSubmitPay,jdbcType=INTEGER},
+      </if>
+      <if test="hasSynchrodata != null">
+        #{hasSynchrodata,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+    update custom_split_success_order
+    <set>
+      <if test="splitOrderNo != null">
+        splitOrderNo = #{splitOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="splitOrderName != null">
+        splitOrderName = #{splitOrderName,jdbcType=VARCHAR},
+      </if>
+      <if test="customKey != null">
+        customKey = #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null">
+        companyId = #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="totalNumber != null">
+        totalNumber = #{totalNumber,jdbcType=INTEGER},
+      </if>
+      <if test="totalAmount != null">
+        totalAmount = #{totalAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="fileName != null">
+        fileName = #{fileName,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        fileUrl = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="hasSubmitPay != null">
+        hasSubmitPay = #{hasSubmitPay,jdbcType=INTEGER},
+      </if>
+      <if test="hasSynchrodata != null">
+        hasSynchrodata = #{hasSynchrodata,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+    update custom_split_success_order
+    set splitOrderNo = #{splitOrderNo,jdbcType=VARCHAR},
+      splitOrderName = #{splitOrderName,jdbcType=VARCHAR},
+      customKey = #{customKey,jdbcType=VARCHAR},
+      companyId = #{companyId,jdbcType=VARCHAR},
+      totalNumber = #{totalNumber,jdbcType=INTEGER},
+      totalAmount = #{totalAmount,jdbcType=VARCHAR},
+      fileName = #{fileName,jdbcType=VARCHAR},
+      fileUrl = #{fileUrl,jdbcType=VARCHAR},
+      hasSubmitPay = #{hasSubmitPay,jdbcType=INTEGER},
+      hasSynchrodata = #{hasSynchrodata,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="selectBySplitOrderNo" resultType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+  SELECT
+  cc.companyName AS customName,
+  cc1.companyName AS companyName,
+  sso.*
+  FROM
+  custom_split_success_order sso
+  LEFT JOIN channel_custom cc ON sso.customKey = cc.customkey
+  LEFT JOIN channel_custom cc1 ON sso.companyId = cc1.customkey
+  where sso.splitOrderNo = #{splitOrderNo}
+  </select>
+
+  <select id="selectAll" resultType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+  SELECT
+  cc.companyName AS customName,
+  cc1.companyName AS companyName,
+  cc.id as customId,
+  cso.payType,
+  sso.*
+  FROM
+  custom_split_success_order sso
+  LEFT JOIN channel_custom cc ON sso.customKey = cc.customkey
+  LEFT JOIN channel_custom cc1 ON sso.companyId = cc1.customkey
+  LEFT JOIN custom_split_order cso ON cso.splitOrderNo=sso.splitOrderNo
+  where sso.splitOrderNo = #{splitOrderNo}
+  <if test="start !=null and limit !=null">
+   limit #{start},#{limit}
+  </if>
+  </select>
+
+  <select id="selectBySplitOrderNoAndCompanyId" resultType="com.jrmf.splitorder.domain.CustomSplitSuccessOrder">
+    SELECT * FROM custom_split_success_order  where splitOrderNo = #{splitOrderNo} and companyId = #{companyId}
+  </select>
+
+</mapper>

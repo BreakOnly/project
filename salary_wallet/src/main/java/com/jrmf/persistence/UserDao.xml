@@ -1,0 +1,762 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.UserDao">
+<!-- 开启二级缓存	回收策略为先进先出	自动刷新时间60s	最多缓存512个引用对象	只读 -->
+<!--<cache eviction="FIFO" flushInterval="600000" size="3096" readOnly="true"/>-->
+
+	<insert id="addUser" parameterType="com.jrmf.domain.User"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qb_users (
+			userNo,merchantId,userName,certId, mobilePhone,account,createTime,companyUserNo,transPassword,
+			userType,remark,batcheId,documentType
+        ) VALUES (
+        	#{userNo},#{merchantId},#{userName},#{certId},#{mobilePhone},#{account} ,now() ,
+        	#{companyUserNo},"false", #{userType} ,#{remark},#{batcheId},#{documentType}
+        )
+	</insert>
+
+	<select id="getUserByUserNo" resultType="com.jrmf.domain.User">
+		SELECT *
+		FROM qb_users where id = #{id}
+	</select>
+
+	<select id="getUserByMerchant" resultType="com.jrmf.domain.User">
+		SELECT *
+		FROM qb_users where userNo = #{userNo} and merchantId= #{merchantId} and userType in(1,2)
+	</select>
+
+	<select id="getUserByMobilePhone" resultType="com.jrmf.domain.User">
+		SELECT * FROM qb_users where mobilePhone = #{mobilePhone} limit 1
+	</select>
+
+	<select id="getUserByUserNameAndCertId" resultType="com.jrmf.domain.User">
+		SELECT * FROM qb_users where userName = #{userName} and certId = #{certId} limit 1
+	</select>
+
+	<select id="getUserByPhoneAndMerchant" resultType="com.jrmf.domain.User">
+		SELECT *
+		FROM qb_users where mobilePhone = #{mobilePhone} and merchantId= #{merchantId} and userType in(-1,1,11) limit 1
+	</select>
+
+	<select id="getActiveUser" resultType="com.jrmf.domain.User">
+		SELECT *
+		FROM qb_users where userNo = #{userNo} and merchantId= #{merchantId} and userType > 0 limit 1
+	</select>
+	<select id="getMerchant" resultType="com.jrmf.domain.User">
+		SELECT *
+		FROM qb_users where userNo = #{userNo} and merchantId= #{merchantId} and userType in (2,-2)
+	</select>
+	<select id="getUserByUserNoAndMerchant" resultType="com.jrmf.domain.User">
+		SELECT *
+		FROM qb_users where userNo = #{userNo} and merchantId= #{merchantId} and userType != 0
+	</select>
+	<!-- 关联微信标识wechartId -->
+	<update id="addWechartId">
+		UPDATE qb_users SET wechartId=#{wechartId} WHERE id=#{id}
+	</update>
+
+	<select id="selectUserByWechartId" resultType="com.jrmf.domain.User">
+		select * from qb_users where wechartId=#{wechartId} limit 1
+	</select>
+
+	<select id="getTokenByUserId" resultType="string">
+		SELECT token FROM qb_userToken where user_id = #{id}
+	</select>
+
+	<select id="checkToken" resultType="string">
+		SELECT token FROM qb_userToken where user_id = #{id} and token = #{token} and lastLoginTime &gt; DATE_SUB(NOW(),INTERVAL 30
+		MINUTE) LIMIT 1
+	</select>
+
+	<select id="getAllProgressUsers" resultType="com.jrmf.domain.User">
+		select * from qb_users where userType in (-1,-2)
+	</select>
+
+	<!-- 查询用户关联信息 -->
+	<select id="getUsersByParam" resultType="com.jrmf.domain.User">
+		SELECT u.*,c.customname as customname,t.bankCardNo as bankNo FROM qb_users u
+		LEFT  JOIN  qb_custom_info c ON u.merchantId = c.customkey
+        LEFT  JOIN qb_transferBank t ON  u.id = t.user_id  where t.status = 1
+		<if test="userType !=null and userType !=''">
+			AND u.userType = #{userType}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName like CONCAT('%',#{userName},'%')
+		</if>
+		<if test="customName !=null and customName !=''">
+			AND c.customname like CONCAT('%',#{customName},'%')
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			AND u.createTime &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND u.createTime &lt; #{endTime}
+		</if>
+		<if test="merchantId !=null and merchantId !=''">
+			AND u.merchantId = #{merchantId}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND u.certId = #{certId}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName = #{userName}
+		</if>
+		<if test="companyType !=null and companyType !=''">
+			AND u.companyType = #{companyType}
+		</if>
+		<if test="mobilePhone !=null and mobilePhone !=''">
+			AND u.mobilePhone = #{mobilePhone}
+		</if>
+		order by u.createTime desc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="getUsersCountByParam" resultType="int">
+		SELECT COUNT(DISTINCT u.id) FROM qb_users u
+		LEFT  JOIN  qb_userrelated c ON u.id = c.userId
+		 where 1=1
+		<if test="userType !=null and userType !=''">
+			AND u.userType = #{userType}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName like CONCAT('%',#{userName},'%')
+		</if>
+		<if test="originalId !=null and originalId !=''">
+			AND c.originalId = #{originalId}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			AND u.createTime &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND u.createTime &lt; #{endTime}
+		</if>
+		<if test="merchantId !=null and merchantId !=''">
+			AND u.merchantId = #{merchantId}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND u.certId = #{certId}
+		</if>
+		<if test="mobilePhone !=null and mobilePhone !=''">
+			AND u.mobilePhone = #{mobilePhone}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName = #{userName}
+		</if>
+		<if test="companyType !=null and companyType !=''">
+			AND u.companyType = #{companyType}
+		</if>
+	</select>
+
+	<select id="getUsersCountByCard" resultType="com.jrmf.domain.User">
+		SELECT  u.* FROM qb_users u
+		WHERE 1=1
+		<if test="userType !=null and userType !=''">
+			AND u.userType = #{userType}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName = #{userName}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND u.certId = #{certId}
+		</if>
+		<if test="documentType !=null and documentType !=''">
+			AND u.documentType = #{documentType}
+		</if>
+		limit 1
+	</select>
+
+	<select id="getUserByParam" resultType="com.jrmf.domain.User">
+		SELECT  u.* FROM qb_users u
+		WHERE 1=1
+		<if test="userName !=null and userName !=''">
+			AND u.userName = #{userName}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND u.certId = #{certId}
+		</if>
+		<if test="merchantId !=null and merchantId !=''">
+			AND u.merchantId = #{merchantId}
+		</if>
+	</select>
+
+
+	<select id="getUserForPlatform" resultType="com.jrmf.domain.User">
+		SELECT * FROM qb_users a WHERE userType=11
+
+		<if test="userName !=null and userName !=''">
+			AND a.userName = #{userName}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND a.certId = #{certId}
+		</if>
+		<if test="userStatus !=null and userStatus !=''">
+			AND a.userStatus = #{userStatus}
+		</if>
+		<if test="checkLevel !=null and checkLevel !=''">
+			AND FIND_IN_SET(a.checkLevel, #{checkLevel})
+		</if>
+		<if test="checkByPhoto != null and checkByPhoto != ''">
+			AND FIND_IN_SET(a.checkByPhoto, #{checkByPhoto})
+		</if>
+		<if test="minCreateTime !=null and minCreateTime !=''">
+			AND  a.createTime &gt;= #{minCreateTime}
+		</if>
+		<if test="maxCreateTime !=null and maxCreateTime !=''">
+			AND a.createTime &lt;= #{maxCreateTime}
+		</if>
+		<if test="minLastModifyTime !=null and minLastModifyTime !=''">
+			AND a.lastModifyTime &gt;= #{minLastModifyTime}
+		</if>
+		<if test="maxLastModifyTime !=null and maxLastModifyTime !=''">
+			AND a.lastModifyTime &lt;= #{maxLastModifyTime}
+		</if>
+		ORDER BY a.createTime DESC
+		<if test="start !=null and offset !=null ">
+			LIMIT #{start},#{offset}
+		</if>
+	</select>
+
+
+	<select id="getUserForMerchantByParams" resultType="com.jrmf.domain.User">
+		SELECT a.*,qu.mobileNo FROM qb_users a left join qb_userrelated qu on a.id = qu.userId
+		where qu.originalId = #{originalId}
+        <if test="userName !=null and userName !=''">
+            AND a.userName = #{userName}
+        </if>
+        <if test="certId !=null and certId !=''">
+            AND a.certId = #{certId}
+        </if>
+        <if test="userNo !=null and userNo !=''">
+            AND a.userNo = #{userNo}
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            AND TO_DAYS( a.createTime ) &gt;= TO_DAYS(#{startTime})
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            AND TO_DAYS( a.createTime ) &lt;= TO_DAYS(#{endTime})
+        </if>
+		group by a.id
+        ORDER BY a.createTime DESC
+        <if test="start !=null and offset !=null ">
+            LIMIT #{start},#{offset}
+        </if>
+
+    </select>
+	<select id="getUsersToNoth" resultType="com.jrmf.domain.User">
+		SELECT u.*,c.customname as customname,t.bankCardNo as bankNo FROM qb_users u
+		LEFT  JOIN  qb_custom_info c ON u.merchantId = c.customkey
+        LEFT  JOIN qb_transferBank t ON  u.id = t.user_id  where  1=1
+		<if test="userType !=null and userType !=''">
+			AND u.userType = #{userType}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName like CONCAT('%',#{userName},'%')
+		</if>
+		<if test="customName !=null and customName !=''">
+			AND c.customname like CONCAT('%',#{customName},'%')
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			AND u.createTime &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND u.createTime &lt; #{endTime}
+		</if>
+		<if test="merchantId !=null and merchantId !=''">
+			AND u.merchantId = #{merchantId}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND u.certId = #{certId}
+		</if>
+		<if test="userName !=null and userName !=''">
+			AND u.userName = #{userName}
+		</if>
+		<if test="companyType !=null and companyType !=''">
+			AND u.companyType = #{companyType}
+		</if>
+		order by u.createTime desc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<!-- 魔方后台__查询普通用户账户信息 -->
+	<select id="getUserAccountByPerson" resultType="map">
+		SELECT u.*,b.bankCardNo,
+			( SELECT y.bankBrhName FROM qb_bankInfo y WHERE y.bankNo = b.bankNo ) AS bankname
+		FROM qb_transferBank b, qb_users u WHERE b.user_id = u.id  AND b.status =1
+		<if test="userId !=null and userId !=''">
+			AND u.id = #{userId}
+		</if>
+	</select>
+
+	<!-- 魔方后台__查询企业用户账户信息 -->
+	<select id="getUserAccountByCompany" resultType="map">
+		SELECT u.merchantId,u.userNo, b.id, b.companyName,b.bankCardProvince,b.bankCardCity,b.bankName, b.createTime,b.cardNo
+		FROM qb_company b, qb_users u WHERE b.userId = u.id
+		<if test="userId !=null and userId !=''">
+			AND b.id = #{userId}
+		</if>
+	</select>
+
+	<select id="getPartnerShips" parameterType="map" resultType="com.jrmf.domain.PartnerShip">
+		select t.id,
+		t.companyName,
+		'' companyBalance,
+		re.remainingBalance
+		from qb_users t
+		left join qb_company cy on t.companyUserNo = cy.id
+		left join qb_custom_info ci on t.merchantId = ci.customkey
+		left join
+		(SELECT qbuc.companyId,sum(qbuc.amount) remainingBalance from
+		qb_userCommission qbuc order by qbuc.companyId) re
+		on t.id = re.companyId
+		where ci.customkey = #{customkey}
+	</select>
+
+	<select id="getPartnerByComNo_Name_Cert" parameterType="map" resultType="com.jrmf.domain.Partner">
+	select
+	u.id,
+	u.userName,
+	u.certId,
+	u.mobilePhone,
+	tb.bankCardNo,
+	u.userCertFrontPicture,
+	u.userCertBackPicture
+	from qb_users u
+	left join qb_transferBank tb on u.id = tb.user_id
+	left join qb_company cy on
+	u.companyUserNo = cy.id
+	where u.companyUserNo = #{comUserNo}
+	<if test="certId !=null and certId !=''">
+		 and u.certId = #{certId}
+	</if>
+	<if test="userName !=null and userName !=''">
+		 and u.userName = #{userName}
+	</if>
+	</select>
+
+	<update id="operatePartnerShip" parameterType="string">
+	update qb_users
+	<if test="partnerComNo !=null and partnerComNo !=''">
+		set companyUserNo = #{partnerComNo}
+	</if>
+	<if test="partnerComNo == null or partnerComNo ==''">
+		set companyUserNo = null
+	</if>
+	where  FIND_IN_SET(id,#{id})
+	</update>
+
+	<update id="updateUserByParam" >
+	update qb_users
+	<trim prefix="SET" suffixOverrides=",">
+				<if test="userCertFrontPicture !=null">
+					userCertFrontPicture = #{userCertFrontPicture},
+				</if>
+				<if test="userCertBackPicture !=null">
+					userCertBackPicture = #{userCertBackPicture},
+				</if>
+				<if test="userType !=null">
+					userType = #{userType},
+				</if>
+			</trim>
+	where  FIND_IN_SET(id,#{id})
+	</update>
+
+	<select id="getUserList" resultType="com.jrmf.domain.User">
+		SELECT u.*,(SELECT b.bankCardNo FROM qb_transferBank  b WHERE b.user_id = u.id LIMIT 1) as bankNo FROM qb_users u where  FIND_IN_SET(id,#{ids})
+	</select>
+
+	<select id="getAccountNum" resultType="String">
+		SELECT COUNT(DISTINCT id) FROM qb_users WHERE companyUserNo =  #{companyUserNo}   AND userType in (1,2)
+		<if test="startTime !=null and startTime !=''">
+				and date(createTime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+				and date(createTime) &lt;= #{endTime}
+		</if>
+	</select>
+
+	<delete id="deleteByIds"  parameterType="String">
+	DELETE FROM qb_users WHERE  FIND_IN_SET(id,#{ids})
+	</delete>
+
+	<delete id="deleteByBatcheId">
+	DELETE FROM qb_users WHERE  batcheId = #{batcheId}
+	and id in (SELECT  r.id  FROM qb_userRelated r WHERE r.originalId = #{originalId});
+	</delete>
+
+	<update id="updateUserSignType">
+		update qb_users set signType = #{signType} where id = #{id}
+	</update>
+
+	<!-- 查询薪税商户列表 -->
+	<select id="getCompanyByMerchantId" resultType="com.jrmf.domain.User">
+		SELECT a.* FROM qb_company b LEFT JOIN `qb_users` a  on  b.userId = a.id
+        where a.userType = 2 and a.merchantId = #{merchantId};
+	</select>
+
+	<!-- 商户下用户列表-->
+	<select id="getUserRelatedByParam" resultType="com.jrmf.domain.User">
+		SELECT u.id,u.userName,u.certId,u.mobilePhone,u.createTime,u.userType,u.remark,u.merchantId,
+		u.userCertFrontPicture,u.userCertBackPicture,
+		r.userNo,r.status,r.companyId as companyUserNo, t.bankCardNo bankNo
+		From qb_users u  LEFT JOIN qb_userRelated r  on u.id = r.userId
+		LEFT join qb_transferBank t ON u.id = t.user_id  WHERE 1=1
+ 	    <if test="originalId != '' and originalId != null">
+			and  r.originalId = #{originalId}
+		</if>
+		<if test="userName != '' and userName != null">
+			and (
+					u.userName like CONCAT('%',#{userName},'%' ) or
+					 u.certId like CONCAT('%',#{userName},'%' )  or
+					 t.bankCardNo like CONCAT('%',#{userName},'%' )  or
+					 u.mobilePhone like CONCAT('%',#{userName},'%')
+			)
+		</if>
+		<if test="userType != '' and userType != null">
+			and  u.userType = #{userType}
+		</if>
+		<if test="batcheId != '' and batcheId != null">
+			and  u.batcheId = #{batcheId}
+		</if>
+		<if test="status != '' and status != null">
+			and  r.status = #{status}
+		</if>
+		<if test="certId != '' and certId != null">
+			and  u.certId = #{certId}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			and date(u.createTime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			and date(u.createTime) &lt;= #{endTime}
+		</if>
+        GROUP BY u.id
+		order by u.createTime desc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<!-- 商户下用户列表-->
+	<select id="getUserRelatedCountByParam" resultType="int">
+		SELECT count(DISTINCT u.id) FROM qb_users u  LEFT JOIN qb_userRelated r  on u.id = r.userId
+		 WHERE   1=1
+		<if test="userName != '' and userName != null">
+			and (
+					u.userName like CONCAT('%',#{userName},'%' ) or
+					 u.certId like CONCAT('%',#{userName},'%' )  or
+					 u.mobilePhone like CONCAT('%',#{userName},'%')
+			)
+		</if>
+		<if test="originalId != '' and originalId != null">
+			and  r.originalId = #{originalId}
+		</if>
+		<if test="userType != '' and userType != null">
+			and  u.userType = #{userType}
+		</if>
+		<if test="status != '' and status != null">
+			and  r.status = #{status}
+		</if>
+		<if test="batcheId != '' and batcheId != null">
+			and  u.batcheId = #{batcheId}
+		</if>
+		<if test="certId != '' and certId != null">
+			and  u.certId = #{certId}
+		</if>
+		<if test="mobilePhone != '' and mobilePhone != null">
+			and  u.mobilePhone = #{mobilePhone}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			and date(u.createTime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			and date(u.createTime) &lt;= #{endTime}
+		</if>
+		and u.userType != 0
+	</select>
+
+	<insert id="addUserBatch" parameterType="com.jrmf.domain.UserBatch"
+	useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO qb_userbatch (
+			createTime,batchId, passNum,batchNum,errorNum,customkey
+        ) VALUES (
+        	now(),#{batchId},#{passNum} ,#{batchNum},#{errorNum}, #{customkey}
+        )
+	</insert>
+
+	<select id="getUserBatchByParam" resultType="com.jrmf.domain.UserBatch">
+		SELECT * From qb_userbatch  WHERE 1=1
+ 	    <if test="customkey != '' and customkey != null">
+			and  customkey = #{customkey}
+		</if>
+		<if test="name != '' and name != null">
+			and (
+					batchId like CONCAT('%',#{name},'%' ) or
+					batchNum like CONCAT('%',#{name},'%' )
+			)
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			and date(createTime) &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			and date(createTime) &lt;= #{endTime}
+		</if>
+		order by createTime desc
+		<if test="start !=null and limit !=''">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="getUserBatchByBatchId" resultType="com.jrmf.domain.UserBatch">
+		SELECT * From qb_userbatch  WHERE batchId = #{batchId} limit 1
+	</select>
+
+	<update id="updateUserBatch" parameterType="com.jrmf.domain.UserBatch">
+		UPDATE qb_userbatch
+					 set passNum = #{passNum},
+					 batchNum = #{batchNum},
+					 errorNum = #{errorNum}
+		WHERE id=#{id}
+	</update>
+
+	<delete id="deleteUserBatch"  parameterType="String">
+	DELETE FROM qb_userbatch WHERE  batchId = #{id}
+	</delete>
+
+	<insert id="insertUserInfo" parameterType="com.jrmf.domain.User" useGeneratedKeys="true"  keyProperty="id">
+		INSERT INTO qb_users
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="userNo != null and userNo != ''">
+				userNo,
+			</if>
+			<if test="userName != null and userName != ''">
+				userName,
+			</if>
+			<if test="certId != null and certId != ''">
+				certId,
+			</if>
+			<if test="mobilePhone != null and mobilePhone != ''">
+				mobilePhone,
+			</if>
+			<if test="account != null and account != ''">
+				account,
+			</if>
+			<if test="createTime != null and createTime != ''">
+				createTime,
+			</if>
+			<if test="merchantId != null and merchantId != ''">
+				merchantId,
+			</if>
+			<if test="transPassword != null and transPassword != ''">
+				transPassword,
+			</if>
+			<if test="companyType != null and companyType != ''">
+				companyType,
+			</if>
+			<if test="userType != null and userType != ''">
+				userType,
+			</if>
+			<if test="companyUserNo != null and companyUserNo != ''">
+				companyUserNo,
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName,
+			</if>
+			<if test="userCertFrontPicture != null and userCertFrontPicture != ''">
+				userCertFrontPicture,
+			</if>
+			<if test="remark != null and remark != ''">
+				remark,
+			</if>
+			<if test="userCertBackPicture != null and userCertBackPicture != ''">
+				userCertBackPicture,
+			</if>
+			<if test="signType != null and signType != ''">
+				signType,
+			</if>
+			<if test="wechartId != null and wechartId != ''">
+				wechartId,
+			</if>
+			<if test="batcheId != null and batcheId != ''">
+				batcheId,
+			</if>
+			<if test="documentType != null and documentType != ''">
+				documentType,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="userNo != null and userNo != ''">
+				#{userNo},
+			</if>
+			<if test="userName != null and userName != ''">
+				#{userName},
+			</if>
+			<if test="certId != null and certId != ''">
+				#{certId},
+			</if>
+			<if test="mobilePhone != null and mobilePhone != ''">
+				#{mobilePhone},
+			</if>
+			<if test="account != null and account != ''">
+				#{account},
+			</if>
+			<if test="createTime != null and createTime != ''">
+				#{createTime},
+			</if>
+			<if test="merchantId != null and merchantId != ''">
+				#{merchantId},
+			</if>
+			<if test="transPassword != null and transPassword != ''">
+				#{transPassword},
+			</if>
+			<if test="companyType != null and companyType != ''">
+				#{companyType},
+			</if>
+			<if test="userType != null and userType != ''">
+				#{userType},
+			</if>
+			<if test="companyUserNo != null and companyUserNo != ''">
+				#{companyUserNo},
+			</if>
+			<if test="companyName != null and companyName != ''">
+				#{companyName},
+			</if>
+			<if test="userCertFrontPicture != null and userCertFrontPicture != ''">
+				#{userCertFrontPicture},
+			</if>
+			<if test="remark != null and remark != ''">
+				#{remark},
+			</if>
+			<if test="userCertBackPicture != null and userCertBackPicture != ''">
+				#{userCertBackPicture},
+			</if>
+			<if test="signType != null and signType != ''">
+				#{signType},
+			</if>
+			<if test="wechartId != null and wechartId != ''">
+				#{wechartId},
+			</if>
+			<if test="batcheId != null and batcheId != ''">
+				#{batcheId},
+			</if>
+			<if test="documentType != null and documentType != ''">
+				#{documentType},
+			</if>
+		</trim>
+	</insert>
+
+	<update id="updateUserInfo"  parameterType="com.jrmf.domain.User">
+		UPDATE qb_users
+		<trim prefix="set" suffixOverrides=",">
+			<if test="userNo != null and userNo != ''">
+				userNo = #{userNo},
+			</if>
+			<if test="userName != null and userName != ''">
+				userName = #{userName},
+			</if>
+			<if test="certId != null">
+				certId = #{certId},
+			</if>
+			<if test="mobilePhone != null and mobilePhone != ''">
+				mobilePhone = #{mobilePhone},
+			</if>
+			<if test="account != null and account != ''">
+				account = #{account},
+			</if>
+			<if test="createTime != null and createTime != ''">
+				createTime = #{createTime},
+			</if>
+			<if test="merchantId != null and merchantId != ''">
+				merchantId = #{merchantId},
+			</if>
+			<if test="transPassword != null and transPassword != ''">
+				transPassword = #{transPassword},
+			</if>
+			<if test="companyType != null and companyType != ''">
+				companyType = #{companyType},
+			</if>
+			<if test="userType != null and userType != ''">
+				userType = #{userType},
+			</if>
+			<if test="companyUserNo != null and companyUserNo != ''">
+				companyUserNo = #{companyUserNo},
+			</if>
+			<if test="companyName != null and companyName != ''">
+				companyName = #{companyName},
+			</if>
+			<if test="userCertFrontPicture != null and userCertFrontPicture != ''">
+				userCertFrontPicture = #{userCertFrontPicture},
+			</if>
+			<if test="remark != null and remark != ''">
+				remark = #{remark},
+			</if>
+			<if test="userCertBackPicture != null and userCertBackPicture != ''">
+				userCertBackPicture = #{userCertBackPicture},
+			</if>
+			<if test="signType != null and signType != ''">
+				signType = #{signType},
+			</if>
+			<if test="wechartId != null and wechartId != ''">
+				wechartId = #{wechartId},
+			</if>
+			<if test="batcheId != null and batcheId != ''">
+				batcheId = #{batcheId},
+			</if>
+			<if test="documentType != null and documentType != ''">
+				documentType = #{documentType},
+			</if>
+			<if test="documentType != null and documentType != ''">
+				documentType = #{documentType},
+			</if>
+			<if test="checkByPhoto !=null and checkByPhoto !=''">
+				checkByPhoto = #{checkByPhoto},
+			</if>
+			<if test="checkLevel !=null and checkLevel !=''">
+				checkLevel = #{checkLevel},
+			</if>
+			<if test="checkTruth != null and checkTruth != ''">
+                checkTruth = #{checkTruth},
+			</if>
+		</trim>
+		where id = #{id}
+	</update>
+
+	<select id="getUserForMerchantByParamsCount" resultType="int">
+		SELECT COUNT(1) FROM (select a.*  from qb_users a LEFT JOIN qb_userrelated b on a.id = b.userId
+		GROUP BY b.userId,b.originalId
+		having 1=1
+		<if test="userName !=null and userName !=''">
+			AND a.userName = #{userName}
+		</if>
+		<if test="certId !=null and certId !=''">
+			AND a.certId = #{certId}
+		</if>
+		<if test="userNo !=null and userNo !=''">
+			AND a.userNo = #{userNo}
+		</if>
+		<if test="startTime !=null and startTime !=''">
+			AND TO_DAYS(a.createTime)&gt;=TO_DAYS(#{startTime})
+		</if>
+		<if test="endTime !=null and endTime !=''">
+			AND TO_DAYS(a.createTime)&lt;= TO_DAYS(#{endTime})
+		</if>
+		<if test="originalId !=null and originalId !=''">
+			AND b.originalId = #{originalId}
+		</if>
+		) temp
+	</select>
+
+	<update id="updateMobileNoByUserId"  parameterType="com.jrmf.domain.User">
+		UPDATE qb_users
+		<trim prefix="set" suffixOverrides=",">
+			<if test="mobilePhone != null and mobilePhone != ''">
+				mobilePhone = #{mobilePhone},
+			</if>
+		</trim>
+		where id = #{id}
+	</update>
+</mapper>

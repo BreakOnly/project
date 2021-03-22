@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbBlackUsersDao" >
+
+  <sql id="Base_Column_List" >
+    id, userName, certId, documentType, createTime, updateTime, addUser, status,belongType,customkey
+  </sql>
+
+  <!-- 根据id查询黑名单用户详细信息 -->
+  <select id="selectByPrimaryKey" resultType="com.jrmf.domain.QbBlackUsers" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from qb_black_users
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <!-- 根据id删除黑名单用户信息 -->
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from qb_black_users
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <!-- 添加黑名单信息 -->
+  <insert id="insert" parameterType="com.jrmf.domain.QbBlackUsers" >
+    insert into qb_black_users (id, userName, certId, 
+      documentType, createTime, updateTime, 
+      addUser, customkey)
+    values (#{id,jdbcType=INTEGER}, #{userName,jdbcType=VARCHAR}, #{certId,jdbcType=VARCHAR}, 
+      #{documentType,jdbcType=INTEGER}, #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, 
+      #{addUser,jdbcType=VARCHAR},#{customkey,jdbcType=VARCHAR})
+  </insert>
+  
+  <!-- 更新黑名单用户信息 -->
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.QbBlackUsers" >
+    update qb_black_users
+    <set >
+      <if test="username != null" >
+        userName = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="certid != null" >
+        certId = #{certId,jdbcType=VARCHAR},
+      </if>
+      <if test="documenttype != null" >
+        documentType = #{documentType,jdbcType=INTEGER},
+      </if>
+      <if test="createtime != null" >
+        createTime = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updatetime != null" >
+        updateTime = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="adduser != null" >
+        addUser = #{addUser,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="belongType != null" >
+        belongType = #{belongType,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 更新黑名单用户信息 -->
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbBlackUsers" >
+    update qb_black_users
+    set userName = #{userName,jdbcType=VARCHAR},
+      certId = #{certId,jdbcType=VARCHAR},
+      documentType = #{documentType,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      addUser = #{addUser,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      belongType = #{belongType,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <!-- 查询黑名单用户总条数 -->
+  <select id="queryBlackUsersCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  	select count(1) from (select * from qb_black_users where 1=1 and status=1
+	  	<if test="params.userName!=null and params.userName!=''">
+	  	and userName like concat('%',#{params.userName},'%')
+	  	</if>
+	  	<if test="params.certId!=null and params.certId!=''">
+	  	and certId=#{params.certId}
+	  	</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+		and date_format(createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+	    <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+		<if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(customkey,#{params.loginCustomer})
+	    </if>
+	ORDER BY id desc
+	)temp
+  </select>
+  
+  <!-- 查询黑名单用户集合（分页） -->
+  <select id="queryBlackUsers" parameterType="com.jrmf.domain.Page" resultType="map">
+  select * from qb_black_users where 1=1 and status=1
+	  	<if test="params.userName!=null and params.userName!=''">
+	  	and userName like concat('%',#{params.userName},'%')
+	  	</if>
+	  	<if test="params.certId!=null and params.certId!=''">
+	  	and certId=#{params.certId}
+	  	</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+		and date_format(createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+	    <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+	    <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(customkey,#{params.loginCustomer})
+	    </if>
+	    ORDER BY id desc
+		<if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+        </if>
+  </select>
+  
+  <!-- 校验用户是否存在 -->
+  <select id="checkIsExists" parameterType="com.jrmf.domain.QbBlackUsers" resultType="int">
+  	select count(1) from qb_black_users where customkey=#{customkey} and certId=#{certId} and documentType=#{documentType} and status=1
+  </select>
+  
+  <!-- 更新黑名单用户名称 -->
+  <update id="updateBlackUserById" parameterType="com.jrmf.domain.QbBlackUsers">
+  	update qb_black_users set userName=#{userName},updateTime=#{updateTime} where id =#{id}
+  </update>
+  
+  <!-- 更新黑名单用户状态 -->
+  <update id="updateStatusById" parameterType="com.jrmf.domain.QbBlackUsers">
+ 	 update qb_black_users set status=2,updateTime=#{updateTime} where id =#{id}
+  </update>
+  
+  <!-- 查询黑名单用户集合（分页） -->
+  <select id="queryBlackUsersNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+  select * from qb_black_users where 1=1 and status=1
+	  	<if test="params.userName!=null and params.userName!=''">
+	  	and userName like concat('%',#{params.userName},'%')
+	  	</if>
+	  	<if test="params.certId!=null and params.certId!=''">
+	  	and certId=#{params.certId}
+	  	</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+		and date_format(createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+	    <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+	    <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(customkey,#{params.loginCustomer})
+	    </if>
+	    ORDER BY id desc
+  </select>
+
+  <!-- 校验用户是否存在 -->
+  <select id="checkIsExistsByName" parameterType="com.jrmf.domain.QbBlackUsers" resultType="int">
+  	select count(1) from qb_black_users where customkey=#{customkey} and userName=#{userName} and documentType=#{documentType} and (certId is null or certId = '') and status=1
+  </select>
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SendSmsHistoryRecordDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.SendSmsHistoryRecord">
+    <id column="id" property="id"/>
+    <result column="receive_user_id" property="receiveUserId"/>
+    <result column="receive_phone" property="receivePhone"/>
+    <result column="custom_key" property="customKey"/>
+    <result column="send_type" property="sendType"/>
+    <result column="send_content" property="sendContent"/>
+    <result column="is_success" property="isSuccess"/>
+  </resultMap>
+  <insert id="batchInsert" parameterType="java.util.List">
+    insert into send_sms_history_record(receive_user_id,receive_phone,custom_key,send_type,send_content,is_success)
+    values
+    <foreach collection="list" item="record"  index="index" separator=",">
+       (
+       #{record.receiveUserId},#{record.receivePhone},#{record.customKey}
+      ,#{record.sendType},#{record.sendContent},#{record.isSuccess}
+      )
+    </foreach>
+  </insert>
+
+  <select id="selectByCondition" resultMap="BaseResultMap">
+    SELECT * FROM send_sms_history_record WHERE is_success = 1 AND custom_key = #{customKey}
+     AND DATE_FORMAT(create_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+  </select>
+
+  <select id="findCountLimit" resultMap="BaseResultMap">
+    	SELECT * FROM (
+  	SELECT id, count(*) AS count,receive_phone	FROM send_sms_history_record WHERE is_success = 1
+		AND custom_key = #{customKey} AND DATE_FORMAT(create_time,'%Y-%m-%d') = DATE_FORMAT(NOW(),'%Y-%m-%d')
+		GROUP BY receive_phone
+		) a WHERE a.count >= 2
+  </select>
+
+  <update id="batchUpdate">
+    update send_sms_history_record set is_success = 1 where custom_key = #{customKey}
+    and receive_phone in
+    <foreach collection="list" item="phone"  index="index" open="(" close=")" separator=",">
+        #{phone}
+    </foreach>
+  </update>
+
+  <select id="checkByUserName" resultType="java.lang.Integer">
+
+    SELECT COUNT(*) FROM grab_member_info WHERE `name` = #{name} AND custom_key = #{customKey}
+
+  </select>
+
+
+</mapper>

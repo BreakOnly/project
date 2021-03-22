@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.UsersAgreementDao">
+
+  <select id="getUsersAgreementsByParams" resultType="com.jrmf.domain.UsersAgreement">
+    select * from users_agreement where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+    <if test="userId !=null and userId !=''">
+      and userId = #{userId}
+    </if>
+    <if test="userIds !=null and userIds !=''">
+      and FIND_IN_SET(userId,#{userIds})
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      and originalId = #{originalId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and certId = #{certId}
+    </if>
+    <if test="agreementTemplateId !=null and agreementTemplateId !=''">
+      and agreementTemplateId = #{agreementTemplateId}
+    </if>
+    <if test="thirdNo !=null and thirdNo !=''">
+      and thirdNo = #{thirdNo}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and userName = #{userName}
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and signStatus = #{signStatus}
+    </if>
+    <if test="agreementTemplateIds !=null and agreementTemplateIds !=''">
+      and FIND_IN_SET(agreementTemplateId,#{agreementTemplateIds})
+    </if>
+    <if test="certIds !=null and certIds !=''">
+      and FIND_IN_SET(certId,#{certIds})
+    </if>
+    <if test="customKeys !=null and customKeys !=''">
+      and FIND_IN_SET(originalId,#{customKeys})
+    </if>
+    <if test="companyIds !=null and companyIds !=''">
+      and FIND_IN_SET(companyId,#{companyIds})
+    </if>
+    <if test="agreementType!=null">
+      and agreementType = #{agreementType}
+    </if>
+    <if test="companyId != null and companyId != ''">
+      and companyId = #{companyId}
+    </if>
+  </select>
+
+
+  <select id="selectUsersAgreementsByParams" resultType="com.jrmf.domain.UsersAgreement">
+    select ua.*,cc.companyName customName,qc.companyName from users_agreement ua
+    left join channel_custom cc on cc.customkey =ua.originalId
+    left join qb_company qc on qc.userId =ua.companyId
+    where ua.signStatus =5
+    <if test="id !=null and id !=''">
+      and ua.id = #{id}
+    </if>
+    <if test="userId !=null and userId !=''">
+      and ua.userId = #{userId}
+    </if>
+    <if test="userIds !=null and userIds !=''">
+      and FIND_IN_SET(ua.userId,#{userIds})
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      and ua.originalId = #{originalId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and ua.certId = #{certId}
+    </if>
+    <if test="agreementTemplateId !=null and agreementTemplateId !=''">
+      and ua.agreementTemplateId = #{agreementTemplateId}
+    </if>
+    <if test="thirdNo !=null and thirdNo !=''">
+      and ua.thirdNo = #{thirdNo}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and ua.userName = #{userName}
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and ua.signStatus = #{signStatus}
+    </if>
+    <if test="agreementTemplateIds !=null and agreementTemplateIds !=''">
+      and FIND_IN_SET(ua.agreementTemplateId,#{agreementTemplateIds})
+    </if>
+    <if test="certIds !=null and certIds !=''">
+      and FIND_IN_SET(ua.certId,#{certIds})
+    </if>
+    <if test="customKeys !=null and customKeys !=''">
+      and FIND_IN_SET(ua.originalId,#{customKeys})
+    </if>
+    <if test="companyIds !=null and companyIds !=''">
+      and FIND_IN_SET(ua.companyId,#{companyIds})
+    </if>
+    <if test="agreementType!=null">
+      and ua.agreementType = #{agreementType}
+    </if>
+    <if test="companyId != null and companyId != ''">
+      and ua.companyId = #{companyId}
+    </if>
+  </select>
+
+  <select id="getUsersAgreementsByChannelType" resultType="com.jrmf.domain.UsersAgreement">
+    select * from users_agreement ua
+    left join agreement_template at on ua.agreementTemplateId = at.id
+    where 1=1
+    <if test="id !=null and id !=''">
+      and ua.id = #{id}
+    </if>
+    <if test="userId !=null and userId !=''">
+      and ua.userId = #{userId}
+    </if>
+    <if test="userIds !=null and userIds !=''">
+      and FIND_IN_SET(ua.userId,#{userIds})
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      and ua.originalId = #{originalId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and ua.certId = #{certId}
+    </if>
+    <if test="agreementTemplateId !=null and agreementTemplateId !=''">
+      and ua.agreementTemplateId = #{agreementTemplateId}
+    </if>
+    <if test="thirdNo !=null and thirdNo !=''">
+      and ua.thirdNo = #{thirdNo}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and ua.userName = #{userName}
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and ua.signStatus = #{signStatus}
+    </if>
+    <if test="agreementTemplateIds !=null and agreementTemplateIds !=''">
+      and FIND_IN_SET(ua.agreementTemplateId,#{agreementTemplateIds})
+    </if>
+    <if test="certIds !=null and certIds !=''">
+      and FIND_IN_SET(ua.certId,#{certIds})
+    </if>
+    <if test="customKeys !=null and customKeys !=''">
+      and FIND_IN_SET(ua.originalId,#{customKeys})
+    </if>
+    <if test="agreementType!=null">
+      and ua.agreementType = #{agreementType}
+    </if>
+    <if test="channelType!=null">
+      and at.channelType = #{channelType}
+    </if>
+  </select>
+
+  <select id="getUsersAgreementsByParamsForCopy" resultType="com.jrmf.domain.UsersAgreement">
+    select * from users_agreement where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+    <if test="userId !=null and userId !=''">
+      and userId = #{userId}
+    </if>
+    <if test="userIds !=null and userIds !=''">
+      and FIND_IN_SET(userId,#{userIds})
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      and originalId = #{originalId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and certId = #{certId}
+    </if>
+    <if test="agreementTemplateId !=null and agreementTemplateId !=''">
+      and agreementTemplateId = #{agreementTemplateId}
+    </if>
+    <if test="thirdNo !=null and thirdNo !=''">
+      and thirdNo = #{thirdNo}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and userName = #{userName}
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and signStatus = #{signStatus}
+    </if>
+    <if test="agreementTemplateIds !=null and agreementTemplateIds !=''">
+      and FIND_IN_SET(agreementTemplateId,#{agreementTemplateIds})
+    </if>
+    <if test="customKeys !=null and customKeys !=''">
+      and FIND_IN_SET(originalId,#{customKeys})
+    </if>
+    <if test="certIds !=null and certIds !=''">
+      and FIND_IN_SET(certId,#{certIds})
+    </if>
+    and companyId != 1003
+    group by certId
+
+  </select>
+
+
+  <update id="updateUsersAgreement" parameterType="com.jrmf.domain.UsersAgreement">
+    update users_agreement set signStatus = #{signStatus},signStatusDes = #{signStatusDes},
+    signSubmitType = #{signSubmitType},thirdNo = #{thirdNo}
+    <if test="mobilePhone !=null and mobilePhone !=''">
+      ,mobilePhone = #{mobilePhone}
+    </if>
+    <if test="agreementURL !=null and agreementURL !=''">
+      ,agreementURL = #{agreementURL}
+    </if>
+    <if test="signStep !=null and signStep !=''">
+      ,signStep = #{signStep}
+    </if>
+    <if test="documentStep !=null and documentStep !=''">
+      ,documentStep = #{documentStep}
+    </if>
+    <if test="imageURLA !=null and imageURLA !=''">
+      ,imageURLA = #{imageURLA}
+    </if>
+    <if test="imageURLB !=null and imageURLB !=''">
+      ,imageURLB = #{imageURLB}
+    </if>
+    <if test="lastUpdateTime !=null and lastUpdateTime !=''">
+      ,last_update_time = now()
+    </if>
+    <if test="approver !=null and approver !=''">
+      ,approver = #{approver}
+    </if>
+    <if test="checkByPhoto !=null and checkByPhoto !=''">
+      ,checkByPhoto = #{checkByPhoto}
+    </if>
+    <if test="checkLevel !=null and checkLevel !=''">
+      ,checkLevel = #{checkLevel}
+    </if>
+    <if test="signSubmitType !=null and signSubmitType !=''">
+      ,signSubmitType = #{signSubmitType}
+    </if>
+    <if test="bankCardNo !=null and bankCardNo !=''">
+      ,bankCardNo = #{bankCardNo}
+    </if>
+    where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+
+  </update>
+
+  <update id="updateUsersAgreementImageURL">
+    update users_agreement
+    set imageURLA = #{imageURLA},
+        imageURLB = #{imageURLB}
+    where id = #{id}
+  </update>
+
+  <insert id="createAgreement" useGeneratedKeys="true" keyProperty="id"
+    parameterType="com.jrmf.domain.UsersAgreement">
+    INSERT INTO users_agreement (userId, agreementTemplateId, agreementName,
+                                 agreementTemplateURL, userName, certId, documentType,
+                                 mobilePhone, signStatus, signStep, documentStep, signStatusDes,
+                                 originalId, merchantId, companyId, thirdMerchId,
+                                 thirdTemplateId, agreementType, agreementURL,
+                                 agreementNo, thirdAgreementNo, orderNo, thirdNo,
+                                 imageURLA, imageURLB, imageURLC, imageURLD,
+                                 create_time, last_update_time, preparedA)
+    VALUES (#{userId}, #{agreementTemplateId}, #{agreementName},
+            #{agreementTemplateURL}, #{userName}, #{certId}, #{documentType},
+            #{mobilePhone}, #{signStatus}, #{signStep}, #{documentStep}, #{signStatusDes},
+            #{originalId}, #{merchantId}, #{companyId}, #{thirdMerchId},
+            #{thirdTemplateId}, #{agreementType}, #{agreementURL},
+            #{agreementNo}, #{thirdAgreementNo}, #{orderNo}, #{thirdNo},
+            #{imageURLA}, #{imageURLB}, #{imageURLC}, #{imageURLD},
+            now(), now(), #{preparedA})
+  </insert>
+
+  <delete id="deleteUsersAgreement">
+    DELETE
+    FROM users_agreement
+    WHERE id = #{id}
+  </delete>
+
+  <select id="getAgreementsForPlatform" parameterType="Map" resultType="HashMap">
+    SELECT
+    a.id as id,
+    c.companyName,
+    a.signSubmitType,
+    d.companyName payCompanyName,
+    a.signStatus,
+    a.signStatusDes,
+    DATE_FORMAT(a.last_update_time,'%Y-%m-%d %H:%i:%s') signTime,
+    a.checkLevel,
+    a.checkByPhoto,
+    a.userName,
+    a.documentType,
+    a.certId,
+    a.mobilePhone,
+    DATE_FORMAT(a.create_time,'%Y-%m-%d %H:%i:%s') createTime,
+    a.agreementName,
+    a.agreementNo,
+    r.userNo,
+    a.preparedA remark,
+    t.thirdTemplateDes,
+    DATE_FORMAT(a.last_update_time,'%Y-%m-%d %H:%i:%s') lastUpdateTime
+    FROM
+    users_agreement a
+    LEFT JOIN qb_userrelated r ON a.userId = r.userId and a.companyId = r.companyId
+    LEFT JOIN agreement_template t ON t.id = a.agreementTemplateId
+    LEFT JOIN channel_custom c ON a.originalId = c.customkey
+    LEFT JOIN channel_custom d ON a.companyId = d.customkey
+    <trim prefix=" WHERE " suffixOverrides="AND">
+      <if test="customName != null and customName != ''">
+        c.companyName like concat('%',#{customName},'%') AND
+      </if>
+      <if test="companyId != null and companyId != ''">
+        a.companyId = #{companyId} AND
+      </if>
+      <if test="userName != null and userName != ''">
+        a.userName = #{userName} AND
+      </if>
+      <if test="certId != null and certId != ''">
+        a.certId = #{certId} AND
+      </if>
+      <if test="checkLevel != null and checkLevel != ''">
+        FIND_IN_SET(a.checkLevel, #{checkLevel}) AND
+      </if>
+      <if test="checkByPhoto != null and checkByPhoto != ''">
+        FIND_IN_SET(a.checkByPhoto, #{checkByPhoto}) AND
+      </if>
+      <if test="signSubmitType != null and signSubmitType != ''">
+        a.signSubmitType = #{signSubmitType} AND
+      </if>
+      <if test="signDateStart != null and signDateStart != ''">
+        date(a.last_update_time) &gt;= #{signDateStart} AND
+      </if>
+      <if test="signDateEnd != null and signDateEnd != ''">
+        date(a.last_update_time) &lt;= #{signDateEnd} AND
+      </if>
+      <if test="signStatus != null and signStatus != ''">
+        a.signStatus = #{signStatus} AND
+      </if>
+      <if test="signStatus ==null or signStatus ==''">
+        a.signStatus &lt;&gt; 7 AND
+      </if>
+      <if test="mobilePhone != null and mobilePhone != ''">
+        a.mobilePhone = #{mobilePhone}
+      </if>
+    </trim>
+    group by a.agreementNo
+    ORDER BY
+    a.last_update_time DESC
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+  </select>
+
+  <select id="getAgreementsByParams" parameterType="Map" resultType="HashMap">
+    SELECT
+    a.id,
+    a.userType,
+    a.agreementNo,
+    a.originalId,
+    a.companyId,
+    r.mobileNo,
+    r.userNo,
+    r.userId,
+    a.userName,
+    a.documentType,
+    a.certId,
+    a.signStatus,
+    a.signStatusDes,
+    c.companyName,
+    d.companyName payCompanyName,
+    a.agreementName,
+    a.preparedA remark,
+    t.thirdTemplateDes,
+    DATE_FORMAT(a.last_update_time,'%Y-%m-%d %H:%i:%s') signTime,
+    yua.business_license_url
+    <!-- a.last_update_time  signTime-->
+    FROM
+    users_agreement a
+    LEFT JOIN qb_userrelated r ON a.userId = r.userId and a.companyId = r.companyId
+    LEFT JOIN agreement_template t ON t.id = a.agreementTemplateId
+    LEFT JOIN channel_custom c ON a.originalId = c.customkey
+    LEFT JOIN channel_custom d ON a.companyId = d.customkey
+    LEFT JOIN yuncr_user_authentication yua ON yua.id_card = a.certId
+    <trim prefix=" WHERE " suffixOverrides="AND">
+      <if test="userName != null and userName != ''">
+        a.userName = #{userName} AND
+      </if>
+      <if test="certId != null and certId != ''">
+        a.certId = #{certId} AND
+      </if>
+      <if test="userType != null and userType != ''">
+        a.userType = #{userType} AND
+      </if>
+      <if test="userNo != null and userNo != ''">
+        r.userNo = #{userNo} AND
+      </if>
+      <if test="originalId != null and originalId != ''">
+        FIND_IN_SET(a.originalId, #{originalId}) AND
+        FIND_IN_SET(r.originalId, #{originalId}) AND
+      </if>
+      <if test="customName != null and customName != ''">
+        c.companyName like concat('%',#{customName},'%') AND
+      </if>
+      <if test="signDateStart != null and signDateStart != ''">
+        date(a.last_update_time) &gt;= #{signDateStart} AND
+      </if>
+      <if test="signDateEnd != null and signDateEnd != ''">
+        date(a.last_update_time) &lt;= #{signDateEnd} AND
+      </if>
+      <if test="companyId != null and companyId != ''">
+        a.companyId = #{companyId} AND
+      </if>
+      <if test="signStatus != null and signStatus != ''">
+        a.signStatus = #{signStatus} AND
+      </if>
+      <if test="signStatus ==null or signStatus ==''">
+        a.signStatus &lt;&gt; 7 AND
+      </if>
+      <if test="remark != null and remark != ''">
+        a.preparedA like concat('%',#{remark},'%') AND
+      </if>
+    </trim>
+    group by a.agreementNo
+    ORDER BY
+    a.last_update_time DESC
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+
+  </select>
+
+  <select id="getAgreementStatistical" parameterType="Map"
+    resultType="com.jrmf.domain.UsersAgreement">
+
+    SELECT
+    a.id,
+    a.userType,
+    a.originalId,
+    a.companyId,
+    r.userId,
+    a.certId,
+    a.signStatus
+    FROM
+    users_agreement a
+    LEFT JOIN qb_userrelated r ON a.userId = r.userId and a.companyId = r.companyId
+    LEFT JOIN agreement_template t ON t.id = a.agreementTemplateId
+    LEFT JOIN channel_custom c ON a.originalId = c.customkey
+    LEFT JOIN channel_custom d ON a.companyId = d.customkey
+    <trim prefix=" WHERE " suffixOverrides="AND">
+      <if test="userName != null and userName != ''">
+        a.userName = #{userName} AND
+      </if>
+      <if test="certId != null and certId != ''">
+        a.certId = #{certId} AND
+      </if>
+      <if test="userType != null and userType != ''">
+        a.userType = #{userType} AND
+      </if>
+      <if test="userNo != null and userNo != ''">
+        r.userNo = #{userNo} AND
+      </if>
+      <if test="originalId != null and originalId != ''">
+        FIND_IN_SET(a.originalId, #{originalId}) AND
+        FIND_IN_SET(r.originalId, #{originalId}) AND
+      </if>
+      <if test="customName != null and customName != ''">
+        c.companyName like concat('%',#{customName},'%') AND
+      </if>
+      <if test="signDateStart != null and signDateStart != ''">
+        date(a.last_update_time) &gt;= #{signDateStart} AND
+      </if>
+      <if test="signDateEnd != null and signDateEnd != ''">
+        date(a.last_update_time) &lt;= #{signDateEnd} AND
+      </if>
+      <if test="companyId != null and companyId != ''">
+        a.companyId = #{companyId} AND
+      </if>
+      <if test="signStatus != null and signStatus != ''">
+        a.signStatus = #{signStatus} AND
+      </if>
+      <if test="signStatus ==null or signStatus ==''">
+        a.signStatus &lt;&gt; 7 AND
+      </if>
+      <if test="remark != null and remark != ''">
+        a.preparedA like concat('%',#{remark},'%') AND
+      </if>
+    </trim>
+    group by a.agreementNo
+  </select>
+
+  <select id="getUserAgreementCountByParam" resultType="int">
+    select count(ua.id)
+    from users_agreement ua where
+    FIND_IN_SET(ua.agreementTemplateId, #{agreementTemplateId})
+    and ua.certId = #{certId}
+    and ua.signStatus = #{signStatus}
+    <if test="userName !=null and userName !=''">
+      and ua.userName = #{userName}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      and ua.companyId = #{companyId}
+    </if>
+    <if test="customKey !=null and customKey !=''">
+      and ua.originalId = #{customKey}
+    </if>
+
+  </select>
+  <select id="getUserAgreementsForPayCompanyByParam" resultType="HashMap">
+    SELECT a.id,b.companyName,a.agreementNo,a.userName,a.documentType,a.certId,a.signStatus,
+    a.signStatusDes,c.templateName,c.thirdTemplateDes,a.mobilePhone,
+    DATE_FORMAT(a.last_update_time,'%Y-%m-%d %H:%i:%s') last_update_time,
+    a.imageURLA,a.imageURLB,c.htmlTemplate
+    FROM users_agreement a
+    LEFT JOIN channel_custom b on a.originalId = b.customkey
+    LEFT JOIN agreement_template c on a.agreementTemplateId = c.id
+    where 1=1
+    <if test="id !=null and id !=''">
+      and a.id = #{id}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and a.userName like concat('%',#{userName},'%')
+    </if>
+    <if test="startTime !=null and startTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &gt;= #{startTime}
+    </if>
+    <if test="endTime !=null and endTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &lt;= #{endTime}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      and a.companyId = #{companyId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and a.certId = #{certId}
+    </if>
+    <if test="companyName !=null and companyName !=''">
+      and b.companyName like concat('%',#{companyName},'%')
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and a.signStatus = #{signStatus}
+    </if>
+    <if test="signStatus ==null or signStatus ==''">
+      and a.signStatus &lt;&gt; 7
+    </if>
+    <if test="templateName !=null and templateName !=''">
+      and c.templateName like concat('%',#{templateName},'%')
+    </if>
+    ORDER BY
+    a.last_update_time DESC
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+
+  </select>
+
+  <select id="getUserAgreementsByParam" resultType="HashMap">
+    SELECT
+    a.id,a.agreementNo,a.userName,a.documentType,a.certId,a.signStatus,a.signStatusDes,a.mobilePhone,
+    DATE_FORMAT(a.last_update_time,'%Y-%m-%d %H:%i:%s') lastUpdateTime,
+    a.imageURLA,a.imageURLB,a.companyId,
+    b.companyName customName,b.customkey,
+    c.templateName,c.thirdTemplateDes,c.htmlTemplate,
+    qc.companyName
+    FROM users_agreement a
+    LEFT JOIN channel_custom b on a.originalId = b.customkey
+    LEFT JOIN agreement_template c on a.agreementTemplateId = c.id
+    LEFT JOIN qb_company qc ON qc.userId = a.companyId
+    where 1=1
+    <if test="id !=null and id !=''">
+      and a.id = #{id}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and a.userName like concat('%',#{userName},'%')
+    </if>
+    <if test="startTime !=null and startTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &gt;= #{startTime}
+    </if>
+    <if test="endTime !=null and endTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &lt;= #{endTime}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      and a.companyId = #{companyId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and a.certId = #{certId}
+    </if>
+    <if test="companyName !=null and companyName !=''">
+      and b.companyName like concat('%',#{companyName},'%')
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and a.signStatus = #{signStatus}
+    </if>
+    <if test="signStatus ==null or signStatus ==''">
+      and a.signStatus &lt;&gt; 7
+    </if>
+    <if test="templateName !=null and templateName !=''">
+      and c.templateName like concat('%',#{templateName},'%')
+    </if>
+    ORDER BY
+    a.last_update_time DESC
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+
+  </select>
+
+  <update id="updateUsersAgreementSignStep" parameterType="com.jrmf.domain.UsersAgreement">
+    update users_agreement set signStatusDes = #{signStatusDes},
+    signStep =#{signStep}
+    <if test="signStatus == 4">
+      ,signStatus = #{signStatus}
+    </if>
+    <if test="agreementURL !=null and agreementURL !=''">
+      ,agreementURL = #{agreementURL}
+    </if>
+    <if test="lastUpdateTime !=null and lastUpdateTime !=''">
+      ,last_update_time = now()
+    </if>
+    where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+  </update>
+
+
+  <update id="updateUsersAgreementSignStepNew" parameterType="com.jrmf.domain.UsersAgreement">
+    update users_agreement set signStatusDes = #{signStatusDes},
+    signStep =#{signStep}
+    <if test="signStatus !=null and signStatus!=''">
+      ,signStatus = #{signStatus}
+    </if>
+    <if test="agreementURL !=null and agreementURL !=''">
+      ,agreementURL = #{agreementURL}
+    </if>
+    <if test="lastUpdateTime !=null and lastUpdateTime !=''">
+      ,last_update_time = now()
+    </if>
+    where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+  </update>
+
+  <update id="updateUsersAgreementDocumentStep" parameterType="com.jrmf.domain.UsersAgreement">
+    update users_agreement set signStatusDes = #{signStatusDes},
+    documentStep =#{documentStep}
+    <if test="signStatus == 4">
+      ,signStatus = #{signStatus}
+    </if>
+    <if test="lastUpdateTime !=null and lastUpdateTime !=''">
+      ,last_update_time = now()
+    </if>
+    where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+  </update>
+  <update id="updateUsersAgreementByBatch" parameterType="string">
+    update users_agreement
+    set signStatusDes    = '成功',
+        documentStep     = 1,
+        signStep         =1,
+        signStatus       = 5,
+        agreementURL     = agreementTemplateURL,
+        last_update_time = now()
+    where FIND_IN_SET(id, #{ids})
+  </update>
+  <!--/**
+  * 修改api签约的  信息提交
+  * 提交方式
+  * 回调地址
+  * 回调次数
+  * 流水号
+  *
+  * @param agreement 协议
+  */-->
+  <update id="updateApiSignDetail">
+    update users_agreement
+    set signSubmitType   = #{signSubmitType},
+        thirdNo          = #{thirdNo},
+        last_update_time = now()
+    where id = #{id}
+  </update>
+  <update id="updateWhiteList">
+    update users_agreement
+    set white_list       = #{whiteList},
+        last_update_time = now()
+    where id = #{id}
+  </update>
+
+  <select id="getWhiteListCount" resultType="int">
+    SELECT count(ua.id)
+    FROM users_agreement ua
+           LEFT JOIN agreement_template atp ON ua.agreementTemplateId = atp.id
+    WHERE ua.originalId = #{customKey}
+      AND ua.companyId = #{companyId}
+      AND ua.certId = #{certId}
+      AND ua.white_list = 1
+      AND atp.agreementPayment = 1
+  </select>
+
+  <!--查询符合条件的id-->
+  <select id="getUserAgreementsIdForPayCompanyByParam" resultType="java.lang.String">
+    SELECT a.id
+    FROM users_agreement a LEFT JOIN channel_custom b on a.originalId = b.customkey
+    LEFT JOIN agreement_template c on a.agreementTemplateId = c.id
+    where 1=1
+    <if test="id !=null and id !=''">
+      and a.id = #{id}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and a.userName like concat('%',#{userName},'%')
+    </if>
+    <if test="startTime !=null and startTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &gt;= #{startTime}
+    </if>
+    <if test="endTime !=null and endTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &lt;= #{endTime}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      and a.companyId = #{companyId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and a.certId = #{certId}
+    </if>
+    <if test="companyName !=null and companyName !=''">
+      and b.companyName like concat('%',#{companyName},'%')
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and a.signStatus = #{signStatus}
+    </if>
+    <if test="signStatus ==null or signStatus ==''">
+      and a.signStatus &lt;&gt; 7
+    </if>
+    <if test="templateName !=null and templateName !=''">
+      and c.templateName like concat('%',#{templateName},'%')
+    </if>
+    ORDER BY
+    a.last_update_time DESC
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+  </select>
+  <!--查询符合条件的 结果条数-->
+  <select id="getUsersAgreementsCountByParams" resultType="java.lang.Integer">
+    select count(*) from users_agreement where 1=1
+    <if test="id !=null and id !=''">
+      and id = #{id}
+    </if>
+    <if test="userId !=null and userId !=''">
+      and userId = #{userId}
+    </if>
+    <if test="userIds !=null and userIds !=''">
+      and FIND_IN_SET(userId,#{userIds})
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      and originalId = #{originalId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and certId = #{certId}
+    </if>
+    <if test="agreementTemplateId !=null and agreementTemplateId !=''">
+      and agreementTemplateId = #{agreementTemplateId}
+    </if>
+    <if test="thirdNo !=null and thirdNo !=''">
+      and thirdNo = #{thirdNo}
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and signStatus = #{signStatus}
+    </if>
+    <if test="agreementTemplateIds !=null and agreementTemplateIds !=''">
+      and FIND_IN_SET(agreementTemplateId,#{agreementTemplateIds})
+    </if>
+    <if test="certIds !=null and certIds !=''">
+      and FIND_IN_SET(certId,#{certIds})
+    </if>
+  </select>
+
+  <select id="getAgreementsByParamsCount" parameterType="Map" resultType="int">
+    SELECT COUNT(1) FROM (SELECT
+    a.agreementNo,
+    r.userNo,
+    a.userName,
+    a.documentType,
+    a.certId,
+    a.signStatus,
+    a.signStatusDes,
+    c.companyName,
+    d.companyName payCompanyName,
+    a.agreementName,
+    a.preparedA remark,
+    t.thirdTemplateDes,
+    DATE_FORMAT(a.last_update_time,'%Y-%m-%d %H:%i:%s') signTime
+    <!-- a.last_update_time  signTime-->
+    FROM
+    users_agreement a
+    LEFT JOIN qb_userrelated r ON a.userId = r.userId and a.companyId = r.companyId
+    LEFT JOIN agreement_template t ON t.id = a.agreementTemplateId
+    LEFT JOIN channel_custom c ON a.originalId = c.customkey
+    LEFT JOIN channel_custom d ON a.companyId = d.customkey
+    <trim prefix=" WHERE " suffixOverrides="AND">
+      <if test="userName != null and userName != ''">
+        a.userName = #{userName} AND
+      </if>
+      <if test="userType != null and userType != ''">
+        a.userType = #{userType} AND
+      </if>
+      <if test="certId != null and certId != ''">
+        a.certId = #{certId} AND
+      </if>
+      <if test="userNo != null and userNo != ''">
+        r.userNo = #{userNo} AND
+      </if>
+      <if test="originalId != null and originalId != ''">
+        FIND_IN_SET(a.originalId, #{originalId}) AND
+        FIND_IN_SET(r.originalId, #{originalId}) AND
+      </if>
+      <if test="customName != null and customName != ''">
+        c.companyName like concat('%',#{customName},'%') AND
+      </if>
+      <if test="signDateStart != null and signDateStart != ''">
+        date(a.last_update_time) &gt;= #{signDateStart} AND
+      </if>
+      <if test="signDateEnd != null and signDateEnd != ''">
+        date(a.last_update_time) &lt;= #{signDateEnd} AND
+      </if>
+      <if test="companyId != null and companyId != ''">
+        a.companyId = #{companyId} AND
+      </if>
+      <if test="signStatus != null and signStatus != ''">
+        a.signStatus = #{signStatus} AND
+      </if>
+      <if test="signStatus ==null or signStatus ==''">
+        a.signStatus &lt;&gt; 7 AND
+      </if>
+      <if test="remark != null and remark != ''">
+        a.preparedA like concat('%',#{remark},'%') AND
+      </if>
+    </trim>
+    group by a.agreementNo ) temp
+  </select>
+
+  <select id="getUserAgreementsIdForPayCompanyByParamCount" resultType="int">
+    SELECT count(1)
+    FROM users_agreement a LEFT JOIN channel_custom b on a.originalId = b.customkey
+    LEFT JOIN agreement_template c on a.agreementTemplateId = c.id
+    where 1=1
+    <if test="id !=null and id !=''">
+      and a.id = #{id}
+    </if>
+    <if test="userName !=null and userName !=''">
+      and a.userName like concat('%',#{userName},'%')
+    </if>
+    <if test="startTime !=null and startTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &gt;= #{startTime}
+    </if>
+    <if test="endTime !=null and endTime !=''">
+      and SUBSTR(a.last_update_time FROM 1 FOR 10) &lt;= #{endTime}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      and a.companyId = #{companyId}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and a.certId = #{certId}
+    </if>
+    <if test="companyName !=null and companyName !=''">
+      and b.companyName like concat('%',#{companyName},'%')
+    </if>
+    <if test="signStatus !=null and signStatus !=''">
+      and a.signStatus = #{signStatus}
+    </if>
+    <if test="signStatus ==null or signStatus ==''">
+      and a.signStatus &lt;&gt; 7
+    </if>
+    <if test="templateName !=null and templateName !=''">
+      and c.templateName like concat('%',#{templateName},'%')
+    </if>
+  </select>
+
+  <select id="getCompanySignShare" resultType="com.jrmf.domain.UsersAgreement">
+    SELECT ua.*
+    FROM users_agreement ua
+           LEFT JOIN t_sign_element_rule tser ON tser.companyId = ua.companyId
+    WHERE ua.signStatus = 5
+      AND ua.companyId = #{companyId}
+      AND ua.userId = #{userId}
+    LIMIT 1
+  </select>
+
+  <select id="getCustomSignShare" resultType="com.jrmf.domain.UsersAgreement">
+    SELECT ua.*
+    FROM users_agreement ua
+    WHERE ua.signStatus = 5
+      AND ua.userId = #{userId}
+      AND ua.checkLevel &gt;= #{signLevel}
+      AND ua.checkByPhoto &gt;= #{papersRequire}
+      AND FIND_IN_SET(ua.originalId, #{customKeys})
+    LIMIT 1
+  </select>
+
+  <select id="getUsersAgreement" resultType="com.jrmf.domain.UsersAgreement">
+    SELECT ua.*,
+           cc.companyName customName,
+           qc.companyName
+    FROM users_agreement ua
+           LEFT JOIN channel_custom cc ON ua.originalId = cc.customkey
+           LEFT JOIN qb_company qc ON qc.userId = ua.companyId
+    WHERE ua.userId = #{userId}
+      and ua.agreementTemplateId = #{agreementTemplateId}
+  </select>
+
+  <select id="countByTemplateId" resultType="java.lang.Integer">
+    select count(1)
+    from users_agreement
+    where signStatus = 5
+      and FIND_IN_SET(agreementTemplateId, #{agreementTemplateId})
+  </select>
+
+  <select id="getAgreementsSignSuccess" resultType="com.jrmf.domain.UsersAgreement">
+    SELECT *
+    FROM users_agreement
+    WHERE userId = #{userId}
+      AND signStatus = '5'
+      AND originalId = #{customkey}
+      <if test="recCustomkey != null and recCustomkey != ''" >
+        AND companyId = #{recCustomkey}
+      </if>
+    ORDER BY checkLevel desc
+    limit 1
+  </select>
+
+  <select id="findSendSmsUsers" resultType="com.jrmf.domain.UsersAgreement">
+    SELECT
+    ua.userId,
+    ua.originalId,
+    ua.userName,
+    qbu.mobileNo AS mobilePhone
+    FROM
+    users_agreement ua
+    LEFT JOIN qb_userrelated qbu ON ua.userId = qbu.userId AND ua.originalId = qbu.originalId
+    LEFT JOIN qb_users qu ON ua.userId = qu.id
+    WHERE ua.originalId = #{customKey}
+    AND ua.signStatus = 1 AND qu.userType = 11 AND qu.userStatus = 1
+    AND ua.userId NOT IN(
+    SELECT userId FROM users_agreement WHERE originalId = #{customKey}
+    AND signStatus != 1
+    )
+    <if test="userIds!=null and userIds.size()>0">
+      AND ua.id in
+      <foreach collection="userIds" index="index" separator="," open="(" close=")" item="id">
+        #{id}
+      </foreach>
+    </if>
+    <if test="needPhone !=null and needPhone != ''">
+      AND qbu.mobileNo IS NOT NULL
+    </if>
+    GROUP BY ua.userId
+  </select>
+
+  <select id="findByIds" resultType="com.jrmf.domain.UsersAgreement">
+    SELECT ua.id,ua.userId,ua.originalId,cc.companyName FROM users_agreement ua LEFT JOIN
+    channel_custom cc ON cc.customkey = ua.originalId
+    WHERE ua.id in
+    <foreach collection="list" item="id" index="index" open="(" close=")" separator=",">
+      #{id}
+    </foreach>
+  </select>
+
+  <select id="findCommissionCount" parameterType="Map" resultType="java.lang.Integer">
+    SELECT IFNULL( COUNT(*),0) FROM ( SELECT COUNT(*) FROM qb_usercommission
+    WHERE FIND_IN_SET(companyId,#{companyIds}) AND FIND_IN_SET(originalId,#{originalIds})
+    AND `status` = 1
+    <if test="startDate !=null and startDate !='' ">
+      AND<![CDATA[ date(createtime) >= #{startDate}  ]]>
+    </if>
+    <if test="endDate !=null and endDate !='' ">
+      AND <![CDATA[ date(createtime) <= #{endDate} ]]>
+    </if>
+    GROUP BY userId ) aa
+  </select>
+  <select id="getlinkageSignProcessingCount" resultType="java.util.Map">
+    SELECT
+        COUNT( ua.id ) processCount,(13-TIMESTAMPDIFF (MINUTE,ua.last_update_time,NOW())) leftTime
+    FROM
+        qb_commissiontemporary qc
+        LEFT JOIN users_agreement ua ON ua.signStatus = 2
+        AND #{customKey} = ua.originalId
+        AND #{companyId} = ua.companyId
+        AND qc.idCard = ua.certId
+    WHERE
+        qc.`status` = 1
+        AND qc.batchId = #{batchId}
+        AND TIMESTAMPDIFF (
+        MINUTE,
+        ua.last_update_time,
+        NOW()) &lt; 13;
+  </select>
+
+</mapper>

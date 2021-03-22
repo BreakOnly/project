@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ChannelUserRealNameDao">
+
+    <sql id="Base_Column_List">
+    id, userId, userPhoneNo, name, certType, certId, certFrontUrl, certBackUrl, orderId,linkPhoneNo
+  </sql>
+
+    <update id="deleteById" parameterType="java.lang.Integer">
+    update channel_user_real_name set state=1 where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <insert id="insert" parameterType="com.jrmf.domain.ChannelUserRealName" >
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into channel_user_real_name (userId, userPhoneNo, name,
+        certType, certId, certFrontUrl,
+        certBackUrl, orderId, linkPhoneNo,state)
+        values (#{userId,jdbcType=INTEGER}, #{userPhoneNo,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR},
+        #{certType,jdbcType=INTEGER}, #{certId,jdbcType=VARCHAR}, #{certFrontUrl,jdbcType=VARCHAR},
+        #{certBackUrl,jdbcType=VARCHAR}, #{orderId,jdbcType=VARCHAR}, #{linkPhoneNo,jdbcType=VARCHAR},
+        #{state,jdbcType=INTEGER})
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.jrmf.domain.ChannelUserRealName">
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into channel_user_real_name
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                userId,
+            </if>
+            <if test="userPhoneNo != null">
+                userPhoneNo,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="certType != null">
+                certType,
+            </if>
+            <if test="certId != null">
+                certId,
+            </if>
+            <if test="certFrontUrl != null">
+                certFrontUrl,
+            </if>
+            <if test="certBackUrl != null">
+                certBackUrl,
+            </if>
+            <if test="orderId != null">
+                orderId,
+            </if>
+            <if test="linkPhoneNo != null">
+                linkPhoneNo,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="userPhoneNo != null">
+                #{userPhoneNo,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="certType != null">
+                #{certType,jdbcType=INTEGER},
+            </if>
+            <if test="certId != null">
+                #{certId,jdbcType=VARCHAR},
+            </if>
+            <if test="certFrontUrl != null">
+                #{certFrontUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="certBackUrl != null">
+                #{certBackUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="orderId != null">
+                #{orderId,jdbcType=VARCHAR},
+            </if>
+            <if test="linkPhoneNo != null">
+                #{linkPhoneNo,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.ChannelUserRealName">
+        update channel_user_real_name
+        <set>
+            <if test="userId != null">
+                userId = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="userPhoneNo != null">
+                userPhoneNo = #{userPhoneNo,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="certType != null">
+                certType = #{certType,jdbcType=INTEGER},
+            </if>
+            <if test="certId != null">
+                certId = #{certId,jdbcType=VARCHAR},
+            </if>
+            <if test="certFrontUrl != null">
+                certFrontUrl = #{certFrontUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="certBackUrl != null">
+                certBackUrl = #{certBackUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="orderId != null">
+                orderId = #{orderId,jdbcType=VARCHAR},
+            </if>
+            <if test="linkPhoneNo != null">
+                linkPhoneNo = #{linkPhoneNo,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.ChannelUserRealName">
+    update channel_user_real_name
+    set userId = #{userId,jdbcType=INTEGER},
+      userPhoneNo = #{userPhoneNo,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      certType = #{certType,jdbcType=INTEGER},
+      certId = #{certId,jdbcType=VARCHAR},
+      certFrontUrl = #{certFrontUrl,jdbcType=VARCHAR},
+      certBackUrl = #{certBackUrl,jdbcType=VARCHAR},
+      orderId = #{orderId,jdbcType=VARCHAR},
+      linkPhoneNo = #{linkPhoneNo,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+    <select id="selectAll" resultType="com.jrmf.domain.ChannelUserRealName">
+        SELECT * FROM channel_user_real_name
+        <trim prefix=" where " suffixOverrides="and">
+            <if test="notState != null">
+                state != #{notState} and
+            </if>
+            <if test="state != null">
+                state = #{state} and
+            </if>
+            <if test="certId != null and certId != ''">
+                certId = #{certId} and
+            </if>
+            <if test="userId != null">
+                userId = #{userId} and
+            </if>
+            <if test="userPhoneNo != null and userPhoneNo != ''">
+                userPhoneNo = #{userPhoneNo} and
+            </if>
+        </trim>
+    </select>
+
+    <delete id="deleteByUserId" >
+		DELETE FROM channel_user_real_name WHERE userId = #{userId}
+	</delete>
+
+
+    <select id="selectByCertId" resultType="com.jrmf.domain.ChannelUserRealName">
+        select *
+        from channel_user_real_name
+        where certId = #{certId} and state = 0 limit 1
+    </select>
+</mapper>

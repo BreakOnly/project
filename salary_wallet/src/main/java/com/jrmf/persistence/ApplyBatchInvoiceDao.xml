@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ApplyBatchInvoiceDao">
+  <resultMap id="baseResultMap" type="com.jrmf.domain.ApplyBatchInvoice">
+    <id column="id" property="id"/>
+    <result column="trade_month" property="tradeMonth"/>
+    <result column="company_name" property="companyName"/>
+    <result column="individual_name" property="individualName"/>
+    <result column="trade_money" property="tradeMoney"/>
+    <result column="invoice_money" property="invoiceMoney"/>
+    <result column="trade_number" property="tradeNumber"/>
+    <result column="id_card" property="idCard"/>
+    <result column="apply_batch_remark" property="applyBatchRemark"/>
+    <result column="invoice_status" property="invoiceStatus"/>
+    <result column="invoice_status_describe" property="invoiceStatusDescribe"/>
+    <result column="step" property="step"/>
+    <result column="step_status" property="stepStatus"/>
+    <result column="custom_firm_name" property="customFirmName"/>
+    <result column="channel_task_id" property="channelTaskId"/>
+    <result column="contract_url" property="contractUrl"/>
+    <result column="final_statement_url" property="finalStatementUrl"/>
+    <result column="invoice_url" property="invoiceUrl"/>
+    <result column="invoice_number" property="invoiceNumber"/>
+    <result column="settlement_card" property="settlementCard"/>
+    <result column="invoice_serial_number" property="invoiceSerialNumber"/>
+    <result column="in_account_no" property="inAccountNo"/>
+    <result column="company_id" property="companyId"/>
+    <result column="settlement_serial_number" property="settlementSerialNumber"/>
+  </resultMap>
+  <sql id="common_where_if">
+    <where>
+      <choose>
+        <when test="ids != null">
+          bic.id in
+          <foreach collection="listId" index="index" item="id" open="(" close=")"
+            separator=",">
+            #{id}
+          </foreach>
+        </when>
+        <otherwise>
+          <if test="companyName != null and companyName != '' ">
+            and bic.company_name like concat('%',#{companyName},'%')
+          </if>
+          <if test="companyId != null and companyId != '' ">
+            and bic.company_id = #{companyId}
+          </if>
+          <if test="individualName != null and individualName != '' ">
+            and bic.individual_name = #{individualName}
+          </if>
+          <if test="contractCompanyName != null and contractCompanyName != '' ">
+            and bic.contract_company_name like concat('%',#{contractCompanyName},'%')
+          </if>
+          <if test="certId != null and certId != '' ">
+            and bic.cert_id = #{certId}
+          </if>
+          <if test="inAccountNo != null and inAccountNo != '' ">
+            and bic.inAccount_no = #{inAccountNo}
+          </if>
+          <if test="accountStartDate != null and accountStartDate!= '' ">
+            and date_format(bic.account_time,'%Y-%m-%d')  <![CDATA[ >= #{accountStartDate} ]]>
+          </if>
+          <if test="accountEndDate != null and accountEndDate!= '' ">
+            and date_format(bic.account_time,'%Y-%m-%d')   <![CDATA[ <= #{accountEndDate} ]]>
+          </if>
+          <if test="amountStart != null and amountStart!= '' ">
+            and   <![CDATA[bic.amount >= #{amountStart} ]]>
+          </if>
+          <if test="amountEnd != null and amountEnd!= '' ">
+            and  <![CDATA[bic.amount <= #{amountEnd} ]]>
+          </if>
+          <if test="amountEnd != null and amountEnd!= '' ">
+            and  <![CDATA[bic.amount <= #{amountEnd} ]]>
+          </if>
+          <if test="invoiceStatusList == null ">
+             AND bic.invoice_status in(0,3)
+          </if>
+
+          <if test="invoiceStatusList != null" >
+            AND bic.invoice_status in
+            <foreach collection="invoiceStatusList" index="index" item="is" open="(" close=")"
+              separator=",">
+              #{is}
+            </foreach>
+          </if>
+
+        </otherwise>
+      </choose>
+     AND bic.receipt_status = 1
+    </where>
+  </sql>
+  <insert id="batchInsert" useGeneratedKeys="true" keyProperty="id">
+    insert into apply_batch_invoice(trade_month,company_name,individual_name,trade_money
+    ,id_card,create_time,invoice_money,in_account_no,company_id,trade_number,channel_task_id
+    ,apply_batch_remark,custom_firm_name)
+    values
+    <foreach collection="list" index="index" separator="," item="apply">
+      (
+      #{apply.tradeMonth},#{apply.companyName},#{apply.individualName},#{apply.tradeMoney}
+      ,#{apply.idCard},now(),#{apply.invoiceMoney},#{apply.inAccountNo},#{apply.companyId}
+      ,#{apply.tradeNumber},#{apply.channelTaskId},#{apply.applyBatchRemark},#{apply.customFirmName}
+      )
+    </foreach>
+
+  </insert>
+
+  <select id="findCommissionStatisticalByCondition"
+    parameterType="com.jrmf.domain.dto.BatchInvoiceCommissionDTO"
+    resultType="com.jrmf.domain.ApplyBatchInvoice">
+    SELECT bic.id,bic.company_name as companyName,bic.individual_name as individualName,bic.invoice_status as invoiceStatus,
+    bic.cert_id as idCard,CAST(ROUND(SUM(bic.amount*100)/100,2) as char) AS tradeMoney, bic.in_account_no as inAccountNo,
+    bic.account_date as tradeMonth,COUNT(*) AS tradeNumber,bic.company_id as companyId,
+    bic.contract_company_name as customFirmName
+    FROM batch_invoice_commission as bic
+    <include refid="common_where_if"/>
+    GROUP BY tradeMonth,cert_id,in_account_no,individual_name
+  </select>
+
+
+  <select id="findByConditionForUpdate"
+    parameterType="com.jrmf.domain.dto.BatchInvoiceCommissionDTO"
+    resultType="com.jrmf.domain.ApplyBatchInvoice">
+    SELECT bic.id,bic.company_name as companyName,bic.individual_name as individualName,bic.invoice_status as invoiceStatus,
+    bic.cert_id as idCard,CAST(ROUND(SUM(bic.amount*100)/100,2) as char) AS tradeMoney, bic.in_account_no as inAccountNo,
+    bic.account_date as tradeMonth,COUNT(*) AS tradeNumber,bic.company_id as companyId,
+    bic.contract_company_name as customFirmName
+    FROM batch_invoice_commission as bic
+    <include refid="common_where_if"/>
+    GROUP BY tradeMonth,cert_id,in_account_no,individual_name
+    FOR UPDATE;
+  </select>
+
+  <select id="findLimitMoney" parameterType="com.jrmf.domain.dto.BatchInvoiceCommissionDTO" resultType="string">
+     SELECT  CAST(ROUND(SUM(bic.amount*100)/100,2) as char ) AS invoiceMoney
+		    FROM batch_invoice_commission bic
+	      LEFT JOIN  apply_batch_invoice_amount amount
+		    ON amount.id_card = bic.cert_id AND bic.account_date = amount.trade_month
+    <include refid="common_where_if"/>
+    AND amount.id IS NOT NULL
+
+  </select>
+  <select id="findStatisticalByCondition"
+    parameterType="com.jrmf.domain.dto.BatchInvoiceCommissionDTO"
+    resultType="com.jrmf.domain.dto.StatisticalBatchInvoiceDTO">
+    SELECT CAST(ROUND(SUM(bic.amount*100)/100,2) as  char) AS invoiceMoney,
+    COUNT(DISTINCT bic.company_name) AS companyNameCount,
+    COUNT(DISTINCT bic.contract_company_name) AS contractCompanyNameCount,
+    COUNT(DISTINCT bic.cert_id) AS certIdCount,
+    bic.contract_company_name
+    FROM batch_invoice_commission as bic
+    <include refid="common_where_if"/>
+  </select>
+
+  <select id="findApplyAmount" resultType="com.jrmf.domain.ApplyBatchInvoiceAmount">
+
+    SELECT id,trade_month as tradeMonth,id_card as idCard
+    FROM apply_batch_invoice_amount WHERE
+    id_card IN
+    <foreach collection="certIds" index="index" item="certId" open="(" close=")"
+      separator=",">#{certId}
+    </foreach>
+    AND
+    trade_month IN
+    <foreach collection="tradeMonths" index="index" item="tradeMonth" open="(" close=")"
+      separator=",">
+      #{tradeMonth}
+    </foreach>
+
+
+  </select>
+
+  <select id="getInvoiceList" resultType="com.jrmf.domain.ApplyBatchInvoice">
+    SELECT
+      abi.id,
+      abi.company_id companyId,
+      abi.create_time createTime,
+      abi.apply_batch_remark applyBatchRemark,
+      abi.trade_month tradeMonth,
+      abi.invoice_status invoiceStatus,
+      abi.invoice_status_describe invoiceStatusDescribe,
+      abi.step,
+      abi.step_status stepStatus,
+      abi.company_name companyName,
+      abi.individual_name individualName,
+      abi.trade_money tradeMoney,
+      abi.invoice_money invoiceMoney,
+      abi.trade_number tradeNumber,
+      abi.id_card idCard,
+      abi.custom_firm_name customFirmName,
+      ct.taskName,
+      ct.full_eco_cate_name fullEcoCateName,
+      ct.full_invoice_category_name fullInvoiceCategoryName,
+      ct.invoice_type invoiceType,
+      abi.update_time updateTime,
+      abi.in_account_no inAccountNo,
+      abi.invoice_serial_number invoiceSerialNumber,
+      abi.contract_name contractName,
+      abi.contract_url contractUrl,
+      abi.settlement_card settlementCard,
+      abi.final_statement_name finalStatementName,
+      abi.final_statement_url finalStatementUrl,
+      abi.settlement_serial_number settlementSerialNumber,
+      abi.invoice_name invoiceName,
+      abi.invoice_url invoiceUrl
+    FROM
+    apply_batch_invoice abi
+    LEFT JOIN channel_task ct ON abi.channel_task_id = ct.id
+    WHERE 1 = 1
+    <if test="companyName != null and companyName != ''">
+      and abi.company_name = #{companyName}
+    </if>
+    <if test="individualName != null and individualName != ''">
+      and abi.individual_name = #{individualName}
+    </if>
+    <if test="companyId != null">
+      and abi.company_id = #{companyId}
+    </if>
+    <if test="invoiceStatus != null">
+      and abi.invoice_status = #{invoiceStatus}
+    </if>
+    <if test="startDate != null and startDate != ''">
+      and date(abi.create_time) &gt;= #{startDate}
+    </if>
+    <if test="endDate != null and endDate != ''">
+      and date(abi.create_time) &lt;= #{endDate}
+    </if>
+    <if test="applyBatchRemark != null and applyBatchRemark != ''">
+      and abi.apply_batch_remark = #{applyBatchRemark}
+    </if>
+    <if test="idCard != null and idCard != ''">
+      and abi.id_card = #{idCard}
+    </if>
+    <if test="step != null">
+      and abi.step = #{step}
+    </if>
+    <if test="stepStatus != null and stepStatus != ''">
+      and abi.step_status = #{stepStatus}
+    </if>
+    <if test="startMoney != null and startMoney != ''">
+      and abi.trade_month &gt;= #{startMoney}
+    </if>
+    <if test="endMoney != null and endMoney != ''">
+      and abi.trade_month &lt;= #{endMoney}
+    </if>
+    <if test="customFirmName != null and customFirmName != ''">
+      and abi.custom_firm_name = #{customFirmName}
+    </if>
+    <if test="channelTaskName != null and channelTaskName != ''">
+      and ct.taskName = #{channelTaskName}
+    </if>
+    order by abi.id desc
+  </select>
+
+  <select id="findCommissionList" resultType="com.jrmf.domain.BatchInvoiceCommission">
+   select
+    bic.id,
+    bic.company_name companyName,
+    bic.custom_key customKey,
+    bic.receipt_status receiptStatus,
+    bic.invoice_status invoiceStatus,
+    bic.individual_name individualName,
+    bic.account_time accountTime,
+    bic.account_date accountDate,
+    bic.amount,
+    bic.fee,
+    bic.in_account_no inAccountNo,
+    bic.in_account_name inAccountName,
+    bic.contract_company_name contractCompanyName,
+    bic.company_id companyId,
+    bic.document_type documentType,
+    bic.cert_id certId,
+    bic.remark,
+    bic.receipt_url receiptUrl,
+    bic.order_no orderNo
+    FROM
+    batch_invoice_commission bic
+    <include refid="common_where_if"/>
+  </select>
+  <select id="findById" resultMap="baseResultMap">
+    select * from apply_batch_invoice  where id = #{id}
+  </select>
+  <update id="updateBatchInvoice" parameterType="com.jrmf.domain.ApplyBatchInvoice">
+    update apply_batch_invoice
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="step != null">
+        step = #{step},
+      </if>
+      <if test="stepStatus != null and stepStatus != ''">
+        step_status = #{stepStatus},
+      </if>
+      <if test="invoiceStatus != null">
+        invoice_status = #{invoiceStatus},
+      </if>
+      <if test="invoiceStatusDescribe != null and invoiceStatusDescribe != ''">
+        invoice_status_describe = #{invoiceStatusDescribe},
+      </if>
+      <if test="updateInvoiceInfo == 1 or (invoiceNumber != null and invoiceNumber != '')">
+        invoice_number = #{invoiceNumber},
+      </if>
+      <if test="updateInvoiceInfo == 1 or (invoiceName != null and invoiceName != '')">
+        invoice_name = #{invoiceName},
+      </if>
+      <if test="updateInvoiceInfo == 1 or (invoiceUrl != null and invoiceUrl != '')">
+        invoice_url = #{invoiceUrl},
+      </if>
+      <if test="contractUrl != null and contractUrl != ''">
+        contract_url = #{contractUrl},
+      </if>
+      <if test="contractName != null and contractName != ''">
+        contract_name = #{contractName},
+      </if>
+      <if test="finalStatementUrl != null and finalStatementUrl != ''">
+        final_statement_url = #{finalStatementUrl},
+      </if>
+      <if test="finalStatementName != null and finalStatementName != ''">
+        final_statement_name = #{finalStatementName},
+      </if>
+      <if test="contractSerialNumber != null and contractSerialNumber != ''">
+        contract_serial_number = #{contractSerialNumber},
+      </if>
+      <if test="contractFileNo != null and contractFileNo != ''">
+        contract_file_no = #{contractFileNo},
+      </if>
+      <if test="settlementSerialNumber != null and settlementSerialNumber != ''">
+        settlement_serial_number = #{settlementSerialNumber},
+      </if>
+      update_time = now(),
+    </trim>
+   where id = #{id}
+  </update>
+
+  <select id="checkCustom" resultType="integer">
+    SELECT COUNT(DISTINCT custom_key) FROM customer_firm_info WHERE company_name = #{companyName}
+  </select>
+  <select id="findTaskList" resultType="hashmap">
+    SELECT ct.id,ct.taskName FROM channel_task ct LEFT JOIN customer_firm_info cc ON cc.custom_key = ct.customKey
+    WHERE cc.company_name = #{companyName}
+    AND biz_type = 2
+    AND deleted_flag = 0
+  </select>
+  <select id="findTaskDetail" resultType="hashmap">
+      SELECT  full_invoice_category_name as invoice_category_name,full_eco_cate_name as eco_cate_name
+       FROM channel_task WHERE id = #{id}
+  </select>
+
+  <select id="findApplyBatchListByStatus" resultType="com.jrmf.domain.PushApplyBatchBean">
+    SELECT
+	  abi.id,
+	  abi.invoice_money as invoiceMoney,
+	  abi.individual_name as individualName,
+	  yua.phone,
+	  yua.address,
+	  yua.business_license_number as businessLicenseNumber,
+	  yua.government_audit_date as governmentAuditDate,
+	  yua.firm_id as firmId,
+	  ct.bidno as bidNo,
+    ct.platsrl as platsrl,
+    ct.taskName,
+    ct.taskDesc,
+	  abi.id_card as idCard,
+	  abi.in_account_no as  inAccountNo,
+	  abi.step,
+	  abi.step_status,
+    abi.trade_month as tradeMonth,
+    abi.contract_serial_number as contractSerialNumber,
+    abi.contract_file_no as contractFileNo,
+    abi.settlement_serial_number as settlementSerialNumber
+    FROM
+	  apply_batch_invoice abi
+	  LEFT JOIN yuncr_user_authentication yua ON yua.id_card = abi.id_card
+	  LEFT JOIN channel_task ct ON ct.id = abi.channel_task_id
+    <where>
+      abi.invoice_status = 2
+	  <choose>
+      <when test="id != null">
+        AND  abi.id = #{id}
+      </when>
+      <otherwise>
+        AND abi.step_status = 2
+      </otherwise>
+    </choose>
+    </where>
+  </select>
+
+  <select id="selectReceiptUrl" resultType="java.lang.String">
+    SELECT bic.receipt_url FROM batch_invoice_commission bic
+LEFT JOIN  batch_invoice_association bia ON bic.id = bia.commission_id
+WHERE bia.apply_batch_invoice_id = #{id}
+  </select>
+  <select id="findCountByCondition" resultType="integer">
+    SELECT COUNT(0) FROM batch_invoice_commission bic
+    <include refid="common_where_if"/>
+  </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

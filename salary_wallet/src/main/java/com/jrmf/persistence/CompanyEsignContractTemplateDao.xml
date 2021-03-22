@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.CompanyEsignContractTemplateDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.CompanyEsignContractTemplate">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="company_id" property="companyId" jdbcType="INTEGER"/>
+    <result column="esign_platform" property="esignPlatform" jdbcType="VARCHAR"/>
+    <result column="account_id" property="accountId" jdbcType="VARCHAR"/>
+    <result column="seal_id" property="sealId" jdbcType="VARCHAR"/>
+    <result column="template_id" property="templateId" jdbcType="VARCHAR"/>
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+    <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, company_id, esign_platform, account_id, seal_id, template_id, create_time, last_update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+    select
+    <include refid="Base_Column_List"/>
+    from company_esign_contract_template
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete
+    from company_esign_contract_template
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.jrmf.domain.CompanyEsignContractTemplate">
+    insert into company_esign_contract_template (id, company_id, esign_platform,
+                                                 account_id, seal_id, template_id,
+                                                 create_time, last_update_time)
+    values (#{id,jdbcType=INTEGER}, #{companyId,jdbcType=INTEGER},
+            #{esignPlatform,jdbcType=VARCHAR},
+            #{accountId,jdbcType=VARCHAR}, #{sealId,jdbcType=VARCHAR},
+            #{templateId,jdbcType=VARCHAR},
+            #{createTime,jdbcType=TIMESTAMP}, #{lastUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.domain.CompanyEsignContractTemplate">
+    insert into company_esign_contract_template
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="companyId != null">
+        company_id,
+      </if>
+      <if test="esignPlatform != null">
+        esign_platform,
+      </if>
+      <if test="accountId != null">
+        account_id,
+      </if>
+      <if test="sealId != null">
+        seal_id,
+      </if>
+      <if test="templateId != null">
+        template_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="lastUpdateTime != null">
+        last_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="companyId != null">
+        #{companyId,jdbcType=INTEGER},
+      </if>
+      <if test="esignPlatform != null">
+        #{esignPlatform,jdbcType=VARCHAR},
+      </if>
+      <if test="accountId != null">
+        #{accountId,jdbcType=VARCHAR},
+      </if>
+      <if test="sealId != null">
+        #{sealId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null">
+        #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null">
+        #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective"
+    parameterType="com.jrmf.domain.CompanyEsignContractTemplate">
+    update company_esign_contract_template
+    <set>
+      <if test="companyId != null">
+        company_id = #{companyId,jdbcType=INTEGER},
+      </if>
+      <if test="esignPlatform != null">
+        esign_platform = #{esignPlatform,jdbcType=VARCHAR},
+      </if>
+      <if test="accountId != null">
+        account_id = #{accountId,jdbcType=VARCHAR},
+      </if>
+      <if test="sealId != null">
+        seal_id = #{sealId,jdbcType=VARCHAR},
+      </if>
+      <if test="templateId != null">
+        template_id = #{templateId,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null">
+        last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.CompanyEsignContractTemplate">
+    update company_esign_contract_template
+    set company_id       = #{companyId,jdbcType=INTEGER},
+        esign_platform   = #{esignPlatform,jdbcType=VARCHAR},
+        account_id       = #{accountId,jdbcType=VARCHAR},
+        seal_id          = #{sealId,jdbcType=VARCHAR},
+        template_id      = #{templateId,jdbcType=VARCHAR},
+        create_time      = #{createTime,jdbcType=TIMESTAMP},
+        last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <select id="getCompanyEsignContractTemplateByParams" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM company_esign_contract_template WHERE company_id =#{companyId} AND biz_type =#{bizType}
+
+  </select>
+</mapper>

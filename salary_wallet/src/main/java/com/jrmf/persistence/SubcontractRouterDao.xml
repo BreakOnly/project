@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.SubcontractRouterDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.SubcontractRouter">
+    <id column="id" jdbcType="INTEGER" property="id"/>
+    <result column="custom_key" jdbcType="VARCHAR" property="customKey"/>
+    <result column="subcontract_company_id" jdbcType="INTEGER" property="subcontractCompanyId"/>
+    <result column="real_company_id" jdbcType="INTEGER" property="realCompanyId"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    <result column="last_update_time" jdbcType="TIMESTAMP" property="lastUpdateTime"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, custom_key, subcontract_company_id, real_company_id, create_time, last_update_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from subcontract_router
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="listSubcontractRouter" parameterType="com.jrmf.domain.dto.SubcontractRouterQueryDTO"
+    resultType="com.jrmf.domain.SubcontractRouter">
+    SELECT sr.real_company_id realCompanyId, qc.companyName
+    FROM subcontract_router sr
+           INNER JOIN qb_company qc ON qc.userId = sr.real_company_id
+    WHERE sr.custom_key = #{customKey}
+      AND sr.subcontract_company_id = #{companyId}
+      AND sr.status = 1
+  </select>
+
+  <select id="listPayTypesOfCompanyDefaultPayChannel" parameterType="java.lang.Integer"
+    resultType="java.lang.String">
+    SELECT paymentType
+    FROM business_payment_route
+    WHERE companyId = #{companyId}
+      AND `default` = 1
+      AND (
+        customKey IS NULL
+        OR customKey = ''
+      )
+    GROUP BY paymentType
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete
+    from subcontract_router
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.jrmf.domain.SubcontractRouter">
+    insert into subcontract_router (id, custom_key, subcontract_company_id,
+                                    real_company_id, create_time, last_update_time)
+    values (#{id,jdbcType=INTEGER}, #{customKey,jdbcType=VARCHAR},
+            #{subcontractCompanyId,jdbcType=INTEGER},
+            #{realCompanyId,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
+            #{lastUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.domain.SubcontractRouter">
+    insert into subcontract_router
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="customKey != null">
+        custom_key,
+      </if>
+      <if test="subcontractCompanyId != null">
+        subcontract_company_id,
+      </if>
+      <if test="realCompanyId != null">
+        real_company_id,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="lastUpdateTime != null">
+        last_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="customKey != null">
+        #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="subcontractCompanyId != null">
+        #{subcontractCompanyId,jdbcType=INTEGER},
+      </if>
+      <if test="realCompanyId != null">
+        #{realCompanyId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null">
+        #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.SubcontractRouter">
+    update subcontract_router
+    <set>
+      <if test="customKey != null">
+        custom_key = #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="subcontractCompanyId != null">
+        subcontract_company_id = #{subcontractCompanyId,jdbcType=INTEGER},
+      </if>
+      <if test="realCompanyId != null">
+        real_company_id = #{realCompanyId,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="lastUpdateTime != null">
+        last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.SubcontractRouter">
+    update subcontract_router
+    set custom_key             = #{customKey,jdbcType=VARCHAR},
+        subcontract_company_id = #{subcontractCompanyId,jdbcType=INTEGER},
+        real_company_id        = #{realCompanyId,jdbcType=INTEGER},
+        create_time            = #{createTime,jdbcType=TIMESTAMP},
+        last_update_time       = #{lastUpdateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

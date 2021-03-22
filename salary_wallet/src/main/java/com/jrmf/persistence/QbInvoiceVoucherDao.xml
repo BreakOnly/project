@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbInvoiceVoucherDao" >
+
+  <select id="getInvoiceVoucherByPage" parameterType="com.jrmf.domain.Page" resultType="map">
+  	select qiv.*,cc.companyName merchantName from qb_invoice_voucher qiv 
+  	left join channel_custom cc on qiv.customkey = cc.customkey where 1=1 and isDelete=0
+  	<if test="params.invoiceNo!=null and params.invoiceNo!=''">
+  		and qiv.invoiceNo = #{params.invoiceNo}
+  	</if>
+  	<if test="params.invoiceCode!=null and params.invoiceCode!=''">
+  		and qiv.invoiceCode = #{params.invoiceCode}
+  	</if>
+  	<if test="params.merchantName!=null and params.merchantName!=''">
+  		and cc.companyName like concat('%',#{params.merchantName},'%')
+  	</if>
+  	<if test="params.status!=null and params.status!=''">
+  		and qiv.status = #{params.status}
+  	</if>
+  	<if test="params.companyId!=null and params.companyId!=''">
+  		and qiv.companyId = #{params.companyId}
+  	</if>
+  	<if test="params.invoiceType!=null and params.invoiceType!=''">
+  		and qiv.invoiceType = #{params.invoiceType}
+  	</if>
+  	<if test="params.invoiceLimitAmout!=null and params.invoiceLimitAmout!=''">
+  		and qiv.invoiceLimitAmout = #{params.invoiceLimitAmout}
+  	</if>
+  	<if test="params.month!=null and params.month!=''">
+  		and date_format(qiv.invoiceDate,'%Y-%m') = #{params.month}
+  	</if>
+  	<if test="params.invoiceSerialNo!=null and params.invoiceSerialNo!=''">
+  		and qiv.invoiceSerialNo = #{params.invoiceSerialNo}
+  	</if>
+  		order by qiv.id desc
+	<if test="pageSize !=null and offset !=null">
+       limit #{offset},#{pageSize}
+     </if>
+  </select>
+  
+  <select id="getInvoiceVoucherCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  	select count(1) from (
+  	  	select qiv.*,cc.companyName merchantName from qb_invoice_voucher qiv 
+	  	left join channel_custom cc on qiv.customkey = cc.customkey where 1=1 and isDelete=0
+	  	<if test="params.invoiceNo!=null and params.invoiceNo!=''">
+	  		and qiv.invoiceNo = #{params.invoiceNo}
+	  	</if>
+	  	<if test="params.invoiceCode!=null and params.invoiceCode!=''">
+	  		and qiv.invoiceCode = #{params.invoiceCode}
+	  	</if>
+	  	<if test="params.merchantName!=null and params.merchantName!=''">
+	  		and cc.companyName like concat('%',#{params.merchantName},'%')
+	  	</if>
+	  	<if test="params.status!=null and params.status!=''">
+  			and qiv.status = #{params.status}
+	  	</if>
+	  	<if test="params.companyId!=null and params.companyId!=''">
+	  		and qiv.companyId = #{params.companyId}
+	  	</if>
+	  	<if test="params.invoiceType!=null and params.invoiceType!=''">
+	  		and qiv.invoiceType = #{params.invoiceType}
+	  	</if>
+	  	<if test="params.invoiceLimitAmout!=null and params.invoiceLimitAmout!=''">
+	  		and qiv.invoiceLimitAmout = #{params.invoiceLimitAmout}
+	  	</if>
+	  	<if test="params.month!=null and params.month!=''">
+	  		and date_format(qiv.invoiceDate,'%Y-%m') = #{params.month}
+	  	</if>
+	  	<if test="params.invoiceSerialNo!=null and params.invoiceSerialNo!=''">
+  			and qiv.invoiceSerialNo = #{params.invoiceSerialNo}
+  	    </if>
+	  		order by qiv.id desc
+  	)temp
+  </select>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultType="com.jrmf.domain.QbInvoiceVoucher">
+    select * from qb_invoice_voucher
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from qb_invoice_voucher
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <insert id="insert" parameterType="com.jrmf.domain.QbInvoiceVoucher" >
+    insert into qb_invoice_voucher (invoiceNo, 
+      invoiceCode,invoiceDate,invoiceAmount, status, 
+      approvalFlag, invoiceSerialNo, invoiceLimitAmout, 
+      customkey, companyId, invoiceType, 
+      createTime, updateTime, addUser,hasCount
+      )
+    values (#{invoiceNo,jdbcType=VARCHAR}, 
+      #{invoiceCode,jdbcType=VARCHAR},#{invoiceDate,jdbcType=VARCHAR}, #{invoiceAmount,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, 
+      #{approvalFlag,jdbcType=INTEGER}, #{invoiceSerialNo,jdbcType=VARCHAR}, #{invoiceLimitAmout,jdbcType=VARCHAR}, 
+      #{customkey,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR}, #{invoiceType,jdbcType=INTEGER}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{addUser,jdbcType=VARCHAR}, #{hasCount,jdbcType=INTEGER}
+      )
+  </insert>
+
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbInvoiceVoucher" >
+    update qb_invoice_voucher
+    set invoiceNo = #{invoiceNo,jdbcType=VARCHAR},
+      invoiceCode = #{invoiceCode,jdbcType=VARCHAR},
+      invoiceDate = #{invoiceDate,jdbcType=VARCHAR},
+      invoiceAmount = #{invoiceAmount,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      approvalFlag = #{approvalFlag,jdbcType=INTEGER},
+      invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      invoiceLimitAmout = #{invoiceLimitAmout,jdbcType=VARCHAR},
+      customkey = #{customkey,jdbcType=VARCHAR},
+      companyId = #{companyId,jdbcType=VARCHAR},
+      invoiceType = #{invoiceType,jdbcType=INTEGER},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      addUser = #{addUser,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="getAlreadyInvoiceCount" parameterType="com.jrmf.domain.QbInvoiceReserve" resultType="int">
+  	select  count(1) from qb_invoice_voucher 
+  	where companyId=#{companyId} and invoiceType=#{invoiceType} 
+  	and invoiceLimitAmout=#{invoiceLimitAmout} 
+  	and date_format(invoiceDate,'%Y-%m')=#{month} and approvalFlag=1 and isDelete=0 and hasCount = 1
+  </select>
+  
+  <select id="getInvoiceVoucherBySerialNo" parameterType="String" resultType="com.jrmf.domain.QbInvoiceVoucher">
+  	select * from qb_invoice_voucher where invoiceSerialNo = #{invoiceSerialNo} and isDelete=0
+  </select>
+  
+  <update id="updateVoucher" parameterType="com.jrmf.domain.QbInvoiceVoucher" >
+  	update qb_invoice_voucher set 
+  	    invoiceCode = #{invoiceCode},
+	  	invoiceDate = #{invoiceDate},
+	  	invoiceAmount = #{invoiceAmount},
+	  	status = #{status},
+	  	updateTime = #{updateTime}
+  	where id = #{id}
+  </update>
+  
+  <update id="updateVoucherIsDelete" parameterType="map">
+    update qb_invoice_voucher set 
+	    isDelete = 1,
+	    deleteUser = #{deleteUser},
+	    updateTime = #{updateTime}
+    where id = #{id}
+  </update>
+</mapper>

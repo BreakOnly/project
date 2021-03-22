@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.LinkAccountTransDao">
+
+	<!-- 查询出入金交易明细 -->
+	<select id="getLinkAccountTransList" parameterType="com.jrmf.domain.Page" resultType="map">
+		select lat.*,cc.companyName merchantName,bb.pathName from link_account_trans lat 
+		left join channel_custom cc on lat.customkey=cc.customkey
+		left join business_payment_channel bb on lat.pathNo = bb.pathNo
+		where 1=1
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.payAccount!=null and params.payAccount!=''">
+			and lat.payAccount = #{params.payAccount}
+		</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+			and date(lat.tranTime) &gt;=#{params.startTime}
+		</if>
+		<if test="params.endTime!=null and params.endTime!=''">
+			and date(lat.tranTime) &lt;=#{params.endTime}
+		</if>
+		<if test="params.orderNo!=null and params.orderNo!=''">
+			and lat.orderNo = #{params.orderNo}
+		</if>
+		<if test="params.tranType!=null and params.tranType!=''">
+			and lat.tranType = #{params.tranType}
+		</if>	
+		<if test="params.status!=null and params.status!=''">
+			and lat.status = #{params.status}
+		</if>
+		<if test="params.receiveAccount!=null and params.receiveAccount!=''">
+			and lat.receiveAccount = #{params.receiveAccount}
+		</if>
+		<if test="params.reqChannelNo!=null and params.reqChannelNo!=''">
+			and lat.reqChannelNo = #{params.reqChannelNo}
+		</if>
+		<if test="params.customkey!=null and params.customkey!=''">
+			and FIND_IN_SET(cc.customkey,#{params.customkey})
+		</if>
+		order by lat.id desc
+		<if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+        </if>
+	</select>
+	
+	<!-- 查询出入金交易明细总条数 -->
+	<select id="getLinkAccountTransListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		select count(1) from (select lat.*,cc.companyName merchantName,bb.pathName from link_account_trans lat 
+		left join channel_custom cc on lat.customkey=cc.customkey
+		left join business_payment_channel bb on lat.pathNo = bb.pathNo
+		where 1=1
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.payAccount!=null and params.payAccount!=''">
+			and lat.payAccount = #{params.payAccount}
+		</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+			and date(lat.tranTime) &gt;=#{params.startTime}
+		</if>
+		<if test="params.endTime!=null and params.endTime!=''">
+			and date(lat.tranTime) &lt;=#{params.endTime}
+		</if>
+		<if test="params.orderNo!=null and params.orderNo!=''">
+			and lat.orderNo = #{params.orderNo}
+		</if>
+		<if test="params.tranType!=null and params.tranType!=''">
+			and lat.tranType = #{params.tranType}
+		</if>	
+		<if test="params.status!=null and params.status!=''">
+			and lat.status = #{params.status}
+		</if>
+		<if test="params.receiveAccount!=null and params.receiveAccount!=''">
+			and lat.receiveAccount = #{params.receiveAccount}
+		</if>
+		<if test="params.reqChannelNo!=null and params.reqChannelNo!=''">
+			and lat.reqChannelNo = #{params.reqChannelNo}
+		</if>
+		<if test="params.customkey!=null and params.customkey!=''">
+			and FIND_IN_SET(cc.customkey,#{params.customkey})
+		</if>
+		order by lat.id desc
+		)temp
+	</select>
+	
+	<!-- 查询出入金交易明细不分页 -->
+	<select id="getLinkAccountTransListNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+		select lat.*,cc.companyName merchantName,bb.pathName from link_account_trans lat 
+		left join channel_custom cc on lat.customkey=cc.customkey
+		left join business_payment_channel bb on lat.pathNo = bb.pathNo
+		where 1=1
+		<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.payAccount!=null and params.payAccount!=''">
+			and lat.payAccount = #{params.payAccount}
+		</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+			and date(lat.tranTime) &gt;=#{params.startTime}
+		</if>
+		<if test="params.endTime!=null and params.endTime!=''">
+			and date(lat.tranTime) &lt;=#{params.endTime}
+		</if>
+		<if test="params.orderNo!=null and params.orderNo!=''">
+			and lat.orderNo = #{params.orderNo}
+		</if>
+		<if test="params.tranType!=null and params.tranType!=''">
+			and lat.tranType = #{params.tranType}
+		</if>	
+		<if test="params.status!=null and params.status!=''">
+			and lat.status = #{params.status}
+		</if>
+		<if test="params.receiveAccount!=null and params.receiveAccount!=''">
+			and lat.receiveAccount = #{params.receiveAccount}
+		</if>
+		<if test="params.reqChannelNo!=null and params.reqChannelNo!=''">
+			and lat.reqChannelNo = #{params.reqChannelNo}
+		</if>
+		<if test="params.customkey!=null and params.customkey!=''">
+			and FIND_IN_SET(cc.customkey,#{params.customkey})
+		</if>
+		order by lat.id desc
+	</select>
+	
+	<insert id="insert" parameterType="com.jrmf.domain.LinkAccountTrans" >
+    insert into link_account_trans (customkey, tranType, 
+      status, msg, tranAmount, 
+      tranTime, payAccountNo, payAccount, 
+      payBank, pathNo, receiveAccount, 
+      receiveAccountNo, receiveBank, mainAccount, 
+      isSubAccountTrans, remark, orderNo, 
+      reqChannelNo, channelNo, createTime, 
+      updateTime)
+    values (#{customkey,jdbcType=VARCHAR}, #{tranType,jdbcType=INTEGER}, 
+      #{status,jdbcType=INTEGER}, #{msg,jdbcType=VARCHAR}, #{tranAmount,jdbcType=VARCHAR}, 
+      #{tranTime,jdbcType=VARCHAR}, #{payAccountNo,jdbcType=VARCHAR}, #{payAccount,jdbcType=VARCHAR}, 
+      #{payBank,jdbcType=VARCHAR}, #{pathNo,jdbcType=VARCHAR}, #{receiveAccount,jdbcType=VARCHAR}, 
+      #{receiveAccountNo,jdbcType=VARCHAR}, #{receiveBank,jdbcType=VARCHAR}, #{mainAccount,jdbcType=VARCHAR}, 
+      #{isSubAccountTrans,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, #{orderNo,jdbcType=VARCHAR}, 
+      #{reqChannelNo,jdbcType=VARCHAR}, #{channelNo,jdbcType=VARCHAR}, now(),
+      now())
+    </insert>
+</mapper>

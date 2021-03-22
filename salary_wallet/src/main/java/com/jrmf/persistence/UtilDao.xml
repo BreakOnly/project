@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.taxsettlement.api.UtilDao">
+
+	<resultMap type="com.jrmf.taxsettlement.util.cache.UnitDefinition" id="ERROR_UNIT_INFO">
+		<id column="ERROR_CODE" property="code" jdbcType="VARCHAR" />
+		<result column="ERROR_MSG" property="name" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<resultMap type="com.jrmf.taxsettlement.util.cache.UnitDefinition" id="ID_UNIT_INFO">
+		<id column="customkey" property="code" jdbcType="VARCHAR" />
+		<result column="companyName" property="name" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<select id="getErrors" resultMap="ERROR_UNIT_INFO">
+		SELECT * FROM t_error
+	</select>
+
+	<select id="getIdNames" resultMap="ID_UNIT_INFO">
+		SELECT customkey, companyName FROM channel_custom
+		WHERE
+			customType in (1,2,5)
+	</select>
+	
+</mapper>

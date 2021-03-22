@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CustomGroupDao">
+    <select id="queryNodeByParam" resultType="com.jrmf.domain.OrganizationNode">
+        select
+        cg.id,
+        cg.parentId,
+        cg.contentLevel,
+        cg.enable,
+        cg.levelCode,
+        cg.customkey,
+        cc.customType,
+        cg.createTime,
+        cc.companyName organizationName,
+        cg.hasChilden
+        from custom_group cg
+        left join channel_custom cc on cg.customkey = cc.customkey
+        where
+        cg.levelCode like concat('',#{levelCode},'%')
+        <if test="customType != null">
+            and cc.customType = #{customType}
+        </if>
+        <if test="customName != null and customName != ''">
+            and cc.companyName like concat('%',#{customName},'%')
+        </if>
+        <if test="customKey != null and customKey != ''">
+            and cc.customkey = #{customKey}
+        </if>
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+        <if test="start != null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getNodeById" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.contentLevel,
+            cg.enable,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.id = #{id}
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+
+    <select id="queryGroupCurrentAndChildrenCustomkeys" resultType="java.lang.String">
+        select customkey
+        from custom_group
+        where levelCode like concat('', #{levelCode}, '%')
+    </select>
+    <select id="queryChild" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.enable,
+            cg.contentLevel,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.levelCode like concat('', #{levelCode}, '%') and cg.id != #{nodeId}
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+
+    <select id="getNodeByCustomKey" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.enable,
+            cg.contentLevel,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.customkey = #{customKey}
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+
+    <select id="queryCurrentAndChildrenNodesLevelOne" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.enable,
+            cg.contentLevel,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.levelCode like concat('', #{levelCode}, '%') and
+              cg.contentLevel in (#{contentLevel}, #{contentLevel} + 1)
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+    <select id="queryNodesChildLevelOne" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.enable,
+            cg.contentLevel,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.levelCode like concat('', #{levelCode}, '%') and
+              cg.contentLevel = #{contentLevel} + 1
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+    <select id="queryNodesCurrentAndChildren" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.enable,
+            cg.contentLevel,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.levelCode like concat('', #{levelCode}, '%')
+        <if test="platformId != null and platformId != ''">
+            and cc.businessPlatformId = #{platformId}
+        </if>
+    </select>
+
+    <select id="listAll" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.enable,
+            cg.contentLevel,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.parentId = 0
+         <if test="platformId != null and platformId != ''">
+             and cc.businessPlatformId = #{platformId}
+         </if>
+
+    </select>
+
+    <update id="updateNodeById" parameterType="com.jrmf.domain.OrganizationNode">
+        UPDATE custom_group
+        SET
+        <if test="customKey != null and customKey != ''">
+            customkey = #{customKey},
+        </if>
+        <if test="parentId != null">
+            parentId = #{parentId},
+        </if>
+        <if test="levelCode != null and levelCode != ''">
+            levelCode = #{levelCode},
+        </if>
+        <if test="contentLevel != null">
+            contentLevel = #{contentLevel},
+        </if>
+        <if test="regType != null">
+            regType = #{regType},
+        </if>
+        <if test="enable != null">
+            enable = #{enable},
+        </if>
+        <if test="hasChilden != null">
+            hasChilden = #{hasChilden},
+        </if>
+        updateTime = now()
+        WHERE
+        id = #{id}
+    </update>
+
+    <insert id="insertGroup" parameterType="com.jrmf.domain.OrganizationNode" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO custom_group
+        (`customkey`,
+         `parentId`,
+         `levelCode`,
+         `contentLevel`,
+         `regType`,
+         `enable`,
+         `hasChilden`,
+         `createTime`,
+         `updateTime`)
+        VALUES
+            (#{customKey},
+             #{parentId},
+             #{levelCode},
+             #{contentLevel},
+             1,
+             #{enable},
+             #{hasChilden},
+             now(),
+             now());
+    </insert>
+    <update id="enable">
+        update custom_group
+        set enable = 1
+        where customkey = #{customkey} and enable = -1
+    </update>
+
+    <update id="removeById">
+        update custom_group
+        set parentId = 0, contentLevel = 1, hasChilden = -1, levelCode = #{levelCode}
+        where id = #{id}
+    </update>
+
+    <select id="getLevelCodeByCustomkey" resultType="java.lang.String">
+        select levelCode FROM custom_group WHERE FIND_IN_SET (customkey, #{newCustomkey})
+    </select>
+
+    <select id="getCustomkeyByLeveCode" resultType="java.lang.String">
+        SELECT customkey FROM custom_group WHERE levelCode LIKE concat('',#{levelCode},'%')
+    </select>
+
+    <select id="getGroupIdByCustomkey" resultType="com.jrmf.domain.OrganizationNode">
+                select * FROM custom_group where customkey = #{customkey}
+    </select>
+
+    <update id="updateNodeParentIdById" parameterType="com.jrmf.domain.OrganizationNode">
+        UPDATE custom_group
+        SET
+          parentId = #{parentId},
+          updateTime = now()
+        WHERE
+          id = #{id}
+    </update>
+
+    <select id="getNodeByIdCustomkey" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cg.id,
+            cg.parentId,
+            cg.contentLevel,
+            cg.enable,
+            cg.levelCode,
+            cg.customkey,
+            cc.customType,
+            cg.createTime,
+            cc.companyName organizationName,
+            cg.hasChilden
+        from custom_group cg
+            left join channel_custom cc on cg.customkey = cc.customkey
+        where cg.id = #{nodeId} and cg.customkey=#{customkey}
+    </select>
+
+    <select id="getCustomGroupByCustomkey" resultType="com.jrmf.domain.OrganizationNode">
+        select
+            cp.id,
+            cp.parentId,
+            cp.enable,
+            cp.contentLevel,
+            cp.levelCode,
+            cp.customkey,
+            cc.customType,
+            cp.createTime,
+            cc.companyName organizationName,
+            cp.hasChilden
+        from custom_group cp
+            left join channel_custom cc on cp.customkey = cc.customkey
+        where cp.customkey = #{customKey}
+    </select>
+</mapper>

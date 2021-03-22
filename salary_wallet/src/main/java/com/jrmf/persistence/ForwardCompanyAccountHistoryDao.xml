@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.ForwardCompanyAccountHistoryDao">
+  <resultMap id="baseResultMap" type="com.jrmf.domain.ForwardCompanyAccountHistory">
+    <id column="id" property="id"/>
+    <result column="custom_key" property="customKey"/>
+    <result column="company_id" property="companyId"/>
+    <result column="real_company_id" property="realCompanyId"/>
+    <result column="trade_type" property="tradeType"/>
+    <result column="trade_money" property="tradeMoney"/>
+    <result column="pre_trade_money" property="preTradeMoney"/>
+    <result column="after_trade_money" property="afterTradeMoney"/>
+    <result column="amount" property="amount"/>
+    <result column="remark" property="remark"/>
+    <result column="merchant_name" property="merchantName"/>
+    <result column="company_name" property="companyName"/>
+    <result column="real_company_name" property="realCompanyName"/>
+    <result column="account_id" property="accountId"/>
+    <result column="relate_order_no" property="relateOrderNo" />
+    <result column="operator" property="operator"/>
+  </resultMap>
+
+
+  <select id="findByCondition" resultMap="baseResultMap">
+    SELECT
+    CAST(mtr.trade_money AS DECIMAL(15,2)) AS trade_money,
+    CAST(mtr.pre_trade_money AS DECIMAL(15,2)) AS pre_trade_money,
+    CAST(mtr.after_trade_money AS DECIMAL(15,2)) AS after_trade_money,
+    mtr.* FROM forward_company_account_history mtr
+    LEFT JOIN channel_custom c ON c.customkey = mtr.custom_key
+    <where>
+      <if test="tradeType != null and tradeType != ''">
+        mtr.trade_type = #{tradeType}
+      </if>
+      <if test="customKey != null and customKey != ''">
+        mtr.custom_key = #{customKey}
+      </if>
+      <if test="accountId != null and accountId != ''">
+        mtr.account_id = #{accountId}
+      </if>
+      <if test="merchantName != null and merchantName != ''">
+        and <![CDATA[ c.companyName like concat('%',#{merchantName},'%')  ]]>
+      </if>
+
+      <if test="companyId != null and companyId != ''">
+        and mtr.company_id = #{companyId}
+      </if>
+
+      <if test="realCompanyId != null and realCompanyId != ''">
+        and mtr.real_company_id = #{realCompanyId}
+      </if>
+
+      <if test="startDate != null and startDate != ''">
+        and <![CDATA[ date_format(mtr.create_time, '%Y-%m-%d')  >= #{startDate} ]]>
+      </if>
+
+      <if test="endDate != null and endDate != ''">
+        and <![CDATA[ date_format(mtr.create_time, '%Y-%m-%d')  <= #{endDate} ]]>
+      </if>
+      <if test=" minBalance != null and minBalance>0 ">
+        and <![CDATA[ mtr.trade_money  >= #{minBalance} ]]>
+      </if>
+      <if test=" maxBalance != null and maxBalance>0 ">
+        and <![CDATA[ mtr.trade_money  <= #{maxBalance} ]]>
+      </if>
+
+    </where>
+    order by mtr.create_time desc
+  </select>
+
+  <insert id="insert" parameterType="com.jrmf.domain.ForwardCompanyAccountHistory">
+        INSERT INTO forward_company_account_history(custom_key,company_id,real_company_id,trade_type,trade_money,pre_trade_money,
+        after_trade_money,amount,remark,create_time,merchant_name,company_name,real_company_name,account_id,relate_order_no,operator)
+        values (#{customKey},#{companyId},#{realCompanyId},#{tradeType},#{tradeMoney},#{preTradeMoney},#{afterTradeMoney},
+        #{amount},#{remark},now(),#{merchantName},#{companyName},#{realCompanyName},#{accountId},#{relateOrderNo},#{operator})
+    </insert>
+</mapper>

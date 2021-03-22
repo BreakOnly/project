@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.ChannelRelatedDao">
+
+    <select id="queryRelatedList" resultType="com.jrmf.domain.ChannelRelated">
+        select r.*
+        from qb_channelrelated r
+        left join channel_custom cc on cc.customkey = r.originalId
+        where FIND_IN_SET(r.originalId, #{customkey})
+        and r.status = 1
+        <if test="customName != null and customName != ''">
+            and cc.companyName like concat('%',#{customName},'%')
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and cc.companyId = #{companyId}
+        </if>
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <insert id="createChannelRelated" parameterType="com.jrmf.domain.ChannelRelated">
+        INSERT INTO qb_channelrelated (
+            originalId,
+            companyId,
+            merchantId,
+            feeRuleType,
+            feeRuleDesc,
+            feeRuleFormula,
+            serviceRates,
+            upperServiceRates,
+            profiltUpper,
+            profiltLower,
+            status,
+            appIdAyg,
+            createtime
+        )
+        VALUES (
+            #{originalId},
+            #{companyId},
+            #{merchantId},
+            #{feeRuleType},
+            #{feeRuleDesc},
+            #{feeRuleFormula},
+            #{serviceRates},
+            #{upperServiceRates},
+            #{profiltUpper},
+            #{profiltLower},
+            #{status},
+            #{appIdAyg},
+            now()
+        )
+    </insert>
+
+    <update id="updateChannelRelated" parameterType="com.jrmf.domain.ChannelRelated">
+        UPDATE qb_channelrelated
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="originalId !=null and originalId !=''">
+                originalId = #{originalId} ,
+            </if>
+            <if test="status != null and status !=''">
+                status = #{status} ,
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                companyId = #{companyId} ,
+            </if>
+            <if test="merchantId !=null and merchantId !=''">
+                merchantId = #{merchantId} ,
+            </if>
+            <if test="profiltLower !=null and profiltLower !=''">
+                profiltLower = #{profiltLower} ,
+            </if>
+            <if test="profiltUpper !=null and profiltUpper !=''">
+                profiltUpper = #{profiltUpper} ,
+            </if>
+            <if test="serviceRates !=null and serviceRates !=''">
+                serviceRates = #{serviceRates} ,
+            </if>
+            <if test="upperServiceRates !=null and upperServiceRates !=''">
+                upperServiceRates = #{upperServiceRates} ,
+            </if>
+            <if test="feeRuleType !=null and feeRuleType !=''">
+                feeRuleType = #{feeRuleType} ,
+            </if>
+            <if test="feeRuleDesc !=null and feeRuleDesc !=''">
+                feeRuleDesc = #{feeRuleDesc} ,
+            </if>
+            <if test="feeRuleFormula !=null and feeRuleFormula !=''">
+                feeRuleFormula = #{feeRuleFormula} ,
+            </if>
+            <if test="appIdAyg !=null">
+                appIdAyg = #{appIdAyg} ,
+            </if>
+            <if test="createtime  !=null and createtime !=''">
+                createtime = #{createtime } ,
+            </if>
+            realCompanyOperate = #{realCompanyOperate } ,
+            updatetime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateRelatedStatus">
+        UPDATE qb_channelrelated
+        <trim prefix="SET" suffixOverrides=",">
+            status = 2,updatetime = now(),
+        </trim>
+        where originalId = #{originalId} and status = #{status}
+    </update>
+
+    <select id="getRelatedByParam" resultType="com.jrmf.domain.ChannelRelated">
+        select r.*,c.companyName,i.customname as customName from qb_channelrelated r LEFT JOIN
+        qb_company c on r.companyId = c.userId LEFT JOIN
+        qb_custom_info i on r.merchantId = i.customkey where 1=1
+        <if test="status != null">
+            and r.status = #{status}
+        </if>
+        <if test="merchantId != '' and merchantId != null">
+            and r.merchantId = #{merchantId}
+        </if>
+        <if test="originalId != '' and originalId != null">
+            and r.originalId = #{originalId}
+        </if>
+        <if test="companyId != '' and companyId != null">
+            and r.companyId = #{companyId}
+        </if>
+    </select>
+
+    <select id="getRelatedCountByParam" resultType="int">
+        select count(id) from qb_channelrelated where 1=1
+        <if test="status != null">
+            and status = #{status}
+        </if>
+        <if test="merchantId != '' and merchantId != null">
+            and merchantId = #{merchantId}
+        </if>
+        <if test="originalId != '' and originalId != null">
+            and originalId = #{originalId}
+        </if>
+        <if test="companyId != '' and companyId != null">
+            and companyId = #{companyId}
+        </if>
+    </select>
+
+    <select id="getRelatedByOriginalId" resultType="com.jrmf.domain.ChannelRelated">
+        select r.* from qb_channelrelated r where 1=1
+        <if test="merchantId != '' and merchantId != null">
+            and r.merchantId = #{merchantId}
+        </if>
+        and r.originalId = #{originalId}
+        and r.status !=0
+    </select>
+
+    <select id="getRelatedList" resultType="com.jrmf.domain.ChannelRelated">
+        select r.*,cc.companyName
+        from qb_channelrelated r
+        left join channel_custom cc on cc.customkey = r.companyId
+        where
+            FIND_IN_SET(r.originalId, #{customkey})
+            and r.status = 1
+    </select>
+
+    <select id="getRelatedById" resultType="com.jrmf.domain.ChannelRelated">
+        select r.*
+        from qb_channelrelated r
+        where r.id = #{id}
+    </select>
+
+    <select id="getRelatedByCompAndOrig" resultType="com.jrmf.domain.ChannelRelated">
+        select *
+        from qb_channelrelated
+        where companyId = #{companyId} and originalId = #{originalId} and status = 1
+    </select>
+    <select id="getRelatedByCompAndOrigAll" resultType="com.jrmf.domain.ChannelRelated">
+        select *
+        from qb_channelrelated
+        where companyId = #{companyId} and originalId = #{originalId}
+    </select>
+    <select id="queryCustomKeysByCompanyId" resultType="java.lang.String">
+        select originalId
+        from qb_channelrelated
+        where companyId = #{companyId} and status = 1
+    </select>
+
+    <select id="getRelatedByCustomKeyAndCompanyId"
+            resultType="com.jrmf.domain.ChannelRelated">
+        select
+        originalId customKey,
+        companyId,
+        merchantId
+        from qb_channelrelated
+        where originalId = #{customKey} and companyId = #{companyId} and status = 1
+    </select>
+
+    <select id="getNameByCustomKey" resultType="java.lang.String">
+        select companyName from channel_custom where customkey = #{customKey}
+    </select>
+
+    <select id="listCompanyByOriginalId" resultType="java.util.Map">
+        SELECT
+          r.originalId,
+          r.companyId,
+          c.companyName
+        FROM
+          qb_channelrelated r
+          LEFT JOIN qb_company c ON r.companyId = c.userId
+        WHERE
+          r.STATUS = '1' AND c.STATUS = '1'
+          AND r.originalId = #{companyId}
+    </select>
+
+</mapper>

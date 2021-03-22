@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.CustomInfoDao">
+	<select id="searchCustomInfoByKey" resultType="com.jrmf.domain.CustomInfo">
+		select * from
+		qb_custom_info where customkey=#{customkey} and status = 1
+	</select>
+	
+	<select id="getAllActiveCustom" resultType="com.jrmf.domain.CustomInfo">
+		select * from qb_custom_info where  status = 1
+	</select>
+	
+	<select id="getCustomByName" resultType="com.jrmf.domain.CustomInfo">
+		select * from qb_custom_info where  status = 1 and customname like concat('%', #{customname}, '%')
+	</select>
+	
+	<update id="updateLoginKey">
+		UPDATE qb_custom_info SET customLoginKey=#{loginKey} WHERE customkey=#{customkey} and status = 1 LIMIT 1
+	</update>
+	
+	<insert id="creatCustomInfo" parameterType="com.jrmf.domain.CustomInfo">
+		INSERT INTO qb_custom_info (customkey, ip, customlogo, customname, salt, 
+		customLoginKey, channelBankNo, moduleNo, channelNo, status, showP2p, 
+		showFund, showInsurance,companyOpenNotify) VALUES (#{customkey}, #{ip}, #{customlogo}, #{customname}, #{salt}, 
+		#{customLoginKey}, #{channelBankNo}, #{moduleNo}, #{channelNo}, #{status}, #{showP2p}, 
+		#{showFund}, #{showInsurance},#{companyOpenNotify})
+	</insert>
+	
+	<update id="updateCustomInfo" parameterType="com.jrmf.domain.CustomInfo">
+		UPDATE qb_custom_info SET customkey=#{customkey}, ip=#{ip}, customlogo=#{customlogo}, 
+		customname=#{customname}, salt=#{salt}, customLoginKey=#{customLoginKey}, 
+		channelBankNo=#{channelBankNo}, moduleNo=#{moduleNo}, channelNo=#{channelNo},
+		 status=#{status}, showP2p=#{showP2p}, showFund=#{showFund}, showInsurance=#{showInsurance},companyOpenNotify=#{companyOpenNotify}
+		  WHERE customkey=#{customkey} LIMIT 1
+	</update>
+</mapper>

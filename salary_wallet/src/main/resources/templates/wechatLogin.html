@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1.0, user-scalable=0" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="email=no" />
+    <meta name="msapplication-tap-highlight" content="no">
+    <script type="text/javascript" src="http://res.wx.qq.com/connect/zh_CN/htmledition/js/wxLogin.js"></script>
+    <script>
+   var obj = new WxLogin({
+       id:"login_container",
+       appid: "wx890819fed7b070a0",
+       scope: "snsapi_login",
+       redirect_uri: "http%3A%2F%2Fms-wallet.jrmf360.com%2Fwechat%2FwechatloginNotify.do%3FconfigId%3D1",
+       state: "",
+       style: "",//这个是二维码样式
+       href: ""
+   });
+   </script>
+    <title>扫码登录</title>
+  </head>
+  <body>
+	<div id="login_container"></div>
+  </body>
+
+</html>

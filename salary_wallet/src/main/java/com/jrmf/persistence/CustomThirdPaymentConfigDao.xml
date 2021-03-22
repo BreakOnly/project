@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.CustomThirdPaymentConfigDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.CustomThirdPaymentConfig">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="config_type" property="configType" jdbcType="INTEGER"/>
+    <result column="custom_key" property="customKey" jdbcType="VARCHAR"/>
+    <result column="path_no" property="pathNo" jdbcType="VARCHAR"/>
+    <result column="third_merchId" property="thirdMerchid" jdbcType="VARCHAR"/>
+    <result column="private_key" property="privateKey" jdbcType="VARCHAR"/>
+    <result column="public_key" property="publicKey" jdbcType="VARCHAR"/>
+    <result column="api_key" property="apiKey" jdbcType="VARCHAR"/>
+    <result column="parameter1" property="parameter1" jdbcType="VARCHAR"/>
+    <result column="parameter2" property="parameter2" jdbcType="VARCHAR"/>
+    <result column="parameter3" property="parameter3" jdbcType="VARCHAR"/>
+    <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    <result column="update_time" property="updateTime" jdbcType="VARCHAR"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" suffix=")" prefixOverrides="and">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")"
+                    separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" suffix=")" prefixOverrides="and">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")"
+                    separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    id, config_type, custom_key, path_no, third_merchId, private_key, public_key, api_key, 
+    parameter1, parameter2, parameter3, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+    select
+    <include refid="Base_Column_List"/>
+    from custom_third_payment_config
+    where id = #{id,jdbcType=INTEGER} and status = 0
+  </select>
+  <select id="getConfigByCustomKeyAndTypeAndPathNo"
+    resultType="com.jrmf.domain.PaymentConfig">
+    SELECT
+      ctpc.path_no pathNo,
+      ctpc.third_merchId appIdAyg,
+      ctpc.third_merchId thirdMerchId,
+      ctpc.private_key payPrivateKey,
+      ctpc.public_key payPublicKey,
+      ctpc.api_key apiKey,
+      ctpc.parameter1,
+      ctpc.parameter2,
+      ctpc.parameter3,
+      cpr.preHost,
+      cpr.remotePort,
+      cpr.readTimeOut,
+      cpr.connectTimeOut,
+      bpcr.isSubAccount,
+      bpcr.keyWords,
+      bpcr.containKeyWords,
+      bpcr.shadowAcctNo
+    FROM
+      custom_third_payment_config ctpc
+      LEFT JOIN company_paychannel_relation cpr ON ctpc.path_no = cpr.pathNo
+      LEFT JOIN business_payment_route bpcr ON cpr.companyId = bpcr.companyId
+      AND cpr.pathNo = bpcr.pathNo
+    WHERE
+      ctpc.status = 0
+      AND ctpc.config_type = #{configType}
+      AND ctpc.custom_key = #{customKey}
+      AND ctpc.path_no = #{pathNo}
+      AND cpr.companyId = #{companyId}
+      AND bpcr.`default` = 1
+      AND bpcr.paymentType = 4
+    ORDER BY
+      bpcr.`default` DESC
+      LIMIT 1
+  </select>
+  <select id="listAllByParam" resultType="com.jrmf.domain.CustomThirdPaymentConfig">
+      SELECT
+        cc.companyName customName,
+        ctpc.id,
+        ctpc.config_type configType,
+        ctpc.custom_key customKey,
+        ctpc.path_no pathNo,
+        bpc.pathName,
+        bpc.pathType,
+        bpc.pathKeyType,
+        ctpc.third_merchId thirdMerchid,
+        ctpc.private_key privateKey,
+        ctpc.public_key publicKey,
+        ctpc.api_key apiKey,
+        ctpc.parameter1 parameter1,
+        ctpc.parameter2 parameter2,
+        ctpc.parameter3 parameter3,
+        ctpc.create_time createTime,
+        ctpc.update_time updateTime
+      FROM
+        custom_third_payment_config ctpc
+        LEFT JOIN channel_custom cc ON ctpc.custom_key = cc.customkey
+        LEFT JOIN business_payment_channel bpc ON bpc.pathNo = ctpc.path_no
+    <trim prefix="where" suffixOverrides="and">
+      ctpc.status = 0 and
+      <if test="thirdMerchid != null and thirdMerchid != ''">
+        ctpc.third_merchId = #{thirdMerchid} and
+      </if>
+      <if test="customName != null and customName != ''">
+        cc.companyName like concat('%', #{customName},'%') and
+      </if>
+      <if test="startTime != null and startTime != ''">
+        date(ctpc.create_time) &gt;= #{startTime} and
+      </if>
+      <if test="endTime != null and endTime != ''">
+        date(ctpc.update_time) &lt;= #{endTime} and
+      </if>
+      <if test="configType != null and configType != ''">
+        FIND_IN_SET(ctpc.config_type, #{configType}) and
+      </if>
+      <if test="pathNo != null and pathNo != ''">
+        FIND_IN_SET(ctpc.path_no, #{pathNo}) and
+      </if>
+    </trim>
+    order by ctpc.id desc
+  </select>
+
+  <select id="getConfigByMerchId" resultType="com.jrmf.domain.PaymentConfig">
+    SELECT
+    ctpc.id,
+    ctpc.config_type configType,
+    ctpc.custom_key customKey,
+    ctpc.path_no pathNo,
+    ctpc.third_merchId thirdMerchid,
+    ctpc.private_key privateKey,
+    ctpc.public_key publicKey,
+    ctpc.api_key apiKey,
+    ctpc.parameter1 parameter1,
+    ctpc.parameter2 parameter2,
+    ctpc.parameter3 parameter3,
+    ctpc.create_time createTime,
+    ctpc.update_time updateTime
+    FROM
+    custom_third_payment_config ctpc
+    where ctpc.third_merchId = #{thirdMerchid}
+    limit 1
+  </select>
+
+  <select id="getByCustomKeyAndPathNo" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List"/>
+    from custom_third_payment_config
+    where status = 0 and custom_key = #{customKey} and path_no = #{pathNo}
+    <if test="id != null">
+      and id!=#{id}
+    </if>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    update custom_third_payment_config set status=1,update_time = now()
+    where status=0 and id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.jrmf.domain.CustomThirdPaymentConfig">
+    insert into custom_third_payment_config (id, config_type, custom_key, 
+      path_no, third_merchId, private_key, 
+      public_key, api_key, parameter1, 
+      parameter2, parameter3, create_time,
+      update_time)
+    values (#{id,jdbcType=INTEGER}, #{configType,jdbcType=INTEGER}, #{customKey,jdbcType=VARCHAR}, 
+      #{pathNo,jdbcType=VARCHAR}, #{thirdMerchid,jdbcType=VARCHAR}, #{privateKey,jdbcType=VARCHAR}, 
+      #{publicKey,jdbcType=VARCHAR}, #{apiKey,jdbcType=VARCHAR}, #{parameter1,jdbcType=VARCHAR}, 
+      #{parameter2,jdbcType=VARCHAR}, #{parameter3,jdbcType=VARCHAR}, now(), now())
+  </insert>
+  <insert id="insertSelective" parameterType="com.jrmf.domain.CustomThirdPaymentConfig">
+    insert into custom_third_payment_config
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="configType != null">
+        config_type,
+      </if>
+      <if test="customKey != null">
+        custom_key,
+      </if>
+      <if test="pathNo != null">
+        path_no,
+      </if>
+      <if test="thirdMerchid != null">
+        third_merchId,
+      </if>
+      <if test="privateKey != null">
+        private_key,
+      </if>
+      <if test="publicKey != null">
+        public_key,
+      </if>
+      <if test="apiKey != null">
+        api_key,
+      </if>
+      <if test="parameter1 != null">
+        parameter1,
+      </if>
+      <if test="parameter2 != null">
+        parameter2,
+      </if>
+      <if test="parameter3 != null">
+        parameter3,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="updateTime != null">
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="configType != null">
+        #{configType,jdbcType=INTEGER},
+      </if>
+      <if test="customKey != null">
+        #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="pathNo != null">
+        #{pathNo,jdbcType=VARCHAR},
+      </if>
+      <if test="thirdMerchid != null">
+        #{thirdMerchid,jdbcType=VARCHAR},
+      </if>
+      <if test="privateKey != null">
+        #{privateKey,jdbcType=VARCHAR},
+      </if>
+      <if test="publicKey != null">
+        #{publicKey,jdbcType=VARCHAR},
+      </if>
+      <if test="apiKey != null">
+        #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="parameter1 != null">
+        #{parameter1,jdbcType=VARCHAR},
+      </if>
+      <if test="parameter2 != null">
+        #{parameter2,jdbcType=VARCHAR},
+      </if>
+      <if test="parameter3 != null">
+        #{parameter3,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.CustomThirdPaymentConfig">
+    update custom_third_payment_config
+    <set>
+      <if test="configType != null">
+        config_type = #{configType,jdbcType=INTEGER},
+      </if>
+      <if test="customKey != null and customKey != ''">
+        custom_key = #{customKey,jdbcType=VARCHAR},
+      </if>
+      <if test="pathNo != null and pathNo != ''">
+        path_no = #{pathNo,jdbcType=VARCHAR},
+      </if>
+      <if test="thirdMerchid != null">
+        third_merchId = #{thirdMerchid,jdbcType=VARCHAR},
+      </if>
+      <if test="privateKey != null">
+        private_key = #{privateKey,jdbcType=VARCHAR},
+      </if>
+      <if test="publicKey != null">
+        public_key = #{publicKey,jdbcType=VARCHAR},
+      </if>
+      <if test="apiKey != null">
+        api_key = #{apiKey,jdbcType=VARCHAR},
+      </if>
+      <if test="parameter1 != null">
+        parameter1 = #{parameter1,jdbcType=VARCHAR},
+      </if>
+      <if test="parameter2 != null">
+        parameter2 = #{parameter2,jdbcType=VARCHAR},
+      </if>
+      <if test="parameter3 != null">
+        parameter3 = #{parameter3,jdbcType=VARCHAR},
+      </if>
+        update_time = now(),
+    </set>
+    where status=0 and id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.CustomThirdPaymentConfig">
+    update custom_third_payment_config
+    set config_type = #{configType,jdbcType=INTEGER},
+      custom_key = #{customKey,jdbcType=VARCHAR},
+      path_no = #{pathNo,jdbcType=VARCHAR},
+      third_merchId = #{thirdMerchid,jdbcType=VARCHAR},
+      private_key = #{privateKey,jdbcType=VARCHAR},
+      public_key = #{publicKey,jdbcType=VARCHAR},
+      api_key = #{apiKey,jdbcType=VARCHAR},
+      parameter1 = #{parameter1,jdbcType=VARCHAR},
+      parameter2 = #{parameter2,jdbcType=VARCHAR},
+      parameter3 = #{parameter3,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=VARCHAR},
+      update_time = #{updateTime,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER} and status = 0
+  </update>
+</mapper>

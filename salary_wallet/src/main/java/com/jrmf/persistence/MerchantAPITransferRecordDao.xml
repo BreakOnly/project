@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.taxsettlement.api.MerchantAPITransferRecordDao">
+
+	<resultMap type="com.jrmf.taxsettlement.api.APITransferRecordDO" id="TRANSFER_RECORD">
+		<result column="MERCHANT_ID" property="merchantId" jdbcType="VARCHAR" />
+		<result column="REQUEST_NO" property="requestNo" jdbcType="VARCHAR" />
+		<result column="BATCH_NO" property="batchNo" jdbcType="VARCHAR" />
+		<result column="PARTNER_ID" property="partnerId" jdbcType="VARCHAR" />
+		<result column="TRANSFER_CORP_ID" property="transferCorpId" jdbcType="VARCHAR" />
+		<result column="DEAL_NO" property="dealNo" jdbcType="VARCHAR" />
+		<result column="NOTIFY_URL" property="notifyUrl" jdbcType="VARCHAR" />
+		<result column="ACCOUNT_DATE" property="accountDate" jdbcType="VARCHAR" />
+		<result column="STATUS" property="status" jdbcType="VARCHAR" />
+		<result column="RET_CODE" property="retCode" jdbcType="VARCHAR" />
+		<result column="RET_MSG" property="retMsg" jdbcType="VARCHAR" />
+		<result column="UPDATE_TIME" property="updateTime" jdbcType="VARCHAR" />
+		<result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+	</resultMap>
+
+	<insert id="addNewTransferRequest" parameterType="map">
+		INSERT INTO t_merchant_api_transfer_record (
+			MERCHANT_ID,
+			REQUEST_NO,
+			BATCH_NO,
+			PARTNER_ID,
+			TRANSFER_CORP_ID,
+			DEAL_NO,
+			NOTIFY_URL,
+			STATUS,
+			CREATE_TIME
+		) VALUES (
+			#{merchantId, jdbcType=VARCHAR},
+			#{requestNo, jdbcType=VARCHAR},
+			#{batchNo, jdbcType=VARCHAR},
+			#{partnerId, jdbcType=VARCHAR},
+			#{transferCorpId, jdbcType=VARCHAR},
+			#{dealNo, jdbcType=VARCHAR},
+			#{notifyUrl, jdbcType=VARCHAR},
+			#{status, jdbcType=VARCHAR},
+			now()
+		)
+	</insert>
+	
+	<update id="updateTransferRequest" parameterType="map">
+		UPDATE t_merchant_api_transfer_record
+		SET
+			<if test="accountDate != null and accountDate != ''">
+				ACCOUNT_DATE = #{accountDate, jdbcType=VARCHAR},
+			</if>
+			STATUS = #{status, jdbcType=VARCHAR},
+			RET_CODE = #{retCode, jdbcType=VARCHAR},
+			RET_MSG = #{retMsg, jdbcType=VARCHAR}
+		WHERE
+			DEAL_NO = #{dealNo, jdbcType=VARCHAR}
+	</update>
+	
+	<select id="matchDealNo" parameterType="String" resultType="String">
+		SELECT DEAL_NO FROM t_merchant_api_transfer_record
+		WHERE
+			MERCHANT_ID = #{merchantId, jdbcType=VARCHAR} AND
+			REQUEST_NO = #{requestNo, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getDealRecord" parameterType="String" resultMap="TRANSFER_RECORD">
+		SELECT * FROM t_merchant_api_transfer_record
+		WHERE
+			DEAL_NO = #{dealNo, jdbcType=VARCHAR}
+	</select>
+	
+	<select id="countDealRecord" parameterType="map" resultType="int">
+		SELECT COUNT(1) FROM t_merchant_api_transfer_record
+		WHERE
+			1 = 1
+			<if test="partnerId != null and partnerId != ''">
+				AND PARTNER_ID = #{partnerId, jdbcType=VARCHAR}
+			</if>
+			<if test="merchantId != null and merchantId != ''">
+				AND MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+			</if>
+			<if test="requestNo != null and requestNo != ''">
+				AND REQUEST_NO = #{requestNo, jdbcType=VARCHAR}
+			</if>
+			<if test="batchNo != null and batchNo != ''">
+				AND BATCH_NO = #{batchNo, jdbcType=VARCHAR}
+			</if>
+			<if test="dealNo != null and dealNo != ''">
+				AND DEAL_NO = #{dealNo, jdbcType=VARCHAR}
+			</if>
+			<if test="accountDate != null and accountDate != ''">
+				AND ACCOUNT_DATE = #{accountDate, jdbcType=VARCHAR}
+			</if>
+			<if test="status != null and status != ''">
+				AND STATUS = #{status, jdbcType=VARCHAR}
+			</if>				
+	</select>
+	
+	<select id="listDealRecord" parameterType="map" resultMap="TRANSFER_RECORD">
+		SELECT * FROM t_merchant_api_transfer_record
+		WHERE
+			1 = 1
+			<if test="partnerId != null and partnerId != ''">
+				AND PARTNER_ID = #{partnerId, jdbcType=VARCHAR}
+			</if>
+			<if test="merchantId != null and merchantId != ''">
+				AND MERCHANT_ID = #{merchantId, jdbcType=VARCHAR}
+			</if>
+			<if test="transferCorpId != null and transferCorpId != ''">
+				AND TRANSFER_CORP_ID = #{transferCorpId, jdbcType=VARCHAR}
+			</if>
+			<if test="requestNo != null and requestNo != ''">
+				AND REQUEST_NO = #{requestNo, jdbcType=VARCHAR}
+			</if>
+			<if test="batchNo != null and batchNo != ''">
+				AND BATCH_NO = #{batchNo, jdbcType=VARCHAR}
+			</if>
+			<if test="dealNo != null and dealNo != ''">
+				AND DEAL_NO = #{dealNo, jdbcType=VARCHAR}
+			</if>
+			<if test="accountDate != null and accountDate != ''">
+				AND ACCOUNT_DATE = #{accountDate, jdbcType=VARCHAR}
+			</if>
+			<if test="status != null and status != ''">
+				AND STATUS = #{status, jdbcType=VARCHAR}
+			</if>
+			<if test="accountMonth != null and accountMonth != ''">
+				AND CREATE_TIME LIKE CONCAT(#{accountMonth, jdbcType=VARCHAR}, "%")
+			</if>			
+	        <if test="recordIndex !=null and pageSize != null">
+            	ORDER BY CREATE_TIME DESC LIMIT #{recordIndex}, #{pageSize}
+        	</if>			
+	</select>
+
+</mapper>

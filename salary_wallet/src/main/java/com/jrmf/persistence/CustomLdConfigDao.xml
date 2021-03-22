@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.CustomLdConfigDao">
+
+	<!-- 联动配置映射resultMap -->
+	<resultMap type="com.jrmf.domain.CustomLdConfig" id="customLdConfigMap">
+		<id column="id" property="id" />
+		<result column="customkey" property="customkey" />
+		<result column="companyId_one" property="companyidOne" />
+		<result column="companyId_two" property="companyidTwo" />
+		<result column="companyId_priority" property="companyidPriority" />
+		<result column="priority_month_limit" property="priorityMonthLimit" />
+		<result column="priority_quarter_limit" property="priorityQuarterLimit" />
+		<result column="pathNo" property="pathno" />
+		<result column="lowest_amount" property="lowestAmount" />
+	</resultMap>
+
+	<!-- 获取联动下发配置信息 -->
+	<select id="getCustomLdConfigByMer" parameterType="Map" resultMap="customLdConfigMap">
+		select * from custom_ld_config where customkey = #{customkey} and companyId_one = #{companyId}
+	</select>
+</mapper>

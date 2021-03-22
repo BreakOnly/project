@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.YuncrUserFailNodeDao">
+<resultMap id="baseResultMap" type="com.jrmf.domain.YuncrUserFailNode">
+  <id  column="id" property="id"/>
+  <result column="authentication_id" property="authenticationId"/>
+  <result column="audit_node" property="auditNode"/>
+  <result column="status" property="status"/>
+  <result column="remark" property="remark"/>
+</resultMap>
+  <insert id="batchInsert">
+    insert into yuncr_user_fail_node(authentication_id,audit_node,status,remark,create_time)
+    values
+    <foreach collection="list" index="index" separator="," item="node">
+       (#{node.authenticationId},#{node.auditNode},#{node.status},#{node.remark},now())
+    </foreach>
+
+  </insert>
+
+  <select id="findByAuthenticationId"  resultMap="baseResultMap">
+    SELECT * FROM yuncr_user_fail_node WHERE status = 1 and authentication_id in
+    <foreach collection="authenticationId" index="index" item="authenticationId" open="(" close=")" separator=",">
+      #{authenticationId}
+    </foreach>
+
+  </select>
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.TransferBankDao">
+    <insert id="creatUserTransferOutBank">
+		INSERT INTO qb_transferBank (
+			user_id,bankCardNo,status,bankNo,transferType,creat_time
+        ) VALUES (
+        	#{userId} ,#{recard} ,-1,#{bankNo},2,now()
+        )
+	</insert>
+
+    <insert id="addTransferBank" useGeneratedKeys="true" keyProperty="id" parameterType="com.jrmf.domain.TransferBank">
+	   INSERT INTO qb_transferBank (user_id, bankCardNo, status, bankNo, transferType,bankCardPhoneNo,creat_time) 
+	   VALUES (#{user_id}, #{bankCardNo}, 1, #{bankNo}, 2,#{bankCardPhoneNo},now()) 
+	</insert>
+
+    <select id="getTransferOutBankListByUserId" resultType="com.jrmf.domain.TransferBank">
+		select a.*,b.bankBrhName bankName from qb_transferBank a LEFT JOIN 
+		qb_bankInfo b on a.bankNo = b.bankno  where a.status = 1 and a.user_id = #{id} and transferType = 2
+	</select>
+    <select id="getTransferInBankListByUserId" resultType="com.jrmf.domain.TransferBank">
+		select a.*,b.bankBrhName bankName from qb_transferBank a LEFT JOIN 
+		qb_bankInfo b on a.bankNo = b.bankno  where a.status = 1 and a.user_id = #{id} and transferType = 1
+	</select>
+
+    <select id="getBankInfo" resultType="com.jrmf.domain.BankCard">
+		SELECT
+			b.id,
+			b.bankFullName,
+			b.bankName,
+			c.bankCode cardFullNo,
+			b.bankNo
+		FROM
+			qb_bankCard b
+		LEFT JOIN qb_bankcardcode c ON b.bankName = c.bankName
+		WHERE
+			b.`start` =  left(#{recard},b.startLength) limit 1
+	</select>
+
+    <insert id="creatTransferOutBankReturnId" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.jrmf.domain.TransferBank">
+	   INSERT INTO qb_transferBank (user_id, bankCardNo, status, bankNo, transferType,bankCardPhoneNo,creat_time) 
+	   VALUES (#{user_id}, #{bankCardNo}, -1, #{bankNo}, 2,#{bankCardPhoneNo},now()) 
+	</insert>
+
+    <update id="activeCard">
+		UPDATE qb_transferBank SET status=1 WHERE id=#{id} 
+	</update>
+
+    <select id="getbanks" resultType="com.jrmf.domain.BankInfo">
+		select bankBrhName,bankNo from qb_bankInfo
+	</select>
+
+    <select id="getbankcardAll" resultType="com.jrmf.domain.BankCard">
+		SELECT * FROM qb_bankcard 
+	</select>
+
+    <insert id="creatCompanyBank" parameterType="com.jrmf.domain.TransferBank">
+		INSERT INTO qb_transferBank (
+			user_id,bankCardNo,status,bankNo,transferType,bankCardPhoneNo,creat_time
+        ) VALUES (
+        	#{user_id} ,#{bankCardNo} ,#{status},#{bankNo},#{transferType},#{bankCardPhoneNo},now()
+        )
+	</insert>
+    <insert id="addBankCard">
+		INSERT INTO `mf_salary_wallet`.`qb_bankcard`
+		( `bankName`, `bankFullName`, `length`, `cardFullNo`, `startLength`, `start`, `bankNo` )
+		VALUES
+		( #{bankName}, #{bankFullName}, #{length}, #{cardFullNo}, #{startLength}, #{start}, #{bankNo} );
+
+	</insert>
+
+    <select id="getCompanyBankList" resultType="com.jrmf.domain.TransferBank">
+		select a.id,a.bankCardNo,a.bankNo,b.bankBrhName bankName from qb_transferBank a LEFT JOIN 
+		qb_bankInfo b on a.bankNo = b.bankno  where a.status = 1 and a.user_id = #{id} and transferType = 3
+	</select>
+
+    <select id="getBankData" resultType="com.jrmf.domain.TransferBank">
+		select a.id,a.bankCardNo,b.bankName ,c.bankCode as bankNo from qb_transferBank a LEFT JOIN 
+		qb_bankcard b on a.bankNo = b.bankno LEFT JOIN qb_bankcardcode c on c.bankName = b.bankName
+ 		 where  a.user_id  = #{id} GROUP BY a.id
+	</select>
+
+    <update id="unbindBankCardById">
+		UPDATE qb_transferBank SET status=0 WHERE id=#{id} 
+	</update>
+    <update id="updateTransferBankInfo" parameterType="com.jrmf.domain.TransferBank">
+        UPDATE qb_transferBank SET bankCardPhoneNo=#{bankCardPhoneNo}
+        <if test="bankNo !=null and bankNo !=''">
+            ,bankNo = #{bankNo}
+        </if>
+        WHERE (id=#{id}) LIMIT 1
+    </update>
+
+    <select id="getBankByCardNo" resultType="com.jrmf.domain.TransferBank">
+		SELECT * FROM qb_transferBank where bankCardNo = #{bankCardNo} AND user_id = #{userId} limit 1
+	</select>
+
+    <delete id="deleteByUserIds" parameterType="String">
+	DELETE FROM qb_transferBank WHERE  FIND_IN_SET(user_id,#{userIds})
+	</delete>
+
+    <delete id="deleteBatcheId">
+	DELETE FROM qb_transferBank WHERE  user_id in  (SELECT id FROM qb_users WHERE batcheId = #{batcheId}) 
+    AND user_id in ( SELECT userId FROM qb_userRelated WHERE originalId = #{originalId})
+	</delete>
+
+    <select id="getUserNameByCertId" resultType="String">
+		SELECT distinct t.userName FROM `qb_users` t where  t.certId = #{certId}
+	</select>
+
+    <update id="updateUserNameByCertId">
+		UPDATE qb_users SET userName = #{userName} WHERE id certId = #{certId} 
+	</update>
+    <update id="updateBankCard" parameterType="com.jrmf.domain.BankCard">
+		update qb_bankcard set bankNo = #{bankNo} where id = #{id}
+	</update>
+
+    <select id="getUserByCertId" resultType="com.jrmf.domain.User">
+		SELECT t.* FROM `qb_users` t where  t.certId = #{certId}
+	</select>
+
+    <select id="getAllBankCodes" resultType="com.jrmf.taxsettlement.api.util.BankCode">
+		SELECT * FROM qb_bankcardcode;
+	</select>
+    <select id="isExist" resultType="java.lang.Integer">
+		select count(id) from qb_bankcard where bankNo = #{bankNo}
+	</select>
+
+</mapper>

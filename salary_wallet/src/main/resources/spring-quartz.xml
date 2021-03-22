@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+<!--	&lt;!&ndash; 银企直联交易状态 &ndash;&gt;-->
+<!--	<bean id="bankPayInitStatusBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="bankPayInitStatus" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 回单处理  &ndash;&gt;-->
+<!--	<bean id="receiptBatchCreateJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="receiptBatchCreateJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 回单明细 迁移 &ndash;&gt;-->
+<!--	<bean id="receiptCommissionCreateJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="receiptCommissionCreateJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--&lt;!&ndash;	&lt;!&ndash; 爱员工回单明细请求  &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;	<bean id="aygRecepitRequestJobBean"&ndash;&gt;-->
+<!--&lt;!&ndash;		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="targetObject" ref="jobService" />&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="targetMethod" value="aygRecepitRequestJob" />&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="concurrent" value="false" />&ndash;&gt;-->
+<!--&lt;!&ndash;	</bean>&ndash;&gt;-->
+
+<!--&lt;!&ndash;	&lt;!&ndash; 爱员工回单批次信息更新 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;	<bean id="aygRecepitBatchJobBean"&ndash;&gt;-->
+<!--&lt;!&ndash;		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="targetObject" ref="jobService" />&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="targetMethod" value="aygRecepitBatchJob" />&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="concurrent" value="false" />&ndash;&gt;-->
+<!--&lt;!&ndash;	</bean>&ndash;&gt;-->
+
+<!--	&lt;!&ndash; 用户下发日累计金额更新 &ndash;&gt;-->
+<!--	<bean id="initDayPaymentTotalAmountJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initDayPaymentTotalAmountJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 用户下发月累计金额更新 &ndash;&gt;-->
+<!--	<bean id="initMonthPaymentTotalAmountJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initMonthPaymentTotalAmountJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 用户下发季度累计金额更新 &ndash;&gt;-->
+<!--	<bean id="initQuarterPaymentTotalAmountJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initQuarterPaymentTotalAmountJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="bankPayInitStatusTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="bankPayInitStatusBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+<!--	<bean id="receiptBatchCreateJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="receiptBatchCreateJobBean" />-->
+<!--		<property name="cronExpression" value="0 0 1 * * ?" />-->
+<!--		&lt;!&ndash; 	<property name="startDelay" value="60000" />-->
+<!--                <property name="repeatCount" value="0" /> &ndash;&gt;-->
+<!--	</bean>-->
+<!--	<bean id="receiptCommissionCreateJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="receiptCommissionCreateJobBean" />-->
+<!--		<property name="cronExpression" value="0 0 2 * * ?" />-->
+<!--	</bean>-->
+
+<!--&lt;!&ndash;	<bean id="aygRecepitRequestJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="jobDetail" ref="aygRecepitRequestJobBean" />&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="cronExpression" value="0 0 3 * * ?" />&ndash;&gt;-->
+<!--&lt;!&ndash;	</bean>&ndash;&gt;-->
+
+<!--&lt;!&ndash;	<bean id="aygRecepitBatchJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="jobDetail" ref="aygRecepitBatchJobBean" />&ndash;&gt;-->
+<!--&lt;!&ndash;		<property name="cronExpression" value="0 0 5 * * ?" />&ndash;&gt;-->
+<!--&lt;!&ndash;	</bean>&ndash;&gt;-->
+
+
+<!--	<bean id="initDayPaymentTotalAmountJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="initDayPaymentTotalAmountJobBean" />-->
+<!--		<property name="cronExpression" value="0 0 0 * * ?" />-->
+<!--		&lt;!&ndash; <property name="cronExpression" value="0 25 16 * * ?" /> &ndash;&gt;-->
+<!--	</bean>-->
+<!--	<bean id="initMonthPaymentTotalAmountJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="initMonthPaymentTotalAmountJobBean" />-->
+<!--		<property name="cronExpression" value="0 30 0 1 * ?" />-->
+<!--		&lt;!&ndash; <property name="cronExpression" value="0 30 16 11 * ?" />   &ndash;&gt;-->
+<!--	</bean>-->
+<!--	<bean id="initQuarterPaymentTotalAmountJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="initQuarterPaymentTotalAmountJobBean" />-->
+<!--		&lt;!&ndash;1,4,7,10月 1日 0点 25分执行&ndash;&gt;-->
+<!--		<property name="cronExpression" value="0 25 0 1 1,4,7,10 ?" />-->
+<!--		&lt;!&ndash; <property name="cronExpression" value="0 30 16 11 * ?" />   &ndash;&gt;-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 佣金批次状态 &ndash;&gt;-->
+<!--	<bean id="jobinitChannelHistoryStatusBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initChannelHistoryStatus" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="jobChannelHistoryStatusTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="jobinitChannelHistoryStatusBean" />-->
+<!--		<property name="cronExpression" value="0 0/3 * * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; API商户前日流水 &ndash;&gt;-->
+<!--	<bean id="merchantDaySerialBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="merchantDataFileGenerationTask" />-->
+<!--		<property name="targetMethod" value="invokeToGenerateMerchantDaySerialFileOfLastDay" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="merchantDaySerialTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="merchantDaySerialBean" />-->
+<!--		<property name="cronExpression" value="0 0 1 * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; API商户前月报表 &ndash;&gt;-->
+<!--	<bean id="merchantMonthReportBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="merchantDataFileGenerationTask" />-->
+<!--		<property name="targetMethod" value="invokeToGenerateMerchantMonthReportFileOfLastMonth" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="merchantMonthReportTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="merchantMonthReportBean" />-->
+<!--		<property name="cronExpression" value="0 0 1 2 * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; API下发明细结果查询 &ndash;&gt;-->
+<!--	<bean id="apiCommissionTaskBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="paymentTask" />-->
+<!--		<property name="targetMethod" value="apiCommissionTask" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="apiCommissionTaskTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="apiCommissionTaskBean" />-->
+<!--		<property name="cronExpression" value="*/30 * * * * ?" />-->
+<!--	</bean>-->
+<!--	&lt;!&ndash; 通联支付下载对账文件 initUmfintechReconciliationDocuments&ndash;&gt;-->
+<!--	&lt;!&ndash;<bean id="umfintechReconciliationDocumentsTaskBean"&ndash;&gt;-->
+<!--	&lt;!&ndash;class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">&ndash;&gt;-->
+<!--	&lt;!&ndash;<property name="targetObject" ref="jobService" />&ndash;&gt;-->
+<!--	&lt;!&ndash;<property name="targetMethod" value="initUmfintechReconciliationDocuments" />&ndash;&gt;-->
+<!--	&lt;!&ndash;<property name="concurrent" value="false" />&ndash;&gt;-->
+<!--	&lt;!&ndash;</bean>&ndash;&gt;-->
+
+<!--	&lt;!&ndash;<bean id="umfintechReconciliationDocumentsTaskTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">&ndash;&gt;-->
+<!--	&lt;!&ndash;<property name="jobDetail" ref="umfintechReconciliationDocumentsTaskBean" />&ndash;&gt;-->
+<!--	&lt;!&ndash;<property name="cronExpression" value="0 30 9 * * ?" />&ndash;&gt;-->
+<!--	&lt;!&ndash;</bean>&ndash;&gt;-->
+
+<!--	&lt;!&ndash; 签约回调定时任务&ndash;&gt;-->
+<!--	<bean id="agreementSignNotifyTaskBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initAgreementSignNotify" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="agreementSignNotifyTaskTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="agreementSignNotifyTaskBean" />-->
+<!--		<property name="cronExpression" value="0 0/2 * * * ?" />-->
+<!--	</bean>-->
+<!--	&lt;!&ndash; 72小时后关闭预授权交易&ndash;&gt;-->
+<!--	<bean id="closePrepareUnifiedOrderTaskBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initClosePrepareUnifiedOrder" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="closePrepareUnifiedOrderTaskTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="closePrepareUnifiedOrderTaskBean" />-->
+<!--		<property name="cronExpression" value="0 0 4 * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 定时生成结算任务&ndash;&gt;-->
+<!--	<bean id="autogenerateTaskBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="initAutogenerateTask" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="autogenerateTaskTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="autogenerateTaskBean" />-->
+<!--		<property name="cronExpression" value="0 */5 * * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 用户下发联动步骤明细数据同步 &ndash;&gt;-->
+<!--	<bean id="bankPayLdInitStatusBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="bankPayInitLdStatus" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="bankPayLdInitStatusTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="bankPayLdInitStatusBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 用户下发联动冲正明细数据同步 &ndash;&gt;-->
+<!--	<bean id="bankPayLdCorrectStatusBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="bankPayInitLdCorrectStatus" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="bankPayLdCorrectStatusTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="bankPayLdCorrectStatusBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+
+
+<!--	&lt;!&ndash; 主动查询平安子账号出入金记录 &ndash;&gt;-->
+<!--	<bean id="querySubAccountTransferRecordBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="querySubAccountTransferRecord" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="querySubAccountTransferRecordTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="querySubAccountTransferRecordBean" />-->
+<!--		<property name="cronExpression" value="0 0/5 * * * ?" />-->
+<!--	</bean>-->
+
+
+<!--	&lt;!&ndash; 充值记录自动确认 &ndash;&gt;-->
+<!--	<bean id="rechargeAutoConfirmBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="rechargeAutoConfirm" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="rechargeAutoConfirmTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="rechargeAutoConfirmBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+
+
+<!--	&lt;!&ndash; 充值记录自动确认 &ndash;&gt;-->
+<!--	<bean id="syncBalanceStatusBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="syncBalanceStatus" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="syncBalanceStatusTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="syncBalanceStatusBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 清结算报表&ndash;&gt;-->
+<!--	<bean id="clearingAccountsJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="clearingAccounts" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="clearingAccountsJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="clearingAccountsJobBean" />-->
+<!--		<property name="cronExpression" value="0 0 1 8 * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 子账号异常充值通知 &ndash;&gt;-->
+<!--	<bean id="warningRechargeJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="warningRechargeJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="warningRechargeJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="warningRechargeJobBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 签约订单落地查询 &ndash;&gt;-->
+<!--	<bean id="signContractJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="signContractJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="signContractJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="signContractJobBean" />-->
+<!--		<property name="cronExpression" value="0 0/2 * * * ?" />-->
+<!--	</bean>-->
+
+
+<!--	&lt;!&ndash; 签约订单落地查询 &ndash;&gt;-->
+<!--	<bean id="linkageTransferStatusJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="linkageTransferStatus" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="linkageTransferStatusJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="linkageTransferStatusJobBean" />-->
+<!--		<property name="cronExpression" value="0 0/2 * * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; 对接第三方电子回单文件收集任务 &ndash;&gt;-->
+<!--	<bean id="receiptFileJobBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="jobService" />-->
+<!--		<property name="targetMethod" value="receiptFileJob" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="receiptFileJobTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="receiptFileJobBean" />-->
+<!--		<property name="cronExpression" value="0 0 15 * * ?" />-->
+<!--	</bean>-->
+
+<!--	&lt;!&ndash; API拆单下发明细结果查询 &ndash;&gt;-->
+<!--	<bean id="apiSplitBankPayInitLdStatusTaskBean"-->
+<!--		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">-->
+<!--		<property name="targetObject" ref="paymentTask" />-->
+<!--		<property name="targetMethod" value="apiSplitBankPayInitLdStatusTask" />-->
+<!--		<property name="concurrent" value="false" />-->
+<!--	</bean>-->
+
+<!--	<bean id="apiSplitBankPayInitLdStatusTaskTriggerBean" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--		<property name="jobDetail" ref="apiSplitBankPayInitLdStatusTaskBean" />-->
+<!--		<property name="cronExpression" value="0 0/1 * * * ?" />-->
+<!--	</bean>-->
+
+	<!--触发配置 -->
+<!--	<bean id="schedulerFactoryBean"-->
+<!--		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">-->
+<!--		<property name="quartzProperties">-->
+<!--			<props>-->
+<!--				<prop key="org.quartz.scheduler.instanceName">schedulerFactoryBean</prop>-->
+<!--				<prop key="org.quartz.scheduler.instanceId">AUTO</prop>-->
+<!--				<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>-->
+<!--				<prop key="org.quartz.threadPool.threadCount">5</prop>-->
+<!--				<prop key="org.quartz.threadPool.threadPriority">6</prop>-->
+<!--			</props>-->
+<!--		</property>-->
+<!--		<property name="triggers">-->
+<!--			<list>-->
+				<!--以下为数据隔离定时任务,集群部署时可开启 -->
+				<!--   <ref bean="jobChannelHistoryStatusTriggerBean" />
+            <ref bean="bankPayInitStatusTriggerBean" />
+            <ref bean="apiCommissionTaskTriggerBean"/>
+            <ref bean="bankPayLdInitStatusTriggerBean"/>
+            <ref bean="bankPayLdCorrectStatusTriggerBean"/>
+            <ref bean="rechargeAutoConfirmTriggerBean"/>
+            <ref bean="syncBalanceStatusTriggerBean"/>
+            <ref bean="warningRechargeJobTriggerBean"/>
+            <ref bean="signContractJobTriggerBean"/>
+            <ref bean="linkageTransferStatusJobTriggerBean"/>
+                    <ref bean="apiSplitBankPayInitLdStatusTaskTriggerBean"/>-->
+
+   <!--以下为未进行数据隔离定时任务,集群部署时请确保只有一台开启注释 -->
+				<!--     <ref bean="receiptBatchCreateJobTriggerBean" />
+             <ref bean="receiptCommissionCreateJobTriggerBean" />
+             <ref bean="merchantDaySerialTriggerBean"/>
+             <ref bean="merchantMonthReportTriggerBean"/>
+             <ref bean="initDayPaymentTotalAmountJobTriggerBean"/>
+             <ref bean="initMonthPaymentTotalAmountJobTriggerBean"/>
+             <ref bean="initQuarterPaymentTotalAmountJobTriggerBean"/>
+             <ref bean="agreementSignNotifyTaskTriggerBean"/>
+             <ref bean="autogenerateTaskTriggerBean"/>
+             <ref bean="querySubAccountTransferRecordTriggerBean"/>
+             <ref bean="clearingAccountsJobTriggerBean"/>
+             <ref bean="receiptFileJobTriggerBean" />-->
+<!--     </list>-->
+<!--   </property>-->
+<!--   </bean>-->
+   </beans>

@@ -1,0 +1,66 @@
+
+
+#======================================#
+#========== Server settings ===========#
+#======================================#
+
+server:
+
+  port: 8778
+  servlet:
+    context-path: ~
+  tomcat:
+    uri-encoding: UTF-8
+    
+#======================================#
+#========== Cloud settings ============#
+#======================================#
+
+# 服务注册
+eureka:
+
+  # 实例设置
+  instance:
+    # 实例主机名称
+    hostname: 127.0.0.1
+    # 实例是否允许使用IP
+    preferIpAddress: false
+    # 实例状态监控参数
+    statusPageUrlPath: ${server.servlet.context-path}
+    healthCheckUrlPath: ${server.servlet.context-path}/actuator/health
+
+  # 客户端设置
+  client:
+    # 注册中心地址（集群时指定另外一个注册中心地址）
+    serviceUrl.defaultZone: http://${eureka.instance.hostname}:8777/eureka/
+  
+
+# 微服务列表
+spring:
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/shared
+  profiles:
+    active: native
+  application:
+    name: platform-cloud-config
+  #RabbitMQ 配置,实现Spring Cloud Bus全局广播配置
+  rabbitmq:
+    host: 192.168.1.15
+    port: 5673
+    username: bigsong
+    password: bigsong
+
+#屏蔽安全验证
+management:
+  endpoints:
+    web:
+      exposure:
+        include: bus-refresh
+
+
+#======================================#
+#========== Project settings ==========#
+#======================================#

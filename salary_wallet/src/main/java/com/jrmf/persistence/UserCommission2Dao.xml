@@ -1,0 +1,3359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jrmf.persistence.UserCommission2Dao">
+    <select id="getCompanyCommissions" parameterType="java.util.Map" resultType="java.util.HashMap">
+        select
+        cc1.companyName customName,
+        qu.orderNo,
+        qu.userName,
+        qu.documentType,
+        qu.certId,
+        qu.account,
+        qu.status,
+        qu.amount,
+        qu.calculationRates,
+        qu.sumFee,
+        qu.supplementAmount,
+        qu.supplementFee,
+        qu.feeRuleType,
+        qu.remark,
+        qu.payType,
+        cc2.companyName companyName,
+        qu.bankName,
+        qu.createtime,
+        qu.batchName,
+        qu.batchDesc,
+        qu.statusDesc,
+        qu.updatetime
+        from qb_usercommission qu
+        left join channel_custom cc1 on cc1.customkey = qu.originalId
+        left join channel_custom cc2 on cc2.customkey = qu.companyId
+        <trim prefix="where" suffixOverrides="AND">
+            <if test="startTime !=null and startTime!=''">
+                date (qu.createtime) &gt;= #{startTime} AND
+            </if>
+            <if test="endTime !=null and endTime!=''">
+                date (qu.createtime) &lt;= #{endTime} AND
+            </if>
+            <if test="userName !=null and userName!=''">
+                qu.userName= #{userName} AND
+            </if>
+            <if test="certId !=null and certId !=''">
+                qu.certId = #{certId} AND
+            </if>
+            <if test="batchName !=null and batchName !=''">
+                qu.batchName= #{batchName} AND
+            </if>
+            <if test="batchDesc !=null and batchDesc !=''">
+                qu.batchDesc= #{batchDesc} AND
+            </if>
+            <if test="batchDesc !=null and batchDesc !=''">
+                qu.batchDesc= #{batchDesc} AND
+            </if>
+            <if test="account !=null and account !=''">
+                qu.account= #{account} AND
+            </if>
+            <if test="amountStart !=null and amountStart !=''">
+                CAST(qu.amount AS SIGNED) &gt;= #{amountStart} AND
+            </if>
+            <if test="amountEnd !=null and amountEnd !=''">
+                CAST(qu.amount AS SIGNED) &lt;= #{amountEnd} AND
+            </if>
+            <if test="payType !=null">
+                qu.payType = #{payType} AND
+            </if>
+            <if test="companyId !=null and companyId !=''">
+                qu.companyId = #{companyId} AND
+            </if>
+            <if test="status != null">
+                qu.status = #{status} AND
+            </if>
+            <if test="customName != null and customName != ''">
+                cc1.companyName like concat('%', #{customName},'%') AND
+            </if>
+        </trim>
+        order by qu.createtime desc
+        <if test="start !=null and limit != null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getCommByOrderNo" resultType="com.jrmf.domain.UserCommission">
+        select
+            id,
+            amount,
+            sumFee,
+            supplementFee,
+            supplementAmount,
+            calculationRates,
+            userId,
+            userType,
+            status,
+            createtime,
+            updatetime,
+            batchId,
+            originalId,
+            merchantId,
+            companyId,
+            orderNo,
+            operatorName,
+            aygOrderNo,
+            statusDesc,
+            profiltFree,
+            profilt,
+            payType,
+            account,
+            invoiceStatus,
+            invoiceBatchNo,
+            menuId,
+            serviceRatesFree,
+            serviceRates,
+            paymentTime,
+            userNo,
+            companyName,
+            certId,
+            documentType,
+            userName,
+            customName,
+            batchFileName,
+            case bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else bankName end as bankName,
+            bankNo,
+            description,
+            batchName,
+            batchDesc,
+            contentName,
+            remark,
+            repeatcheck,
+            feeRuleType,
+            accountDate,
+            receiptNo
+        from qb_userCommission
+        where orderNo = #{orderNo}
+        limit 1
+    </select>
+
+    <insert id="addUserCommissionBatch" parameterType="java.util.List">
+        INSERT INTO qb_userCommission (
+        createtime,
+        userId,
+        amount,
+        sourceAmount,
+        userType,
+        status,
+        statusDesc,
+        batchId,
+        originalId,
+        merchantId,
+        companyId,
+        orderNo,
+        operatorName,
+        profiltFree,
+        sumFee,
+        supplementFee,
+        supplementAmount,
+        calculationRates,
+        profilt,
+        payType,
+        account,
+        remark,
+        sourceRemark,
+        invoiceStatus,
+        menuId,
+        userNo,
+        companyName,
+        certId,
+        documentType,
+        userName,
+        customName,
+        batchFileName,
+        bankName,
+        bankNo,
+        description,
+        batchName,
+        batchDesc,
+        contentName,
+        repeatcheck,
+        feeRuleType,
+        phoneNo,
+        receiptNo,
+        accountDate,
+        businessManager,
+        operationsManager,
+        businessPlatform,
+        businessChannel,
+        customLabel,
+        subAcctNo,
+        rateInterval,
+        realCompanyId,
+        payUserName,
+        businessChannelKey,
+        pathNo
+        )
+        VALUES
+        <foreach collection="commissionBatch" item="commission" separator=",">
+            (now(),
+            #{commission.userId},
+            #{commission.amount},
+            #{commission.sourceAmount},
+            #{commission.userType},
+            #{commission.status},
+            #{commission.statusDesc},
+            #{commission.batchId},
+            #{commission.originalId},
+            #{commission.merchantId},
+            #{commission.companyId},
+            #{commission.orderNo},
+            #{commission.operatorName},
+            #{commission.profiltFree},
+            #{commission.sumFee},
+            #{commission.supplementFee},
+            #{commission.supplementAmount},
+            #{commission.calculationRates},
+            #{commission.profilt},
+            #{commission.payType},
+            #{commission.account},
+            #{commission.remark},
+            #{commission.sourceRemark},
+            #{commission.invoiceStatus},
+            #{commission.menuId},
+            #{commission.userNo},
+            #{commission.companyName},
+            #{commission.certId},
+            #{commission.documentType},
+            #{commission.userName},
+            #{commission.customName},
+            #{commission.batchFileName},
+            #{commission.bankName},
+            #{commission.bankNo},
+            #{commission.description},
+            #{commission.batchName},
+            #{commission.batchDesc},
+            #{commission.contentName},
+            #{commission.repeatcheck},
+            #{commission.feeRuleType},
+            #{commission.phoneNo},
+            #{commission.receiptNo},
+            #{commission.accountDate},
+            #{commission.businessManager},
+            #{commission.operationsManager},
+            #{commission.businessPlatform},
+            #{commission.businessChannel},
+            #{commission.customLabel},
+            #{commission.subAcctNo},
+            #{commission.rateInterval},
+            #{commission.realCompanyId},
+            #{commission.payUserName},
+            #{commission.businessChannelKey},
+            #{commission.pathNo}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="addUserCommission" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.jrmf.domain.UserCommission">
+        INSERT INTO qb_userCommission (
+            createtime,
+            userId,
+            amount,
+            userType,
+            status,
+            statusDesc,
+            batchId,
+            originalId,
+            merchantId,
+            companyId,
+            orderNo,
+            operatorName,
+            profiltFree,
+            sumFee,
+            supplementFee,
+            supplementAmount,
+            calculationRates,
+            profilt,
+            payType,
+            account,
+            remark,
+            invoiceStatus,
+            menuId,
+            userNo,
+            companyName,
+            certId,
+            documentType,
+            userName,
+            customName,
+            batchFileName,
+            bankName,
+            bankNo,
+            description,
+            batchName,
+            batchDesc,
+            contentName,
+            repeatcheck,
+            feeRuleType,
+            realCompanyId,
+            businessChannelKey
+        )
+        VALUES (
+            now(),
+            #{userId},
+            #{amount},
+            #{userType},
+            #{status},
+            #{statusDesc},
+            #{batchId},
+            #{originalId},
+            #{merchantId},
+            #{companyId},
+            #{orderNo},
+            #{operatorName},
+            #{profiltFree},
+            #{sumFee},
+            #{supplementFee},
+            #{supplementAmount},
+            #{calculationRates},
+            #{profilt},
+            #{payType},
+            #{account},
+            #{remark},
+            #{invoiceStatus},
+            #{menuId},
+            #{userNo},
+            #{companyName},
+            #{certId},
+            #{documentType},
+            #{userName},
+            #{customName},
+            #{batchFileName},
+            #{bankName},
+            #{bankNo},
+            #{description},
+            #{batchName},
+            #{batchDesc},
+            #{contentName},
+            #{repeatcheck},
+            #{feeRuleType},
+            #{realCompanyId},
+            #{businessChannelKey}
+        )
+    </insert>
+
+    <select id="getUserCommissionByParam" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+        c.id,
+        c.amount,
+        c.sumFee,
+        c.supplementFee,
+        c.supplementAmount,
+        c.calculationRates,
+        c.userId,
+        c.userType,
+        c.status,
+        c.createtime,
+        c.updatetime,
+        c.batchId,
+        c.originalId,
+        c.merchantId,
+        c.companyId,
+        c.orderNo,
+        c.operatorName,
+        c.aygOrderNo,
+        c.statusDesc,
+        c.profiltFree,
+        c.profilt,
+        c.payType,
+        c.account,
+        c.invoiceStatus,
+        c.invoiceBatchNo,
+        c.menuId,
+        c.serviceRatesFree,
+        c.serviceRates,
+        c.paymentTime,
+        c.userNo,
+        c.companyName,
+        c.certId,
+        c.documentType,
+        c.userName,
+        c.customName,
+        c.batchFileName,
+        case c.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else c.bankName end as bankName,
+        c.bankNo,
+        c.description,
+        c.batchName,
+        c.batchDesc,
+        c.contentName,
+        c.remark,
+        c.repeatcheck,
+        c.feeRuleType,
+        u.userName as userName ,u.certId as certId ,i.companyName as customName,f.companyName
+        FROM qb_userCommission c LEFT JOIN qb_users u ON c.userId = u.id
+        LEFT JOIN channel_custom i on c.originalId = i.customkey
+        LEFT JOIN channel_custom f on c.companyId = f.customkey where 1=1
+        <if test="invoiceStatus !=null and invoiceStatus !=''">
+            and c.invoiceStatus = #{invoiceStatus}
+        </if>
+        <if test="invoiceBatchNo !=null and invoiceBatchNo !=''">
+            and c.invoiceBatchNo = #{invoiceBatchNo}
+        </if>
+        <if test="userType !=null and userType !=''">
+            and c.userType = #{userType}
+        </if>
+        <if test="status !=null and status !=''">
+            and c.status = #{status}
+        </if>
+        <if test="userId !=null and userId !=''">
+            and c.userId = #{userId}
+        </if>
+        <if test="batchId !=null and batchId !=''">
+            and c.batchId = #{batchId}
+        </if>
+        <if test="orderNo !=null and orderNo !=''">
+            and c.orderNo = #{orderNo}
+        </if>
+        <if test="amount !=null and amount !=''">
+            and c.amount = #{amount}
+        </if>
+        <if test="name !=null and name !=''">
+            and (c.batchId like concat('%', #{name}, '%')
+            or c.orderNo like concat('%', #{name}, '%')
+            or c.amount like concat('%', #{name}, '%')
+            or u.userName like concat('%', #{name}, '%')
+            or i.companyName like concat('%', #{name}, '%')
+            or f.companyName like concat('%', #{name}, '%')
+            )
+        </if>
+        <if test="id !=null and id !=''">
+            and c.id = #{id}
+        </if>
+        <if test="companyId !=null and companyId !=''">
+            and c.companyId = #{companyId}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="userNo !=null and userNo !=''">
+            and u.userNo = #{userNo}
+        </if>
+        <if test="certId !=null and certId !=''">
+            and u.certId = #{certId}
+        </if>
+        <if test="account !=null and account !=''">
+            and u.account = #{account}
+        </if>
+        <if test="userName !=null and userName !=''">
+            and u.userName = #{userName}
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(c.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(c.createtime) &lt;= #{endTime}
+        </if>
+        order by c.createtime desc
+        <if test="start !=null and limit !=''">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getUserCommissionedByParam" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+        c.id,
+        c.amount,
+        c.sumFee,
+        c.supplementFee,
+        c.supplementAmount,
+        c.calculationRates,
+        c.userId,
+        c.userType,
+        c.status,
+        c.createtime,
+        c.updatetime,
+        c.batchId,
+        c.originalId,
+        c.merchantId,
+        c.companyId,
+        c.orderNo,
+        c.operatorName,
+        c.aygOrderNo,
+        c.statusDesc,
+        c.profiltFree,
+        c.profilt,
+        c.payType,
+        c.account,
+        c.invoiceStatus,
+        c.invoiceBatchNo,
+        c.menuId,
+        c.serviceRatesFree,
+        c.serviceRates,
+        c.paymentTime,
+        c.userNo,
+        c.companyName,
+        c.certId,
+        c.documentType,
+        c.userName,
+        c.customName,
+        c.batchFileName,
+        case c.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else c.bankName end as bankName,
+        c.bankNo,
+        c.description,
+        c.batchName,
+        c.batchDesc,
+        c.contentName,
+        c.remark,
+        c.repeatcheck,
+        c.feeRuleType,
+        u.userName as userName ,u.certId as certId ,i.companyName as customName,f.companyName
+        FROM qb_userCommission c LEFT JOIN qb_users u ON c.userId = u.id
+        LEFT JOIN channel_custom i on c.originalId = i.customkey
+        LEFT JOIN channel_custom f on c.companyId = f.customkey where 1=1
+        <if test="name !=null and name !=''">
+            and (c.batchId like concat('%', #{name}, '%')
+            or c.orderNo like concat('%', #{name}, '%')
+            or c.amount like concat('%', #{name}, '%')
+            or u.userName like concat('%', #{name}, '%')
+            or i.companyName like concat('%', #{name}, '%')
+            or f.companyName like concat('%', #{name}, '%')
+            )
+        </if>
+        <if test="companyId !=null and companyId !=''">
+            and c.companyId = #{companyId}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(c.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(c.createtime) &lt;= #{endTime}
+        </if>
+        and c.status != 0
+        order by c.createtime desc
+        <if test="start !=null and limit !=''">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getUserCommissionToInvoice" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+        c.id,
+        c.amount,
+        c.sumFee,
+        c.supplementFee,
+        c.supplementAmount,
+        c.calculationRates,
+        c.userId,
+        c.userType,
+        c.status,
+        c.createtime,
+        c.updatetime,
+        c.batchId,
+        c.originalId,
+        c.merchantId,
+        c.companyId,
+        c.orderNo,
+        c.operatorName,
+        c.aygOrderNo,
+        c.statusDesc,
+        c.profiltFree,
+        c.profilt,
+        c.payType,
+        c.account,
+        c.invoiceStatus,
+        c.invoiceBatchNo,
+        c.menuId,
+        c.serviceRatesFree,
+        c.serviceRates,
+        c.paymentTime,
+        c.userNo,
+        c.companyName,
+        c.certId,
+        c.documentType,
+        c.userName,
+        c.customName,
+        c.batchFileName,
+        case c.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else c.bankName end as bankName,
+        c.bankNo,
+        c.description,
+        c.batchName,
+        c.batchDesc,
+        c.contentName,
+        c.remark,
+        c.repeatcheck,
+        c.feeRuleType,
+        u.userName as userName ,u.certId as certId ,i.companyName as customName,f.companyName
+        FROM qb_userCommission c LEFT JOIN qb_users u ON c.userId = u.id
+        LEFT JOIN channel_custom i on c.originalId = i.customkey
+        LEFT JOIN channel_custom f on c.companyId = f.customkey where
+        c.status != 4
+        <if test="status !=null and status !=''">
+            and c.status = #{status}
+        </if>
+        <if test="companyId !=null and companyId !=''">
+            and c.companyId = #{companyId}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(c.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(c.createtime) &lt;= #{endTime}
+        </if>
+        and invoiceStatus = 2
+        order by c.createtime desc
+        <if test="start !=null and limit !=''">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getUserCommissionSum" resultType="String">
+        SELECT ROUND(sum(c.amount),2)
+        FROM qb_userCommission c LEFT JOIN qb_users u ON c.userId = u.id
+        LEFT JOIN channel_custom i on c.originalId = i.customkey
+        LEFT JOIN channel_custom f on c.companyId = f.customkey where c.status != 4
+        <if test="userType !=null and userType !=''">
+            and c.userType = #{userType}
+        </if>
+        <if test="status !=null and status !=''">
+            and c.status = #{status}
+        </if>
+        <if test="userId !=null and userId !=''">
+            and c.userId = #{userId}
+        </if>
+        <if test="batchId !=null and batchId !=''">
+            and c.batchId = #{batchId}
+        </if>
+        <if test="orderNo !=null and orderNo !=''">
+            and c.orderNo = #{orderNo}
+        </if>
+        <if test="name !=null and name !=''">
+            and (c.batchId like concat('%', #{name}, '%')
+            or c.orderNo like concat('%', #{name}, '%')
+            or c.amount like concat('%', #{name}, '%')
+            or u.userName like concat('%', #{name}, '%')
+            or i.companyName like concat('%', #{name}, '%')
+            or f.companyName like concat('%', #{name}, '%')
+            )
+        </if>
+        <if test="id !=null and id !=''">
+            and c.id = #{id}
+        </if>
+        <if test="companyId !=null and companyId !=''">
+            and c.companyId = #{companyId}
+        </if>
+        <if test="originalId !=null and originalId !=''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="userNo !=null and userNo !=''">
+            and u.userNo = #{userNo}
+        </if>
+        <if test="certId !=null and certId !=''">
+            and u.certId = #{certId}
+        </if>
+        <if test="userName !=null and userName !=''">
+            and u.userName = #{userName}
+        </if>
+        <if test="startTime !=null and startTime !=''">
+            and date(c.createtime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime !=''">
+            and date(c.createtime) &lt;= #{endTime}
+        </if>
+    </select>
+
+    <select id="getUserCommissionByIds" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+            c.id,
+            c.amount,
+            c.sumFee,
+            c.supplementFee,
+            c.supplementAmount,
+            c.calculationRates,
+            c.userId,
+            c.userType,
+            c.status,
+            c.createtime,
+            c.updatetime,
+            c.batchId,
+            c.originalId,
+            c.merchantId,
+            c.companyId,
+            c.orderNo,
+            c.operatorName,
+            c.aygOrderNo,
+            c.statusDesc,
+            c.profiltFree,
+            c.profilt,
+            c.payType,
+            c.account,
+            c.invoiceStatus,
+            c.invoiceBatchNo,
+            c.menuId,
+            c.serviceRatesFree,
+            c.serviceRates,
+            c.paymentTime,
+            c.userNo,
+            c.companyName,
+            c.certId,
+            c.documentType,
+            c.userName,
+            c.customName,
+            c.batchFileName,
+            case c.bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else c.bankName end as bankName,
+            c.bankNo,
+            c.description,
+            c.batchName,
+            c.batchDesc,
+            c.contentName,
+            c.remark,
+            c.repeatcheck,
+            c.feeRuleType,
+            u.certId            as certId,
+            u.companyName       as companyName,
+            u.userNo            as userNo
+        FROM qb_userCommission c, qb_users u
+        WHERE c.userId = u.id and FIND_IN_SET(c.id, #{ids})
+    </select>
+    <update id="updateUserCommissionById" parameterType="com.jrmf.domain.UserCommission">
+        update qb_usercommission
+        set status = #{status}, statusDesc = #{statusDesc},
+         paymentTime = #{paymentTime},
+         updatetime = now()
+        where id = #{id} and status = 3
+    </update>
+    <update id="updateUserCommission" parameterType="com.jrmf.domain.UserCommission">
+        update qb_userCommission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="invoiceStatus !=null and invoiceStatus !=''">
+                invoiceStatus = #{invoiceStatus},
+            </if>
+            <if test="invoiceBatchNo !=null and invoiceBatchNo !=''">
+                invoiceBatchNo = #{invoiceBatchNo},
+            </if>
+            <if test="status !=null and status !=''">
+                status = #{status},
+            </if>
+            <if test="statusDesc !=null and statusDesc !=''">
+                statusDesc = #{statusDesc},
+            </if>
+            <if test="receiptNo !=null and receiptNo !=''">
+                receiptNo = #{receiptNo},
+            </if>
+            <if test="accountDate !=null and accountDate !=''">
+                accountDate = #{accountDate},
+            </if>
+            <if test="remark !=null and remark !=''">
+                remark = #{remark},
+            </if>
+            <if test="operatorName !=null and operatorName !=''">
+                operatorName = #{operatorName},
+            </if>
+            <if test="amount !=null and amount !=''">
+                amount = #{amount},
+            </if>
+            <if test="aygOrderNo !=null and aygOrderNo !=''">
+                aygOrderNo = #{aygOrderNo},
+            </if>
+            <if test="sumFee !=null and sumFee !=''">
+                sumFee = #{sumFee},
+            </if>
+            <if test="profiltFree !=null and profiltFree !=''">
+                profiltFree = #{profiltFree},
+            </if>
+            <if test="calculationRates !=null and calculationRates !=''">
+                calculationRates = #{calculationRates},
+            </if>
+            <if test="profilt !=null and profilt !=''">
+                profilt = #{profilt},
+            </if>
+            <if test="statusDesc !=null and statusDesc !=''">
+                statusDesc = #{statusDesc},
+            </if>
+            <if test="paymentTime !=null and paymentTime !=''">
+                paymentTime = #{paymentTime},
+            </if>
+            updatetime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateUserCommissionBatchIdAndStatus" parameterType="com.jrmf.domain.UserCommission">
+        update qb_userCommission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="status !=null and status !=''">
+                status = #{status},
+            </if>
+            <if test="batchId !=null and batchId !=''">
+                batchId = #{batchId},
+            </if>
+            updatetime = now(),
+        </trim>
+        where id = #{id}
+        <if test="status == 2">
+            and status != 2
+        </if>
+    </update>
+
+    <update id="updateUserCommissionByCompanyId">
+        update qb_userCommission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyId !=null">
+                companyId = #{companyId},
+            </if>
+            <if test="operatorName !=null">
+                operatorName = #{operatorName},
+            </if>
+            updatetime = now(),
+        </trim>
+        where FIND_IN_SET(id,#{ids})
+    </update>
+
+    <update id="updateUserCommissionByInvoice">
+        update qb_userCommission
+        Set
+            invoiceBatchNo = #{invoiceBatchNo},
+            updatetime     = now(),
+            invoiceStatus  = 1
+        where FIND_IN_SET(id, #{ids})
+    </update>
+
+    <update id="updateUserCommissionByBacthId">
+        update qb_userCommission
+        SET batchId = #{newBatchId}, updatetime = now()
+        where batchId = #{batchId}
+    </update>
+
+    <update id="updateUserCommissionByOrderNo" parameterType="com.jrmf.domain.UserCommission">
+        update qb_userCommission
+        SET status     = #{status}, updatetime = now(),businessType=#{businessType},isSplit=#{isSplit},
+            statusDesc = #{statusDesc},paymentTime = #{paymentTime},pathNo=#{pathNo}
+        where orderNo = #{orderNo}
+              and status not in (1, 2)
+    </update>
+
+    <update id="deleteById" parameterType="int">
+        update qb_userCommission
+        Set status = 4, updatetime = now()
+        WHERE id = #{id} and status in (1, 2)
+    </update>
+
+    <update id="deleteByBatchId" parameterType="String">
+        update qb_userCommission
+        Set status = 4, updatetime = now()
+        WHERE batchId = #{batchId}
+    </update>
+
+    <update id="deleteTemporary" parameterType="String">
+        update qb_userCommission
+        Set status = 4, updatetime = now()
+        WHERE status = 0 AND createtime &lt; SUBDATE(now(), interval 1 hour)
+    </update>
+
+    <select id="getCommissionDeatailList" parameterType="map"
+            resultType="com.jrmf.domain.CommissionDetail">
+        SELECT
+        quc.id,
+        qu.id userId,
+        qu.certId,
+        quc.amount,
+        quc.`status`,
+        quc.remark
+        quc.createtime,
+        quc.updatetime
+        FROM
+        qb_users qu
+        LEFT JOIN qb_userCommission quc ON qu.id = quc.userId
+        WHERE quc.status != 4
+        <if test="status = 0">
+            quc.`status` = 0,
+        </if>
+        <if test="status != 0">
+            quc.`status` in (1,2),
+        </if>
+        <if test="startDate != null">
+            and quc.createTime &gt;= date_format(#{startDate}, '%Y-%c-%d %H:%i:%s' )
+        </if>
+        <if test="endDate != null">
+            and quc.createTime &lt;= date_format(#{endDate}, '%Y-%c-%d %H:%i:%s' )
+        </if>
+        and qu.companyUserNo = quc.companyId
+        and quc.userType = 2
+        and quc.companyId = #{companyId}
+        order by quc.createTime desc
+        limit #{start},#{pageSize}
+    </select>
+
+    <!--该批次对应下发公司总金额  -->
+    <select id="getStockByBatchId" resultType="String">
+        SELECT IFNULL((SELECT SUM(truncate(amount, 2))
+                       FROM qb_userCommission
+                       WHERE batchId = #{batchId}
+                             and companyId = #{companyId} and status != 2
+                      ), 0) as stock
+    </select>
+
+    <!--该批次对应下发公司服务费总金额  -->
+    <select id="getServiceRatesFreeByBatchId" resultType="String">
+        SELECT IFNULL((SELECT SUM(truncate(sumFee, 2))
+                       FROM qb_userCommission
+                       WHERE batchId = #{batchId}
+                             and status != 2
+                      ), 0) as stock
+    </select>
+
+    <!--该批次总佣金金额  -->
+    <select id="getAmountByBatchId" resultType="String">
+        SELECT IFNULL((SELECT SUM(truncate(amount, 2))
+                       FROM qb_userCommission
+                       WHERE batchId = #{batchId}), 0) as stock
+    </select>
+
+    <!--该批次未成功发放数量  -->
+    <select id="getBatchNum" resultType="int">
+        SELECT COUNT(id)
+        FROM qb_userCommission
+        where batchId = #{batchId}
+              and status = #{status}
+    </select>
+
+    <select id="getCommissionsByBatchId" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+            c.id,
+            c.amount,
+            c.sumFee,
+            c.supplementFee,
+            c.supplementAmount,
+            c.calculationRates,
+            c.userId,
+            c.userType,
+            c.status,
+            c.createtime,
+            c.updatetime,
+            c.batchId,
+            c.originalId,
+            c.merchantId,
+            c.companyId,
+            c.orderNo,
+            c.operatorName,
+            c.aygOrderNo,
+            c.statusDesc,
+            c.profiltFree,
+            c.profilt,
+            c.payType,
+            c.account,
+            c.invoiceStatus,
+            c.invoiceBatchNo,
+            c.menuId,
+            c.serviceRatesFree,
+            c.serviceRates,
+            c.paymentTime,
+            c.userNo,
+            c.companyName,
+            c.certId,
+            c.documentType,
+            c.userName,
+            c.customName,
+            c.batchFileName,
+            case c.bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else c.bankName end as bankName,
+            c.bankNo,
+            c.description,
+            c.batchName,
+            c.batchDesc,
+            c.contentName,
+            c.remark,
+            c.repeatcheck,
+            c.feeRuleType
+        FROM qb_userCommission c
+        WHERE batchId = #{batchId} and c.status != 4
+    </select>
+
+    <select id="getCommissionsById" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+            c.id,
+            c.amount,
+            c.sumFee,
+            c.supplementFee,
+            c.supplementAmount,
+            c.calculationRates,
+            c.userId,
+            c.userType,
+            c.status,
+            c.createtime,
+            c.updatetime,
+            c.batchId,
+            c.originalId,
+            c.merchantId,
+            c.companyId,
+            c.orderNo,
+            c.operatorName,
+            c.aygOrderNo,
+            c.statusDesc,
+            c.profiltFree,
+            c.profilt,
+            c.payType,
+            c.account,
+            c.invoiceStatus,
+            c.invoiceBatchNo,
+            c.menuId,
+            c.serviceRatesFree,
+            c.serviceRates,
+            c.paymentTime,
+            c.userNo,
+            c.companyName,
+            c.certId,
+            c.documentType,
+            c.userName,
+            c.customName,
+            c.batchFileName,
+            case c.bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else c.bankName end as bankName,
+            c.bankNo,
+            c.description,
+            c.batchName,
+            c.batchDesc,
+            c.contentName,
+            c.remark,
+            c.repeatcheck,
+            c.feeRuleType
+        FROM qb_userCommission c
+        WHERE id = #{id}
+    </select>
+
+    <select id="getCommissionsByAygId" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+            c.id,
+            c.amount,
+            c.sumFee,
+            c.supplementFee,
+            c.supplementAmount,
+            c.calculationRates,
+            c.userId,
+            c.userType,
+            c.status,
+            c.createtime,
+            c.updatetime,
+            c.batchId,
+            c.originalId,
+            c.merchantId,
+            c.companyId,
+            c.orderNo,
+            c.operatorName,
+            c.aygOrderNo,
+            c.statusDesc,
+            c.profiltFree,
+            c.profilt,
+            c.payType,
+            c.account,
+            c.invoiceStatus,
+            c.invoiceBatchNo,
+            c.menuId,
+            c.serviceRatesFree,
+            c.serviceRates,
+            c.paymentTime,
+            c.userNo,
+            c.companyName,
+            c.certId,
+            c.documentType,
+            c.userName,
+            c.customName,
+            c.batchFileName,
+            case c.bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else c.bankName end as bankName,
+            c.bankNo,
+            c.description,
+            c.batchName,
+            c.batchDesc,
+            c.contentName,
+            c.remark,
+            c.repeatcheck,
+            c.feeRuleType
+        FROM qb_userCommission c
+        WHERE c.aygOrderNo = #{orderNo}
+    </select>
+
+    <select id="getListByTypeAndStatus" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+            c.id,
+            c.amount,
+            c.sumFee,
+            c.supplementFee,
+            c.supplementAmount,
+            c.calculationRates,
+            c.userId,
+            c.userType,
+            c.status,
+            c.createtime,
+            c.updatetime,
+            c.batchId,
+            c.originalId,
+            c.merchantId,
+            c.companyId,
+            c.orderNo,
+            c.operatorName,
+            c.aygOrderNo,
+            c.statusDesc,
+            c.profiltFree,
+            c.profilt,
+            c.payType,
+            c.account,
+            c.invoiceStatus,
+            c.invoiceBatchNo,
+            c.menuId,
+            c.serviceRatesFree,
+            c.serviceRates,
+            c.paymentTime,
+            c.userNo,
+            c.companyName,
+            c.certId,
+            c.documentType,
+            c.userName,
+            c.customName,
+            c.batchFileName,
+            case c.bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else c.bankName end as bankName,
+            c.bankNo,
+            c.description,
+            c.batchName,
+            c.batchDesc,
+            c.contentName,
+            c.remark,
+            c.repeatcheck,
+            c.feeRuleType
+        FROM qb_userCommission c
+        WHERE c.status = #{status} and FIND_IN_SET(c.payType, #{payType}) and c.batchId is not null and IFNULL(isSplit,0) !=1;
+    </select>
+
+    <select id="getApiListByTypeAndStatus" resultType="com.jrmf.domain.UserCommission">
+        SELECT
+            c.id,
+            c.amount,
+            c.sumFee,
+            c.supplementFee,
+            c.supplementAmount,
+            c.calculationRates,
+            c.userId,
+            c.userType,
+            c.status,
+            c.createtime,
+            c.updatetime,
+            c.batchId,
+            c.originalId,
+            c.merchantId,
+            c.companyId,
+            c.orderNo,
+            c.operatorName,
+            c.aygOrderNo,
+            c.statusDesc,
+            c.profiltFree,
+            c.profilt,
+            c.payType,
+            c.account,
+            c.invoiceStatus,
+            c.invoiceBatchNo,
+            c.menuId,
+            c.serviceRatesFree,
+            c.serviceRates,
+            c.paymentTime,
+            c.userNo,
+            c.companyName,
+            c.certId,
+            c.documentType,
+            c.userName,
+            c.customName,
+            c.batchFileName,
+            case c.bankName
+            when 'alipay'
+                then '支付宝'
+            when 'wx'
+                then '微信'
+            when 'wxpack'
+                then '微信'
+            else c.bankName end as bankName,
+            c.bankNo,
+            c.description,
+            c.batchName,
+            c.batchDesc,
+            c.contentName,
+            c.remark,
+            c.repeatcheck,
+            c.feeRuleType
+        FROM qb_userCommission c
+        WHERE c.status = #{status} and FIND_IN_SET(c.payType, #{payType}) and c.batchId is null and IFNULL(isSplit,0) !=1;
+    </select>
+
+    <select id="commissionResultQuery" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        c.id,
+        c.amount,
+        c.sumFee,
+        c.supplementFee,
+        c.supplementAmount,
+        c.calculationRates,
+        c.userId,
+        c.userType,
+        c.status,
+        c.createtime,
+        c.updatetime,
+        c.batchId,
+        c.originalId,
+        c.merchantId,
+        c.companyId,
+        c.orderNo,
+        c.operatorName,
+        c.aygOrderNo,
+        c.statusDesc,
+        c.profiltFree,
+        c.profilt,
+        c.payType,
+        c.account,
+        c.invoiceStatus,
+        c.invoiceBatchNo,
+        c.menuId,
+        c.serviceRatesFree,
+        c.serviceRates,
+        c.paymentTime,
+        c.userNo,
+        c.companyName,
+        c.certId,
+        c.documentType,
+        c.userName,
+        c.customName,
+        c.batchFileName,
+        case c.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else c.bankName end as bankName,
+        c.bankNo,
+        c.description,
+        c.batchName,
+        c.batchDesc,
+        c.contentName,
+        c.remark,
+        c.repeatcheck,
+        c.feeRuleType
+        FROM
+        qb_usercommission c
+        WHERE c.batchId = #{batchId} and c.status != 4
+        <if test="userName != null and userName != ''">
+            and c.userName = #{userName}
+        </if>
+        <if test="certId != null and certId != ''">
+            and c.certId = #{certId}
+        </if>
+        <if test="account != null and account != ''">
+            and c.account = #{account}
+        </if>
+        <if test="amount != null and amount != ''">
+            and c.amount = #{amount}
+        </if>
+        <if test="status != null and status != ''">
+            and c.status = #{status}
+        </if>
+        order by c.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+    <select id="getUserDealRecord" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        userId userId,
+        userName userName,
+        certId certId,
+        ROUND(SUM(amount),2) amount,
+        COUNT(id) passNum,
+        documentType documentType,
+        ROUND(SUM(sumFee),2) sumFee,
+        ROUND(SUM(supplementFee),2) supplementFee,
+        createtime createtime
+        FROM
+        qb_usercommission
+        WHERE
+        originalId = #{customkey}
+        and status = 1
+        <if test="certId != null and certId != ''">
+            and certId = #{certId}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and batchName = #{batchName}
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            and FIND_IN_SET(menuId, #{menuIds})
+        </if>
+        <if test="userName != null and userName != ''">
+            and userName = #{userName}
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(createtime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(createtime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and batchDesc like concat('%', #{batchDesc},'%')
+        </if>
+        <if test="payType != null and payType != ''">
+            and payType = #{payType}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        GROUP BY
+        userId
+        ORDER BY createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getUserDealDetail" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        id,
+        amount,
+        sumFee,
+        supplementFee,
+        supplementAmount,
+        calculationRates,
+        userId,
+        userType,
+        status,
+        createtime,
+        updatetime,
+        batchId,
+        originalId,
+        merchantId,
+        companyId,
+        orderNo,
+        operatorName,
+        aygOrderNo,
+        statusDesc,
+        profiltFree,
+        profilt,
+        payType,
+        account,
+        invoiceStatus,
+        invoiceBatchNo,
+        menuId,
+        serviceRatesFree,
+        serviceRates,
+        paymentTime,
+        userNo,
+        companyName,
+        certId,
+        documentType,
+        userName,
+        customName,
+        batchFileName,
+        bankNo,
+        description,
+        case bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else bankName end as bankName,
+        batchDesc,
+        contentName,
+        remark,
+        repeatcheck,
+        feeRuleType
+        FROM
+        qb_usercommission
+        WHERE userId = #{userId} AND `status`=1
+        <if test="originalId != null and originalId != ''">
+            and originalId = #{originalId}
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            AND FIND_IN_SET(menuId,#{menuIds})
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="certId != null and certId != ''">
+            and certId = #{certId}
+        </if>
+        <if test="customName != null and customName != ''">
+            and customName =#{customName}
+        </if>
+        <if test="userName != null and userName != ''">
+            and userName =#{userName}
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(paymentTime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(paymentTime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and batchDesc like concat('%',#{batchDesc},'%')
+        </if>
+        <if test="companyName != null and companyName != ''">
+            and companyName = #{companyName}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and batchName = #{batchName}
+        </if>
+        <if test="payType != null and payType != ''">
+            and payType = #{payType}
+        </if>
+        ORDER BY createtime DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="commissionDetailResult" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        id,
+        amount,
+        sumFee,
+        supplementFee,
+        supplementAmount,
+        calculationRates,
+        userId,
+        userType,
+        status,
+        createtime,
+        updatetime,
+        batchId,
+        originalId,
+        merchantId,
+        companyId,
+        orderNo,
+        phoneNo,
+        operatorName,
+        aygOrderNo,
+        statusDesc,
+        profiltFree,
+        profilt,
+        payType,
+        account,
+        invoiceStatus,
+        invoiceBatchNo,
+        menuId,
+        serviceRatesFree,
+        serviceRates,
+        paymentTime,
+        userNo,
+        companyName,
+        certId,
+        documentType,
+        userName,
+        customName,
+        batchFileName,
+        case bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else bankName end as bankName,
+        bankNo,
+        description,
+        batchName,
+        batchDesc,
+        contentName,
+        remark,
+        repeatcheck,
+        feeRuleType
+        FROM
+        qb_usercommission
+        WHERE status != 4
+        <if test="originalId != null and originalId != ''">
+            and FIND_IN_SET(originalId, #{originalId})
+        </if>
+        <if test="userName != null and userName != ''">
+            and userName = #{userName}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and batchName like concat('%',#{batchName},'%')
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            and FIND_IN_SET(menuId, #{menuIds})
+        </if>
+        <if test="certId != null and certId != ''">
+            and certId = #{certId}
+        </if>
+        <if test="createTimeStart != null and createTimeStart != ''">
+            and date(createtime) &gt;= #{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            and date(createtime) &lt;= #{createTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and batchDesc like concat('%',#{batchDesc},'%')
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and contentName like concat('%',#{contentName},'%')
+        </if>
+        <if test="account != null and account != ''">
+            and account = #{account}
+        </if>
+        <if test="payType != null and payType != ''">
+            and payType = #{payType}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="customName != null and customName != ''">
+            and customName like concat('%',#{customName},'%')
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            and amount &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and amount &lt;= #{amountEnd}
+        </if>
+         <if test="operatorName != null and operatorName != ''">
+            and operatorName = #{operatorName}
+        </if>
+        ORDER BY createtime DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="commissionByMemuResult" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        c.contentName ,
+        c.menuId,
+        ROUND(SUM(c.amount),2) amount,
+        COUNT(c.id) passNum,
+        ROUND(SUM(c.sumFee),2) sumFee,
+        ROUND(SUM(c.supplementFee),2) supplementFee,
+        COUNT(DISTINCT c.batchId) batchNum,
+        COUNT(DISTINCT c.userId) userNum
+        FROM
+        qb_usercommission c
+        WHERE
+        c.originalId = #{originalId} and c.status = 1
+        <if test="contentName != null and contentName != ''">
+            and c.contentName = #{contentName}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName like concat('%', #{batchName},'%')
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            and FIND_IN_SET(c.menuId,#{menuIds})
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(c.createtime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(c.createtime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%', #{batchDesc},'%')
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and c.companyId = #{companyId}
+        </if>
+        GROUP BY
+        c.menuId
+        ORDER BY
+        c.createtime
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="commissionByMemuDetail" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        c.id,
+        c.amount,
+        c.sumFee,
+        c.supplementFee,
+        c.supplementAmount,
+        c.calculationRates,
+        c.userId,
+        c.userType,
+        c.status,
+        c.createtime,
+        c.updatetime,
+        c.batchId,
+        c.originalId,
+        c.merchantId,
+        c.companyId,
+        c.orderNo,
+        c.operatorName,
+        c.aygOrderNo,
+        c.statusDesc,
+        c.profiltFree,
+        c.profilt,
+        c.payType,
+        c.account,
+        c.invoiceStatus,
+        c.invoiceBatchNo,
+        c.menuId,
+        c.serviceRatesFree,
+        c.serviceRates,
+        c.paymentTime,
+        c.userNo,
+        c.companyName,
+        c.certId,
+        c.documentType,
+        c.userName,
+        c.customName,
+        c.batchFileName,
+        case c.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else c.bankName end as bankName,
+        c.bankNo,
+        c.description,
+        c.batchName,
+        c.batchDesc,
+        c.contentName,
+        c.remark,
+        c.repeatcheck,
+        c.feeRuleType
+        FROM
+        qb_usercommission c
+        WHERE
+        c.originalId = #{originalId} and c.menuId = #{menuId} and c.status = 1
+        <if test="amount != null and amount != ''">
+            and c.amount = #{amount}
+        </if>
+        <if test="certId != null and certId != ''">
+            and c.certId = #{certId}
+        </if>
+        <if test="userName != null and userName != ''">
+            and c.userName like concat('%', #{userName},'%')
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName like concat('%', #{batchName},'%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%', #{batchDesc},'%')
+        </if>
+        <if test="account != null and account != ''">
+            and c.account = #{account}
+        </if>
+        <if test="batchId != null and batchId != ''">
+            and c.batchId = #{batchId}
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        <if test="account != null and account != ''">
+            and c.account = #{account}
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(c.createtime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(c.createtime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and c.contentName = #{contentName}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and c.companyId = #{companyId}
+        </if>
+        ORDER BY c.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getUserTradeData" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        c.userId userId,
+        c.certId certId,
+        c.userName userName,
+        c.documentType documentType,
+        ROUND(SUM(c.amount),2) amount,
+        COUNT(c.id) passNum,
+        ROUND(SUM(c.sumFee),2) sumFee,
+        u.createTime createtime
+        FROM
+        qb_usercommission c
+        LEFT JOIN qb_users u ON c.userId = u.id
+        WHERE
+        c.companyId = #{companyId}
+        and c.status = 1
+        <if test="originalId != null and originalId != ''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="certId != null and certId != ''">
+            and u.certId = #{certId}
+        </if>
+        <if test="userName != null and userName != ''">
+            and u.userName=#{userName}
+        </if>
+        <if test="customName != null and customName != ''">
+            and c.customName like concat('%',#{customName},'%')
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(c.paymentTime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(c.paymentTime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc = #{batchDesc}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName = #{batchName}
+        </if>
+        <if test="companyName != null and companyName != ''">
+            and c.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        GROUP BY c.userId
+        ORDER BY c.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getUserTradeCompany" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        aa.userId,
+        aa.certId,
+        aa.userName,
+        aa.documentType,
+        aa.amount,
+        aa.passNum,
+        aa.sumFee,
+        aa.supplementFee,
+        aa.createtime
+        FROM
+        (SELECT
+        c.userId userId,
+        c.certId certId,
+        c.userName userName,
+        c.documentType documentType,
+        ROUND(SUM(c.amount), 2) amount,
+        COUNT(c.id) passNum,
+        ROUND(SUM(c.sumFee), 2) sumFee,
+        ROUND(SUM(c.supplementFee), 2) supplementFee,
+        u.createTime createtime
+        FROM
+        qb_usercommission c
+        LEFT JOIN qb_users u ON c.userId = u.id
+        WHERE
+        c.companyId = #{companyId}
+        AND `status` = 1
+        <if test="originalId != null and originalId != ''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="certId != null and certId != ''">
+            and u.certId = #{certId}
+        </if>
+        <if test="userName != null and userName != ''">
+            and u.userName=#{userName}
+        </if>
+        <if test="customName != null and customName != ''">
+            and c.customName like concat('%',#{customName},'%')
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(c.paymentTime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(c.paymentTime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%',#{batchDesc},'%')
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName = #{batchName}
+        </if>
+        <if test="companyName != null and companyName != ''">
+            and c.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        GROUP BY c.userId) aa
+        where 1=1
+        <if test="amountStart != null and amountStart != ''">
+            and aa.amount &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and aa.amount &lt;= #{amountEnd}
+        </if>
+        <if test='monthAmount == "1"'>
+            and aa.amount &gt;= #{calculationLimit}
+        </if>
+        <if test='monthAmount == "-1"'>
+            and aa.amount &lt; #{calculationLimit}
+        </if>
+        order by aa.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getUserTradeDetailCompany" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+        SELECT
+        c.id,
+        c.amount,
+        c.sumFee,
+        c.supplementFee,
+        c.supplementAmount,
+        c.calculationRates,
+        c.userId,
+        c.userType,
+        c.status,
+        c.createtime,
+        c.updatetime,
+        c.batchId,
+        c.originalId,
+        c.merchantId,
+        c.companyId,
+        c.orderNo,
+        c.operatorName,
+        c.aygOrderNo,
+        c.statusDesc,
+        c.profiltFree,
+        c.profilt,
+        c.payType,
+        c.account,
+        c.invoiceStatus,
+        c.invoiceBatchNo,
+        c.menuId,
+        c.serviceRatesFree,
+        c.serviceRates,
+        c.paymentTime,
+        c.userNo,
+        c.companyName,
+        c.certId,
+        c.documentType,
+        c.userName,
+        c.customName,
+        c.batchFileName,
+        case c.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else c.bankName end as bankName,
+        c.bankNo,
+        c.description,
+        c.batchName,
+        c.batchDesc,
+        c.contentName,
+        c.remark,
+        c.repeatcheck,
+        c.feeRuleType
+        FROM
+        qb_usercommission c
+        WHERE
+        c.`status` = 1
+        <if test="companyId != null and companyId != ''">
+            and c.companyId = #{companyId}
+        </if>
+        <if test="originalId != null and originalId != ''">
+            and c.originalId = #{originalId}
+        </if>
+        <if test="certId != null and certId != ''">
+            and c.certId = #{certId}
+        </if>
+        <if test="userId != null and userId != ''">
+            and c.userId = #{userId}
+        </if>
+        <if test="userName != null and userName != ''">
+            and c.userName=#{userName}
+        </if>
+        <if test="customName != null and customName != ''">
+            and c.customName like concat('%',#{customName},'%')
+        </if>
+        <if test="tradeTimeStart != null and tradeTimeStart != ''">
+            and date(c.paymentTime) &gt;= #{tradeTimeStart}
+        </if>
+        <if test="tradeTimeEnd != null and tradeTimeEnd != ''">
+            and date(c.paymentTime) &lt;= #{tradeTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and c.batchDesc like concat('%',#{batchDesc},'%')
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and c.batchName = #{batchName}
+        </if>
+        <if test="companyName != null and companyName != ''">
+            and c.companyName like concat('%',#{companyName},'%')
+        </if>
+        <if test="payType != null and payType != ''">
+            and c.payType = #{payType}
+        </if>
+        order by c.createtime desc
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getSumCommissionsByParams" resultType="com.jrmf.domain.UserCommission">
+        select userId,customName,sum(amount) amount,count(id) id,ROUND(SUM(sumFee), 2) sumFee,ROUND(SUM(supplementFee),
+        2) supplementFee,originalId
+        from qb_usercommission
+        where status = 1
+        <if test="customName != null and customName != ''">
+            and customName like CONCAT('%',#{customName},'%')
+        </if>
+        <if test="tradeStartTime != null and tradeStartTime != ''">
+            and date(paymentTime) &gt;= #{tradeStartTime}
+        </if>
+        <if test="tradeEndTime != null and tradeEndTime != ''">
+            and date(paymentTime) &lt;= #{tradeEndTime}
+        </if>
+        <if test="payType != null and payType != ''">
+            and payType = #{payType}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and batchName like CONCAT('%',#{batchName},'%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and batchDesc like CONCAT('%',#{batchDesc},'%')
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="payCompanyId != null and payCompanyId != ''">
+            and companyId = #{payCompanyId}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and contentName like CONCAT('%',#{contentName},'%')
+        </if>
+        group by userId,originalId having
+        <choose>
+            <when test="payAmountLevel ==1 ">
+                amount &gt;= #{calculationLimit}
+            </when>
+            <when test="payAmountLevel =='-1' ">
+                amount &lt; #{calculationLimit}
+            </when>
+            <otherwise>
+                amount >=0
+            </otherwise>
+        </choose>
+        order by updatetime desc
+    </select>
+
+
+    <select id="getCommissionsDetailByParams" resultType="com.jrmf.domain.UserCommission">
+        select
+        id,
+        amount,
+        sumFee,
+        supplementFee,
+        supplementAmount,
+        calculationRates,
+        userId,
+        userType,
+        status,
+        createtime,
+        updatetime,
+        batchId,
+        originalId,
+        merchantId,
+        companyId,
+        orderNo,
+        operatorName,
+        aygOrderNo,
+        statusDesc,
+        profiltFree,
+        profilt,
+        payType,
+        account,
+        invoiceStatus,
+        invoiceBatchNo,
+        menuId,
+        serviceRatesFree,
+        serviceRates,
+        paymentTime,
+        userNo,
+        companyName,
+        certId,
+        documentType,
+        userName,
+        customName,
+        batchFileName,
+        case bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else bankName end as bankName,
+        bankNo,
+        description,
+        batchName,
+        batchDesc,
+        contentName,
+        remark,
+        repeatcheck,
+        feeRuleType
+        from qb_usercommission
+        where status = 1
+        <if test="customName != null and customName != ''">
+            and customName like CONCAT('%',#{customName},'%')
+        </if>
+        <if test="tradeStartTime != null and tradeStartTime != ''">
+            and date(createtime) &gt;= #{tradeStartTime}
+        </if>
+        <if test="tradeEndTime != null and tradeEndTime != ''">
+            and date(createtime) &lt;= #{tradeEndTime}
+        </if>
+        <if test="payType != null and payType != ''">
+            and payType = #{payType}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and batchName like CONCAT('%',#{batchName},'%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and batchDesc like CONCAT('%',#{batchDesc},'%')
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="payCompanyId != null and payCompanyId != ''">
+            and companyId = #{payCompanyId}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and contentName like CONCAT('%',#{contentName},'%')
+        </if>
+        and userId in (
+        select userId from (
+        select userId,sum(amount) amount from qb_usercommission
+        where 1=1
+        <if test="customName != null and customName != ''">
+            and customName like CONCAT('%',#{customName},'%')
+        </if>
+        <if test="tradeStartTime != null and tradeStartTime != ''">
+            and date(paymentTime) &gt;= #{tradeStartTime}
+        </if>
+        <if test="tradeEndTime != null and tradeEndTime != ''">
+            and date(paymentTime) &lt;= #{tradeEndTime}
+        </if>
+        <if test="payType != null and payType != ''">
+            and payType = #{payType}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and batchName like CONCAT('%',#{batchName},'%')
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and batchDesc like CONCAT('%',#{batchDesc},'%')
+        </if>
+        <if test="payCompanyId != null and payCompanyId != ''">
+            and companyId = #{payCompanyId}
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and contentName like CONCAT('%',#{contentName},'%')
+        </if>
+        group by userId,originalId having
+        <choose>
+            <when test="payAmountLevel ==1 ">
+                amount &gt;= #{calculationLimit}
+            </when>
+            <when test="payAmountLevel =='-1' ">
+                amount &lt; #{calculationLimit}
+            </when>
+            <otherwise>
+                amount >=0
+            </otherwise>
+        </choose>
+        ) a)
+        order by updatetime desc
+        <if test="pageSize != null and pageSize != ''">
+            <if test="page != null and page != ''">
+                limit ${page},${pageSize}
+            </if>
+        </if>
+    </select>
+<!--
+    <select id="getSumAmountOfMonthByCertId" resultType="java.lang.String">
+        select IFNULL((SUM(truncate(quc.amount, 2))), 0) amount
+        from qb_usercommission quc
+        where quc.certId = #{certId}
+              and quc.updatetime &gt; date_add(curdate(), interval -day(curdate()) + 1 day)
+              and quc.updatetime &lt; date_add(curdate() - day(curdate()) + 1, interval 1 month)
+              and quc.`status` = 1
+              and quc.originalId = #{originalId}
+              and quc.companyId = #{companyId}
+    </select>
+
+    <select id="getSumAmountOfDayByCertId" resultType="java.lang.String">
+        select IFNULL((SUM(truncate(quc.amount, 2))), 0) amount
+        from qb_usercommission quc
+        where quc.certId = #{certId}
+              and quc.updatetime &gt;= DATE_SUB(curdate(),INTERVAL 0 DAY)
+              and quc.updatetime &lt; DATE_SUB(curdate(),INTERVAL -1 DAY)
+              and quc.`status` = 1
+              and quc.originalId = #{originalId}
+              and quc.companyId = #{companyId}
+    </select>
+  -->
+    <select id="getCommissionsUserNameByCertId" resultType="java.lang.String">
+        select DISTINCT t.userName
+        from qb_usercommission t
+        where t.certId = #{certId} and t.status = 1
+    </select>
+    <select id="listCommissionByCustomKeys" resultType="com.jrmf.domain.UserCommission">
+        SELECT DISTINCT m.id ,
+        case m.bankName
+        when 'alipay' then '支付宝'
+        when 'wx' then '微信'
+        when 'wxpack' then '微信'
+        else m.bankName end as bankName,
+        m.createtime,
+        m.userId,
+        m.amount,
+        m.sourceAmount,
+        m.phoneNo,
+        m.reviewName,
+        m.sumFee,
+        m.supplementFee,
+        m.supplementAmount,
+        m.calculationRates,
+        m.originalId,
+        m.merchantId,
+        m.companyId,
+        m.userType,
+        m.accountDate,
+        m.receiptNo,
+        m.statusDesc,
+        m.status,
+        m.batchId,
+        m.aygOrderNo,
+        m.orderNo,
+        m.updatetime,
+        m.operatorName,
+        m.remark,
+        m.sourceRemark,
+        m.feeRuleType,
+        m.serviceRatesFree,
+        m.profiltFree,
+        m.serviceRates,
+        m.profilt,
+        m.payType,
+        m.account,
+        m.invoiceStatus,
+        m.invoiceBatchNo,
+        m.menuId,
+        m.contentName,
+        m.paymentTime,
+        m.userNo,
+        m.companyName,
+        m.certId,
+        m.documentType,
+        m.userName,
+        m.batchFileName,
+        m.description,
+        m.batchName,
+        m.batchDesc,
+        m.bankNo,
+        m.repeatcheck,
+        m.channelHandlingFee,
+        m.channelOrderNo,
+        m.customOrderNo,
+        m.serviceType,
+        m.regType,
+        m.notifyUrl,
+        m.calculateType,
+        m.businessType,
+        m.isSplit,
+        m.isPulbic,
+        m.isTask,
+        m.businessManager,
+        m.businessPlatform,
+        m.businessChannel,
+        m.customLabel,
+        m.pathNo,
+        m.subAcctNo,
+        m.rateInterval,
+        m.realCompanyId,
+        m.payUserName,
+        m.businessChannelKey,
+        m.invoiceSerialNo,
+        m.invoiceSerialNo2,
+        m.individualTax,
+        m.individualBackTax,
+        m.invoiceStatus2,
+        m.taxRate,
+        cc.companyName customName
+        FROM
+        qb_usercommission m
+        left join channel_custom cc on cc.customkey = m.originalId
+        WHERE status != 4 and
+        m.originalId IN
+        <foreach item="originalId" index="index" collection="originalIds" open="(" separator="," close=")">
+            #{originalId}
+        </foreach>
+        <if test="userName != null and userName != ''">
+            and m.userName = #{userName}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and m.batchName like concat('%',#{batchName},'%')
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            and FIND_IN_SET(m.menuId, #{menuIds})
+        </if>
+        <if test="certId != null and certId != ''">
+            and m.certId = #{certId}
+        </if>
+        <if test="createTimeStart != null and createTimeStart != ''">
+            and date(m.createtime) &gt;= #{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            and date(m.createtime) &lt;= #{createTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and m.batchDesc like concat('%',#{batchDesc},'%')
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and m.contentName like concat('%',#{contentName},'%')
+        </if>
+        <if test="account != null and account != ''">
+            and m.account = #{account}
+        </if>
+        <if test="payType != null and payType != ''">
+            and m.payType = #{payType}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and m.companyId = #{companyId}
+        </if>
+        <if test="customName != null and customName != ''">
+            and m.customName like concat('%',#{customName},'%')
+        </if>
+        <if test="status != null and status != ''">
+            and m.status = #{status}
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            and m.amount &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and m.amount &lt;= #{amountEnd}
+        </if>
+        <if test="operatorName != null and operatorName != ''">
+            and (m.operatorName = #{operatorName} or m.payUserName=#{operatorName})
+        </if>
+        ORDER BY m.createtime DESC
+        <if test="start !=null and limit !=null">
+            limit #{start},#{limit}
+        </if>
+    </select>
+
+    <select id="getSuccessUserCommission" resultType="com.jrmf.domain.UserCommission" parameterType="Map">
+      select * FROM qb_usercommission
+        where status = 1
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="originalId != null and originalId != ''">
+            and originalId = #{originalId}
+        </if>
+       <if test="tradeStartTime != null and tradeStartTime != ''">
+            and date(createtime) &gt;= #{tradeStartTime}
+        </if>
+        <if test="tradeEndTime != null and tradeEndTime != ''">
+            and date(createtime) &lt;= #{tradeEndTime}
+        </if>
+        order by id asc
+      </select>
+
+    <select id="getPayingCount" resultType="java.lang.Integer">
+       SELECT
+            COUNT( * )
+        FROM
+            qb_usercommission qc
+            LEFT JOIN qb_channelhistory qch ON qc.batchId = qch.id
+        WHERE
+            qc.originalId = #{customKey}
+            AND qc.companyId = #{companyId}
+            AND qc.payType = #{payType}
+            AND ( qc.`status` IN ( 0, 3 ) OR ( qch.transfertype = 2 AND qch.`status` = 3 ) )
+    </select>
+
+
+    <select id="getSuccessAmount" resultType="java.lang.String" parameterType="Map">
+        select cast(COALESCE(SUM(amount),0) as decimal(15,2)) FROM qb_usercommission
+        where status = 1 and id &lt;= #{commissionId} and certId = #{certId}
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="originalId != null and originalId != ''">
+            and originalId = #{originalId}
+        </if>
+        <if test="tradeStartTime != null and tradeStartTime != ''">
+            and date(createtime) &gt;= #{tradeStartTime}
+        </if>
+        <if test="tradeEndTime != null and tradeEndTime != ''">
+            and date(createtime) &lt;= #{tradeEndTime}
+        </if>
+    </select>
+
+    <update id="updateUserCommissionRate" parameterType="com.jrmf.domain.UserCommission">
+        update qb_userCommission
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="rateInterval !=null and rateInterval !=''">
+                rateInterval = #{rateInterval},
+            </if>
+            <if test="calculationRates !=null and calculationRates !=''">
+                calculationRates = #{calculationRates},
+            </if>
+            updatetime = now(),
+        </trim>
+        where id = #{id}
+    </update>
+
+
+    <select id="getSumAmountOfDayByCertId" resultType="java.lang.String">
+        SELECT
+        cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) )
+        FROM
+        qb_usercommission
+        WHERE
+        <if test="originalId !=null and originalId !=''">
+            originalId = #{originalId} AND
+        </if>
+        companyId = #{companyId}
+        AND `status` != 2
+        AND certId = #{certId}
+        AND to_days( createtime ) = to_days( now( ) )
+    </select>
+
+    <select id="getSumAmountOfMonthByCertId" resultType="java.lang.String">
+        SELECT
+            cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) )
+        FROM
+            qb_usercommission
+        WHERE
+            <if test="originalId !=null and originalId !=''">
+                originalId = #{originalId} AND
+            </if>
+            companyId = #{companyId}
+            AND `status` != 2
+            AND certId = #{certId}
+            AND DATE_FORMAT( createtime, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+    </select>
+
+    <select id="getSumAmountOfQuarterByCertId" resultType="java.lang.String">
+        SELECT
+        cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) )
+        FROM
+        qb_usercommission
+        WHERE
+        <if test="originalId !=null and originalId !=''">
+            originalId = #{originalId} AND
+        </if>
+        companyId = #{companyId}
+        AND `status` != 2
+        AND certId = #{certId}
+        AND QUARTER ( createtime ) = QUARTER ( now( ) )
+    </select>
+
+    <select id="listCommissionByCustomKeysCount" resultType="int">
+        SELECT
+            count(1)
+        FROM
+            qb_usercommission m
+        left join channel_custom cc on cc.customkey = m.originalId
+        WHERE status != 4
+        <if test="originalId != null and originalId != ''">
+            and FIND_IN_SET(m.originalId, #{originalId})
+        </if>
+        <if test="userName != null and userName != ''">
+            and m.userName = #{userName}
+        </if>
+        <if test="batchName != null and batchName != ''">
+            and m.batchName like concat('%',#{batchName},'%')
+        </if>
+        <if test="menuIds != null and menuIds != ''">
+            and FIND_IN_SET(m.menuId, #{menuIds})
+        </if>
+        <if test="certId != null and certId != ''">
+            and m.certId = #{certId}
+        </if>
+        <if test="createTimeStart != null and createTimeStart != ''">
+            and date(m.createtime) &gt;= #{createTimeStart}
+        </if>
+        <if test="createTimeEnd != null and createTimeEnd != ''">
+            and date(m.createtime) &lt;= #{createTimeEnd}
+        </if>
+        <if test="batchDesc != null and batchDesc != ''">
+            and m.batchDesc like concat('%',#{batchDesc},'%')
+        </if>
+        <if test="contentName != null and contentName != ''">
+            and m.contentName like concat('%',#{contentName},'%')
+        </if>
+        <if test="account != null and account != ''">
+            and m.account = #{account}
+        </if>
+        <if test="payType != null and payType != ''">
+            and m.payType = #{payType}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and m.companyId = #{companyId}
+        </if>
+        <if test="customName != null and customName != ''">
+            and m.customName like concat('%',#{customName},'%')
+        </if>
+        <if test="status != null and status != ''">
+            and m.status = #{status}
+        </if>
+        <if test="amountStart != null and amountStart != ''">
+            and m.amount &gt;= #{amountStart}
+        </if>
+        <if test="amountEnd != null and amountEnd != ''">
+            and m.amount &lt;= #{amountEnd}
+        </if>
+        <if test="operatorName != null and operatorName != ''">
+            and (m.operatorName = #{operatorName} or m.payUserName=#{operatorName})
+        </if>
+    </select>
+
+   	<!-- 获取商户直客交易汇总 -->
+	 <select id="summaryInfoByMerchant" parameterType="map" resultType="String">
+	 select cast(sum(amount) as DECIMAL(16,2)) amount from qb_usercommission
+	 where `status`=1 and businessPlatform=#{businessPlatform} and (businessChannelKey is null
+	 or businessChannelKey=''
+	 or originalId in (select customkey from channel_custom where businessChannel='I6GM5SiiC1vHCD3O4Zwa')
+	 )
+     <if test="startTime!=null and startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{startTime}
+     </if>
+     <if test="endTime!=null and endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{endTime}
+     </if>
+	 </select>
+
+	<!-- 获取渠道交易汇总 -->
+	 <select id="summaryInfoByAgent" parameterType="map" resultType="String">
+	 select cast(sum(amount) as DECIMAL(16,2)) amount from qb_usercommission
+	 where `status`=1 and businessPlatform=#{businessPlatform} and (businessChannelKey is not null and businessChannelKey!=''
+	 and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+     <if test="startTime!=null and startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{startTime}
+     </if>
+     <if test="endTime!=null and endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{endTime}
+     </if>
+	 </select>
+
+	 <!-- 按照商户分组统计交易汇总 -->
+	 <select id="summaryInfoGroupMerchant" parameterType="com.jrmf.domain.Page" resultType="map">
+	 select qutemp.*,cc.companyName,#{params.startTime} startTime,#{params.endTime} endTime from (select cast(sum(amount)  as DECIMAL(16,2)) amount,originalId from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform} and (businessChannelKey is null or businessChannelKey=''
+	 or originalId in (select customkey from channel_custom where businessChannel='I6GM5SiiC1vHCD3O4Zwa'))
+     <if test="params.startTime!=null and params.startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{params.startTime}
+     </if>
+     <if test="params.endTime!=null and params.endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{params.endTime}
+     </if>
+	 GROUP BY originalId) qutemp left join channel_custom cc on qutemp.originalId=cc.customkey
+     order by qutemp.amount desc
+     <if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+     </if>
+	 </select>
+
+	 <!-- 按照商户分组统计交易汇总不分页 -->
+	 <select id="summaryInfoGroupMerchantNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+	 select qutemp.*,cc.companyName,#{params.startTime} startTime,#{params.endTime} endTime from (select cast(sum(amount)  as DECIMAL(16,2)) amount,originalId from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform} and (businessChannelKey is null or businessChannelKey=''
+	 or originalId in (select customkey from channel_custom where businessChannel='I6GM5SiiC1vHCD3O4Zwa'))
+     <if test="params.startTime!=null and params.startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{params.startTime}
+     </if>
+     <if test="params.endTime!=null and params.endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{params.endTime}
+     </if>
+	 GROUP BY originalId) qutemp left join channel_custom cc on qutemp.originalId=cc.customkey
+	 order by qutemp.amount desc
+	 </select>
+
+	 <!-- 按照商户分组统计交易汇总总条数 -->
+	 <select id="summaryInfoGroupMerchantCount" parameterType="com.jrmf.domain.Page" resultType="int">
+	 select count(1) from (select qutemp.*,cc.companyName from (select cast(sum(amount) as DECIMAL(16,2)) amount,originalId from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform} and (businessChannelKey is null or businessChannelKey=''
+	 or businessChannelKey = 'I6GM5SiiC1vHCD3O4Zwa')
+     <if test="params.startTime!=null and params.startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{params.startTime}
+     </if>
+     <if test="params.endTime!=null and params.endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{params.endTime}
+     </if>
+	 GROUP BY originalId) qutemp left join channel_custom cc on qutemp.originalId=cc.customkey
+	 order by qutemp.amount desc
+	 )temp
+	 </select>
+
+	 <!-- 按照代理分组统计交易汇总 -->
+	 <select id="summaryInfoGroupAgent" parameterType="com.jrmf.domain.Page" resultType="map">
+	 select qutemp.*,cc.companyName,#{params.startTime} startTime,#{params.endTime} endTime from (select cast(sum(amount) as DECIMAL(16,2)) amount,businessChannelKey from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform} and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+     <if test="params.startTime!=null and params.startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{params.startTime}
+     </if>
+     <if test="params.endTime!=null and params.endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{params.endTime}
+     </if>
+	 GROUP BY businessChannelKey) qutemp left join channel_custom cc on qutemp.businessChannelKey=cc.customkey
+	 order by qutemp.amount desc
+	 <if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+    </if>
+	 </select>
+
+	 <!-- 按照代理分组统计交易汇总不分页 -->
+	 <select id="summaryInfoGroupAgentNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+	 select qutemp.*,cc.companyName,#{params.startTime} startTime,#{params.endTime} endTime from (select cast(sum(amount) as DECIMAL(16,2)) amount,businessChannelKey from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform} and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+     <if test="params.startTime!=null and params.startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{params.startTime}
+     </if>
+     <if test="params.endTime!=null and params.endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{params.endTime}
+     </if>
+	 GROUP BY businessChannelKey) qutemp left join channel_custom cc on qutemp.businessChannelKey=cc.customkey
+	 order by qutemp.amount desc
+	 </select>
+
+	 <!-- 按照代理分组统计交易汇总总条数 -->
+	 <select id="summaryInfoGroupAgentCount" parameterType="com.jrmf.domain.Page" resultType="int">
+	 select count(1) from (select qutemp.*,cc.companyName from (select cast(sum(amount) as DECIMAL(16,2)) amount,businessChannelKey from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform} and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+     <if test="params.startTime!=null and params.startTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s') &gt;=#{params.startTime}
+     </if>
+     <if test="params.endTime!=null and params.endTime!=''">
+     and str_to_date(createtime,'%Y-%m-%d %H:%i:%s')&lt;=#{params.endTime}
+     </if>
+	 GROUP BY businessChannelKey) qutemp left join channel_custom cc on qutemp.businessChannelKey=cc.customkey
+	 order by qutemp.amount desc
+	 )temp
+	 </select>
+
+    <!--<resultMap id="mounthSumAmonutGroup"  type="java.util.HashMap">-->
+        <!--<result property="key" column="certId"/>-->
+        <!--<result property="value" column="mounthSumAmonut"/>-->
+    <!--</resultMap>-->
+
+    <select id="getCommissionMounthSumAmonut" resultType="java.util.Map">
+        SELECT
+        certId,
+        cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) mounthSumAmonut
+        FROM
+        qb_usercommission
+        WHERE 1=1
+        <if test="originalId !=null and originalId !=''">
+            and originalId = #{originalId}
+        </if>
+        AND companyId = #{companyId}
+        AND `status` != 2
+        AND certId IN ( SELECT DISTINCT t.idCard FROM qb_commissiontemporary t WHERE batchId = #{batchId}
+        <if test="status !=null and status !=''">
+            and t.status = #{status}
+        </if>
+        )
+        AND DATE_FORMAT( createtime, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+        GROUP BY
+        certId;
+
+    </select>
+
+
+    <select id="getCommissionQuarterSumAmonut" resultType="java.util.Map">
+        SELECT
+        certId,
+        cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) mounthSumAmonut
+        FROM
+        qb_usercommission
+        WHERE 1=1
+        <if test="originalId !=null and originalId !=''">
+            and originalId = #{originalId}
+        </if>
+        AND companyId = #{companyId}
+        AND `status` != 2
+        AND certId IN ( SELECT t.idCard FROM qb_commissiontemporary t WHERE batchId = #{batchId}
+        <if test="status !=null and status !=''">
+            and t.status = #{status}
+        </if>
+        )
+        AND QUARTER ( createtime ) = QUARTER ( now( ) )
+        GROUP BY
+        certId;
+
+    </select>
+
+
+    <select id="getCommissionDaySumAmonut" resultType="java.util.Map">
+        SELECT
+        certId,
+        cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) mounthSumAmonut
+        FROM
+        qb_usercommission
+        WHERE 1=1
+        <if test="originalId !=null and originalId !=''">
+            and originalId = #{originalId}
+        </if>
+        AND companyId = #{companyId}
+        AND `status` != 2
+        AND certId IN ( SELECT t.idCard FROM qb_commissiontemporary t WHERE batchId = #{batchId}
+        <if test="status !=null and status !=''">
+            and t.status = #{status}
+        </if>
+        )
+        AND to_days( createtime ) = to_days( now( ) )
+        GROUP BY
+        certId;
+
+    </select>
+
+     <!-- 清结算直客/渠道按月份统计 -->
+	 <select id="summaryInfoByMerchantMonth" parameterType="com.jrmf.domain.Page" resultType="map">
+		select * from (
+		select '直客' belongName,`month`,
+		cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+		cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+		cast(sum(amount) as DECIMAL(16,2)) totalAmount
+		from (
+			select qu.*,circ.gearLabel
+			 from (
+				 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+				 from qb_usercommission
+				 where `status`=1
+				 and businessPlatform=#{params.businessPlatform}
+				 and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+				<if test="params.startMonth!=null and params.startMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+				</if>
+				<if test="params.endMonth!=null and params.endMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+				</if>
+				 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+			 ) qu
+			left join (
+			select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+			from custom_company_rate_conf ccrc
+			left join company_rate_conf crc on ccrc.rateConfId = crc.id
+			left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+			) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId
+			and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) hd GROUP BY `month`
+		UNION all
+		select '渠道' belongName,`month`,
+		cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+		cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+		cast(sum(amount) as DECIMAL(16,2)) totalAmount
+		from (
+			select qu.*,circ.gearLabel
+			 from (
+				 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+				 from qb_usercommission
+				 where `status`=1
+				 and businessPlatform=#{params.businessPlatform}
+				 and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+				<if test="params.startMonth!=null and params.startMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+				</if>
+				<if test="params.endMonth!=null and params.endMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+				</if>
+				 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+			 ) qu
+			left join (
+			select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+			from custom_company_rate_conf ccrc
+			left join company_rate_conf crc on ccrc.rateConfId = crc.id
+			left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+			) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) hd GROUP BY `month`
+		) temp ORDER BY totalAmount desc
+	 <if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+     </if>
+	 </select>
+
+	 <!-- 清结算直客/渠道按月份统计 -->
+	 <select id="summaryInfoByMerchantMonthNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+		select * from (
+		select '直客' belongName,`month`,
+		cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+		cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+		cast(sum(amount) as DECIMAL(16,2)) totalAmount
+		from (
+			select qu.*,circ.gearLabel
+			 from (
+				 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+				 from qb_usercommission
+				 where `status`=1
+				 and businessPlatform=#{params.businessPlatform}
+				 and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+				<if test="params.startMonth!=null and params.startMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+				</if>
+				<if test="params.endMonth!=null and params.endMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+				</if>
+				 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+			 ) qu
+			left join (
+			select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+			from custom_company_rate_conf ccrc
+			left join company_rate_conf crc on ccrc.rateConfId = crc.id
+			left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+			) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) hd GROUP BY `month`
+		UNION all
+		select '渠道' belongName,`month`,
+		cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+		cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+		cast(sum(amount) as DECIMAL(16,2)) totalAmount
+		from (
+			select qu.*,circ.gearLabel
+			 from (
+				 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+				 from qb_usercommission
+				 where `status`=1
+				 and businessPlatform=#{params.businessPlatform}
+				 and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+				 <if test="params.startMonth!=null and params.startMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+				 </if>
+				 <if test="params.endMonth!=null and params.endMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+				 </if>
+				 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+			 ) qu
+			left join (
+			select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+			from custom_company_rate_conf ccrc
+			left join company_rate_conf crc on ccrc.rateConfId = crc.id
+			left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+			) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) hd GROUP BY `month`
+		) temp ORDER BY totalAmount desc
+	 </select>
+
+	 <!-- 清结算直客/渠道按月份统计 -->
+	 <select id="summaryInfoByMerchantMonthCount" parameterType="com.jrmf.domain.Page" resultType="int">
+	 select count(1) from (
+	  select * from (
+		select '直客' belongName,`month`,
+		cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+		cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+		cast(sum(amount) as DECIMAL(16,2)) totalAmount
+		from (
+			select qu.*,circ.gearLabel
+			 from (
+				 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+				 from qb_usercommission
+				 where `status`=1
+				 and businessPlatform=#{params.businessPlatform}
+				 and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+				 <if test="params.startMonth!=null and params.startMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+				 </if>
+				 <if test="params.endMonth!=null and params.endMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+				 </if>
+				 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+			 ) qu
+			left join (
+			select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+			from custom_company_rate_conf ccrc
+			left join company_rate_conf crc on ccrc.rateConfId = crc.id
+			left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+			) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) hd GROUP BY `month`
+		UNION all
+		select '渠道' belongName,`month`,
+		cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+		cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+		cast(sum(amount) as DECIMAL(16,2)) totalAmount
+		from (
+			select qu.*,circ.gearLabel
+			 from (
+				 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+				 from qb_usercommission
+				 where `status`=1
+				 and businessPlatform=#{params.businessPlatform}
+				 and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+				 <if test="params.startMonth!=null and params.startMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+				 </if>
+				 <if test="params.endMonth!=null and params.endMonth!=''">
+				 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+				 </if>
+				 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+			 ) qu
+			left join (
+			select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+			from custom_company_rate_conf ccrc
+			left join company_rate_conf crc on ccrc.rateConfId = crc.id
+			left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+			) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+		) hd GROUP BY `month`
+		) temp ORDER BY totalAmount desc
+	 )tempa
+	 </select>
+
+	 <!-- 获取渠道交易汇总 -->
+	 <select id="summaryInfoByMonth" parameterType="com.jrmf.domain.Page" resultType="String">
+	 select cast(sum(amount) as DECIMAL(16,2)) amount from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform}
+	 <if test="params.startMonth!=null and params.startMonth!=''">
+	 and DATE_FORMAT(createTime,'%Y-%m')  &gt;=#{params.startMonth}
+	 </if>
+	 <if test="params.endMonth!=null and params.endMonth!=''">
+	 and DATE_FORMAT(createTime,'%Y-%m')  &lt;=#{params.endMonth}
+	 </if>
+	 </select>
+
+	 <select id="summaryInfoGroupMerchantMonth" parameterType="com.jrmf.domain.Page" resultType="map">
+		select md.*,
+		cc.companyName merchantName,cg.companyName agentName
+		from (
+			select `month`,
+			originalId,
+			cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+			cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+			cast(sum(amount) as DECIMAL(16,2)) totalAmount
+			from (
+						select qu.*,circ.gearLabel
+						 from (
+								 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+								 from qb_usercommission
+								 where `status`=1
+								 and businessPlatform=#{params.businessPlatform}
+								 and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+								 <if test="params.month!=null and params.month!=''">
+							     and DATE_FORMAT(createTime,'%Y-%m') = #{params.month}
+							     </if>
+								 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+						 ) qu
+						left join (
+						select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+						from custom_company_rate_conf ccrc
+						left join company_rate_conf crc on ccrc.rateConfId = crc.id
+						left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+						) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+			) hd GROUP BY `month`,originalId
+		) md
+		 left join channel_custom cc on md.originalId = cc.customkey
+		 left join channel_custom cg on cc.businessChannel = cg.customkey
+		 order by md.totalAmount desc
+		 <if test="pageSize !=null and offset !=null">
+	        limit #{offset},#{pageSize}
+	     </if>
+	 </select>
+
+	 <select id="summaryInfoGroupAgentMonth" parameterType="com.jrmf.domain.Page" resultType="map">
+		select month,cc.businessChannel businessChannelKey,
+		cg.companyName agentName,
+		cast(sum(smallAmount) as DECIMAL(16,2)) smallAmount,
+		cast(sum(bigAmount) as DECIMAL(16,2)) bigAmount,
+		cast(sum(totalAmount) as DECIMAL(16,2)) totalAmount
+		from (
+			select `month`,
+			originalId,
+			cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+			cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+			cast(sum(amount) as DECIMAL(16,2)) totalAmount
+			from (
+				select qu.*,circ.gearLabel
+				 from (
+						 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+						 from qb_usercommission
+						 where `status`=1
+						 and businessPlatform=#{params.businessPlatform}
+						 and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+						 <if test="params.month!=null and params.month!=''">
+						 and DATE_FORMAT(createTime,'%Y-%m') = #{params.month}
+					     </if>
+						 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+				 ) qu
+				left join (
+				select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+				from custom_company_rate_conf ccrc
+				left join company_rate_conf crc on ccrc.rateConfId = crc.id
+				left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+				) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+			) hd GROUP BY `month`,originalId
+		) md
+		 left join channel_custom cc on md.originalId = cc.customkey
+		 left join channel_custom cg on cc.businessChannel = cg.customkey
+		 group by cc.businessChannel,md.month
+		 order by totalAmount desc
+		 <if test="pageSize !=null and offset !=null">
+	        limit #{offset},#{pageSize}
+	     </if>
+	 </select>
+
+	 <select id="summaryInfoGroupAgentMonthCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		 select count(1) from (
+			select month,cc.businessChannel businessChannelKey,
+			cg.companyName agentName,
+			cast(sum(smallAmount) as DECIMAL(16,2)) smallAmount,
+			cast(sum(bigAmount) as DECIMAL(16,2)) bigAmount,
+			cast(sum(totalAmount) as DECIMAL(16,2)) totalAmount
+			from (
+				select `month`,
+				originalId,
+				cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+				cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+				cast(sum(amount) as DECIMAL(16,2)) totalAmount
+				from (
+					select qu.*,circ.gearLabel
+					 from (
+							 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+							 from qb_usercommission
+							 where `status`=1
+							 and businessPlatform=#{params.businessPlatform}
+							 and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+							 <if test="params.month!=null and params.month!=''">
+							 and DATE_FORMAT(createTime,'%Y-%m') = #{params.month}
+						     </if>
+							 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+					 ) qu
+					left join (
+					select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+					from custom_company_rate_conf ccrc
+					left join company_rate_conf crc on ccrc.rateConfId = crc.id
+					left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+					) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+				) hd GROUP BY `month`,originalId
+			) md
+			 left join channel_custom cc on md.originalId = cc.customkey
+			 left join channel_custom cg on cc.businessChannel = cg.customkey
+			 group by cc.businessChannel,md.month
+			 order by totalAmount desc
+		 )temp
+	 </select>
+
+	 <select id="summaryInfoGroupMerchantMonthCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		 select count(1) from (
+			select md.*,
+			cc.companyName merchantName,cg.companyName agentName
+			from (
+				select `month`,
+				originalId,
+				cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+				cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+				cast(sum(amount) as DECIMAL(16,2)) totalAmount
+				from (
+							select qu.*,circ.gearLabel
+							 from (
+									 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+									 from qb_usercommission
+									 where `status`=1
+									 and businessPlatform=#{params.businessPlatform}
+									 and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+									 <if test="params.month!=null and params.month!=''">
+								     and DATE_FORMAT(createTime,'%Y-%m') = #{params.month}
+								     </if>
+									 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+							 ) qu
+							left join (
+							select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+							from custom_company_rate_conf ccrc
+							left join company_rate_conf crc on ccrc.rateConfId = crc.id
+							left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+							) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+				) hd GROUP BY `month`,originalId
+			) md
+			 left join channel_custom cc on md.originalId = cc.customkey
+			 left join channel_custom cg on cc.businessChannel = cg.customkey
+			 order by md.totalAmount desc
+		 )temp
+	 </select>
+
+	 <!-- 获取渠道交易汇总 -->
+	 <select id="summaryInfoByMonthDetail" parameterType="com.jrmf.domain.Page" resultType="String">
+	 select cast(sum(amount) as DECIMAL(16,2)) amount from qb_usercommission
+	 where `status`=1 and businessPlatform=#{params.businessPlatform}
+ 	 <if test="params.dataType!=null and params.dataType!=''">
+		<if test="params.dataType==1">
+			and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+		</if>
+		<if test="params.dataType==2">
+			and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+		</if>
+	 </if>
+	 <if test="params.month!=null and params.month!=''">
+	 and DATE_FORMAT(createTime,'%Y-%m') =#{params.month}
+	 </if>
+	 </select>
+
+	 <select id="summaryInfoGroupMerchantMonthNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+		select md.*,
+		cc.companyName merchantName,cg.companyName agentName
+		from (
+			select `month`,
+			originalId,
+			cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+			cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+			cast(sum(amount) as DECIMAL(16,2)) totalAmount
+			from (
+						select qu.*,circ.gearLabel
+						 from (
+								 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+								 from qb_usercommission
+								 where `status`=1
+								 and businessPlatform=#{params.businessPlatform}
+								 and (businessChannelKey is null or businessChannelKey='' or businessChannelKey='I6GM5SiiC1vHCD3O4Zwa')
+								 <if test="params.month!=null and params.month!=''">
+							     and DATE_FORMAT(createTime,'%Y-%m') = #{params.month}
+							     </if>
+								 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+						 ) qu
+						left join (
+						select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+						from custom_company_rate_conf ccrc
+						left join company_rate_conf crc on ccrc.rateConfId = crc.id
+						left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+						) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+			) hd GROUP BY `month`,originalId
+		) md
+		 left join channel_custom cc on md.originalId = cc.customkey
+		 left join channel_custom cg on cc.businessChannel = cg.customkey
+		 order by md.totalAmount desc
+	 </select>
+
+	 <select id="summaryInfoGroupAgentMonthNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+		select month,cc.businessChannel businessChannelKey,
+		cg.companyName agentName,
+		cast(sum(smallAmount) as DECIMAL(16,2)) smallAmount,
+		cast(sum(bigAmount) as DECIMAL(16,2)) bigAmount,
+		cast(sum(totalAmount) as DECIMAL(16,2)) totalAmount
+		from (
+			select `month`,
+			originalId,
+			cast(sum(if(gearLabel=1,amount,0)) as DECIMAL(16,2)) smallAmount,
+			cast(sum(if(gearLabel=2,amount,0)) as DECIMAL(16,2)) bigAmount,
+			cast(sum(amount) as DECIMAL(16,2)) totalAmount
+			from (
+				select qu.*,circ.gearLabel
+				 from (
+						 select DATE_FORMAT(createtime,'%Y-%m') month,originalId,companyId,certId,cast(sum(amount) as DECIMAL(16,2)) amount
+						 from qb_usercommission
+						 where `status`=1
+						 and businessPlatform=#{params.businessPlatform}
+						 and (businessChannelKey is not null and businessChannelKey!='' and businessChannelKey!='I6GM5SiiC1vHCD3O4Zwa')
+						 <if test="params.month!=null and params.month!=''">
+						 and DATE_FORMAT(createTime,'%Y-%m') = #{params.month}
+					     </if>
+						 GROUP BY certId,originalId,companyId,DATE_FORMAT(createtime,'%Y-%m')
+				 ) qu
+				left join (
+				select ccrc.customkey,crc.companyId,ccrc.customRate,crc.amountStart,crc.operator,crc.amountEnd,cnrc.gearLabel
+				from custom_company_rate_conf ccrc
+				left join company_rate_conf crc on ccrc.rateConfId = crc.id
+				left join company_netfile_rate_conf cnrc on cnrc.id = crc.netfileId
+				) circ on qu.originalId = circ.customkey and qu.companyId = circ.companyId and qu.amount &gt; circ.amountStart and qu.amount &lt;= circ.amountEnd
+			) hd GROUP BY `month`,originalId
+		) md
+		 left join channel_custom cc on md.originalId = cc.customkey
+		 left join channel_custom cg on cc.businessChannel = cg.customkey
+		 group by cc.businessChannel,md.month
+		 order by totalAmount desc
+	 </select>
+
+   <select id="getInvoiceCustomInfos" parameterType="com.jrmf.domain.CommissionInvoice" resultType="map">
+      select SUBSTR(createtime,1,7) month, originalId,customName,companyId,companyName,
+             GROUP_CONCAT(invoiceStatus2) invoiceStatus2
+      from qb_usercommission
+      where status = 1
+      <if test="startMonth != null and startMonth != ''">
+          and createtime &gt;= #{startMonth}
+      </if>
+      <if test="endMonth and endMonth != ''">
+          and createtime &lt;= #{endMonth}
+      </if>
+      <if test="originalId != null and originalId != ''">
+          and find_in_set(originalId,#{originalId})
+      </if>
+      <if test="customName != null and customName != ''">
+          and customName = #{customName}
+      </if>
+      <if test="companyName != null and companyName != ''">
+          and companyName = #{companyName}
+      </if>
+      <if test="companyId != null and companyId != ''">
+          and find_in_set(companyId,#{companyId})
+      </if>
+      GROUP BY  month desc,originalId,companyId
+      HAVING
+      <if test="invoiceStatus == null">
+          find_in_set(0,invoiceStatus2) or find_in_set(1,invoiceStatus2) or find_in_set(3,invoiceStatus2)
+      </if>
+      <if test="invoiceStatus != null and invoiceStatus == 0">
+          (find_in_set(0,invoiceStatus2) or find_in_set(3,invoiceStatus2)) and (!find_in_set(1,invoiceStatus2) and !find_in_set(2,invoiceStatus2))
+      </if>
+      <if test="invoiceStatus != null and invoiceStatus == 1">
+          find_in_set(1,invoiceStatus2) and (!find_in_set(0,invoiceStatus2) and !find_in_set(3,invoiceStatus2))
+      </if>
+      <if test="invoiceStatus != null and invoiceStatus == 4">
+          (find_in_set(0,invoiceStatus2) or find_in_set(3,invoiceStatus2)) and (find_in_set(1,invoiceStatus2) or find_in_set(2,invoiceStatus2))
+      </if>
+      <if test="invoiceStatus != null and invoiceStatus == 5">
+          find_in_set(0,invoiceStatus2) or find_in_set(3,invoiceStatus2)
+      </if>
+      ORDER BY month desc,originalId,companyId
+   </select>
+
+    <select id="getUserCommissionInvoiceRecord" parameterType="map"
+      resultType="com.jrmf.domain.UserCommission">
+        SELECT id,userId,userName,certId,originalId,companyId,createtime,amount,sumFee,invoiceStatus2,
+               operatorName,calculationRates,individualTax,individualBackTax
+        from qb_usercommission
+        WHERE status = 1
+        <if test="invoiceSerialNo != null and invoiceSerialNo != ''">
+            and invoiceSerialNo = #{invoiceSerialNo}
+        </if>
+        <if test="invoiceSerialNo2 != null and invoiceSerialNo2 != ''">
+            and invoiceSerialNo2 = #{invoiceSerialNo2}
+        </if>
+        <if test="originalId != null and originalId != ''">
+            and originalId = #{originalId}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="invoiceStatus2 != null and invoiceStatus2 != ''">
+            and find_in_set(invoiceStatus2,#{invoiceStatus2})
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and createtime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and createtime &lt;= #{endTime}
+        </if>
+        ORDER BY userId,createtime;
+    </select>
+
+    <update id="updateCommissionInvoiceInfo" parameterType="map">
+        update qb_usercommission
+        <trim prefix="set" suffixOverrides=",">
+            <if test="invoiceSerialNo != null and invoiceSerialNo != ''">
+                invoiceSerialNo = #{invoiceSerialNo},
+            </if>
+            <if test="invoiceSerialNo2 != null and invoiceSerialNo2 != ''">
+                invoiceSerialNo2 = #{invoiceSerialNo2},
+            </if>
+            <if test="individualTax != null and individualTax != ''">
+                individualTax = #{individualTax},
+            </if>
+            <if test="individualBackTax != null and individualBackTax != ''">
+                individualBackTax = #{individualBackTax},
+            </if>
+            <if test="invoiceStatus2 != null and invoiceStatus2 != ''">
+                invoiceStatus2 = #{invoiceStatus2},
+            </if>
+            <if test="taxRate != null and taxRate != ''">
+                taxRate = #{taxRate},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+    <update id="updateCommissionInvoiceInfoByInvoiceSerialNo" parameterType="map">
+        update qb_usercommission
+        <trim prefix="set" suffixOverrides=",">
+            <if test="individualTax != null and individualTax != ''">
+                individualTax = #{individualTax},
+            </if>
+            <if test="individualBackTax != null and individualBackTax != ''">
+                individualBackTax = #{individualBackTax},
+            </if>
+            <if test="invoiceStatus2 != null and invoiceStatus2 != ''">
+                invoiceStatus2 = #{invoiceStatus2},
+            </if>
+            <if test="taxRate != null and taxRate != ''">
+                taxRate = #{taxRate},
+            </if>
+        </trim>
+        where 1=1
+        <if test="invoiceSerialNo != null and invoiceSerialNo != ''">
+            and invoiceSerialNo = #{invoiceSerialNo}
+        </if>
+        <if test="invoiceSerialNo2 != null and invoiceSerialNo2 != ''">
+            and invoiceSerialNo2 = #{invoiceSerialNo2}
+        </if>
+    </update>
+
+    <select id="groupUserCommissionInvoiceRecord" parameterType="map" resultType="com.jrmf.domain.UserCommission">
+        SELECT count(userId),userId,userName,certId,cast(sum(amount) as decimal (10,2)) amount,cast(sum(individualTax) as decimal(10,2)) individualTax,
+        cast(sum(individualBackTax) as decimal (10,2)) individualBackTax
+        from qb_usercommission
+        WHERE status = 1
+        <if test="originalId != null and originalId != ''">
+            and originalId = #{originalId}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="invoiceStatus2 != null and invoiceStatus2 != ''">
+            and find_in_set(invoiceStatus2,#{invoiceStatus2})
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and createtime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and createtime &lt;= #{endTime}
+        </if>
+        group by userid
+        ORDER BY userId
+    </select>
+
+    <select id="getCommissionInvoiceSerialNos" resultType="java.lang.String">
+        select invoiceSerialNo from mf_salary_wallet.qb_usercommission
+        where status = 1 and invoiceStatus2 in (1,2)
+        <if test="originalId != null and originalId != ''">
+            and originalId = #{originalId}
+        </if>
+        <if test="companyId != null and companyId != ''">
+            and companyId = #{companyId}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and createtime &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            and createtime &lt;= #{endTime}
+        </if>
+        <if test="month != null and month != ''">
+            and substr(createtime,1,7) = #{month}
+        </if>
+        group by invoiceSerialNo
+        order by invoiceSerialNo desc
+    </select>
+
+    <select id="getRealCommissionMounthSumAmonut" resultType="java.util.Map">
+        SELECT
+        certId,
+        cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) mounthSumAmonut
+        FROM
+        qb_usercommission
+        WHERE 1=1
+        <if test="originalId !=null and originalId !=''">
+            and originalId = #{originalId}
+        </if>
+        AND realCompanyId = #{companyId}
+        AND `status` != 2
+        AND certId IN ( SELECT DISTINCT t.idCard FROM qb_commissiontemporary t WHERE batchId = #{batchId}
+        <if test="status !=null and status !=''">
+            and t.status = #{status}
+        </if>
+        )
+        AND DATE_FORMAT( createtime, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+        GROUP BY
+        certId;
+
+    </select>
+    <select id="getRealCommissionMounthSumAmonutByCertId" resultType="java.lang.String">
+
+        SELECT
+          cast( COALESCE ( SUM( sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) mounthSumAmonut
+        FROM
+          qb_usercommission
+        WHERE
+          1 = 1
+          AND `status` != 2
+          AND realCompanyId = #{companyId}
+          AND certId = #{certId}
+          AND DATE_FORMAT( createtime, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+        GROUP BY
+          certId;
+    </select>
+    <select id="getCommissionMounthSumAmonutByPlatformId" resultType="java.util.Map">
+        SELECT
+          qu.certId,
+          cast( COALESCE ( SUM( qu.sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) monthSumAmonut
+        FROM
+          qb_usercommission qu
+        WHERE
+          qu.`status` != 2
+          AND qu.certId IN ( SELECT DISTINCT t.idCard FROM qb_commissiontemporary t WHERE batchId = #{batchId}
+          AND t.STATUS = 1 )
+          AND DATE_FORMAT( qu.createtime, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+        GROUP BY
+          qu.certId;
+    </select>
+
+    <select id="getSignleCommissionMounthSumAmonutByPlatformId"
+      resultType="java.lang.String">
+               SELECT
+          cast( COALESCE ( SUM( qu.sourceAmount ), 0 ) AS DECIMAL ( 15, 2 ) ) monthSumAmonut
+        FROM
+          qb_usercommission qu
+        WHERE
+          1 = 1
+          AND qu.`status` != 2
+          AND qu.certId = #{certId}
+          AND DATE_FORMAT( qu.createtime, '%Y%m' ) = DATE_FORMAT( CURDATE( ), '%Y%m' )
+        GROUP BY
+          qu.certId;
+    </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

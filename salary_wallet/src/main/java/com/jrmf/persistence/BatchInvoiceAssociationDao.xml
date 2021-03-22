@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.BatchInvoiceAssociationDao">
+
+  <insert id="insert" useGeneratedKeys="true">
+    insert into batch_invoice_association (commission_id, apply_batch_invoice_id) values (#{commissionId},#{applyBatchInvoiceId})
+  </insert>
+  <insert id="batchInsert" useGeneratedKeys="true">
+    insert into batch_invoice_association (commission_id, apply_batch_invoice_id)
+     values
+    <foreach collection="list" index="index" separator="," item="apply">
+      (
+      #{apply.commissionId},#{apply.applyBatchInvoiceId}
+      )
+    </foreach>
+
+  </insert>
+  <insert id="batchInsertCustom" useGeneratedKeys="true">
+    insert IGNORE  invoice_custom_association (custom_key, apply_batch_invoice_id)
+    values
+    <foreach collection="list" index="index" separator="," item="apply">
+      (
+      #{apply.customKey},#{apply.applyBatchInvoiceId}
+      )
+    </foreach>
+
+  </insert>
+
+  <select id="findInvoiceCustomAssociationList" resultType="com.jrmf.domain.BatchInvoiceAssociation">
+    select * from invoice_custom_association where 1=1
+    <if test="id != null">
+      and id = #{id}
+    </if>
+    <if test="customKey != null">
+      and custom_key = #{customKey}
+    </if>
+    <if test="applyBatchInvoiceId != null">
+      and apply_batch_invoice_id = #{applyBatchInvoiceId}
+    </if>
+  </select>
+
+  <select id="findInvoiceCustomList" resultType="com.jrmf.domain.BatchInvoiceAssociation">
+    select ica.id,cc.customkey,cc.companyName,cc.contractCompanyName
+    from invoice_custom_association ica
+    left join channel_custom cc on ica.custom_key = cc.customkey
+    where 1=1
+    <if test="id != null">
+      and ica.id = #{id}
+    </if>
+    <if test="customKey != null">
+      and ica.custom_key = #{customKey}
+    </if>
+    <if test="applyBatchInvoiceId != null">
+      and ica.apply_batch_invoice_id = #{applyBatchInvoiceId}
+    </if>
+  </select>
+
+  <update id="updateCommissionStatus">
+    update batch_invoice_commission set invoice_status = 1
+    where  id in
+    <foreach collection="list" index="index" separator="," item="apply" open="(" close=")">
+      #{apply.commissionId}
+    </foreach>
+
+  </update>
+
+  <select id="findBatchInvoiceAssociationList" resultType="com.jrmf.domain.BatchInvoiceAssociation">
+    select * from batch_invoice_association where 1=1
+    <if test="id != null">
+      and id = #{id}
+    </if>
+    <if test="commissionId != null">
+      and commission_id = #{commissionId}
+    </if>
+    <if test="applyBatchInvoiceId != null">
+      and apply_batch_invoice_id = #{applyBatchInvoiceId}
+    </if>
+  </select>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

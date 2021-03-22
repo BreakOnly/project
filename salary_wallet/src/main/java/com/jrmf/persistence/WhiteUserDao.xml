@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.WhiteUserDao" >
+
+	<!-- 分页查询白名单用户 -->
+	<select id="getWhiteUsersByPage" parameterType="com.jrmf.domain.Page" resultType="map">
+		select qwu.*,cc.companyName merchantName,qc.companyName companyName from qb_white_users qwu
+		left join channel_custom cc on qwu.customkey=cc.customkey
+		left join qb_company qc on qwu.companyId=qc.userId 
+		where 1=1
+		<if test="params.companyId!=null and params.companyId!=''">
+		and qwu.companyId=#{params.companyId}
+		</if>
+		<if test="params.customkey!=null and params.customkey!=''">
+		and FIND_IN_SET(qwu.customkey,#{params.customkey})
+		</if>
+		<if test="params.userName!=null and params.userName!=''">
+		and qwu.userName like concat('%',#{params.userName},'%')
+		</if>
+		<if test="params.certId!=null and params.certId!=''">
+		and qwu.certId like concat('%',#{params.certId},'%')
+		</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qwu.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+	    <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qwu.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+		<if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.status!=null and params.status!=''">
+		and qwu.status=#{params.status}
+		</if>
+		ORDER BY qwu.id desc
+		<if test="pageSize !=null and offset !=null">
+	    limit #{offset},#{pageSize}
+	     </if>
+	</select>
+	
+	<!-- 查询白名单用户总条数 -->
+	<select id="getWhiteUsersCount" parameterType="com.jrmf.domain.Page" resultType="int">
+	    select count(1) from (
+			select qwu.*,cc.companyName merchantName,qc.companyName companyName from qb_white_users qwu
+			left join channel_custom cc on qwu.customkey=cc.customkey
+			left join qb_company qc on qwu.companyId=qc.userId 
+			where 1=1
+			<if test="params.companyId!=null and params.companyId!=''">
+			and qwu.companyId=#{params.companyId}
+			</if>
+			<if test="params.customkey!=null and params.customkey!=''">
+			and FIND_IN_SET(qwu.customkey,#{params.customkey})
+			</if>
+			<if test="params.userName!=null and params.userName!=''">
+			and qwu.userName like concat('%',#{params.userName},'%')
+			</if>
+			<if test="params.certId!=null and params.certId!=''">
+			and qwu.certId like concat('%',#{params.certId},'%')
+			</if>
+			<if test="params.startTime!=null and params.startTime!=''">
+			and date_format(qwu.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+			</if>
+			   <if test="params.endTime!=null and params.endTime!=''">
+			and date_format(qwu.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+			</if>
+			<if test="params.merchantName!=null and params.merchantName!=''">
+			and cc.companyName like concat('%',#{params.merchantName},'%')
+			</if>
+			<if test="params.status!=null and params.status!=''">
+			and qwu.status=#{params.status}
+			</if>
+			ORDER BY qwu.id desc
+	    )temp
+	</select>
+	
+	<!-- 查询白名单用户 -->
+	<select id="getWhiteUsersNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+		select qwu.*,cc.companyName merchantName,qc.companyName companyName from qb_white_users qwu
+		left join channel_custom cc on qwu.customkey=cc.customkey
+		left join qb_company qc on qwu.companyId=qc.userId 
+		where 1=1
+		<if test="params.companyId!=null and params.companyId!=''">
+		and qwu.companyId=#{params.companyId}
+		</if>
+		<if test="params.customkey!=null and params.customkey!=''">
+		and FIND_IN_SET(qwu.customkey,#{params.customkey})
+		</if>
+		<if test="params.userName!=null and params.userName!=''">
+		and qwu.userName like concat('%',#{params.userName},'%')
+		</if>
+		<if test="params.certId!=null and params.certId!=''">
+		and qwu.certId like concat('%',#{params.certId},'%')
+		</if>
+		<if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qwu.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+		</if>
+		   <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qwu.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+		</if>
+		<if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like concat('%',#{params.merchantName},'%')
+		</if>
+		<if test="params.status!=null and params.status!=''">
+		and qwu.status=#{params.status}
+		</if>
+		ORDER BY qwu.id desc
+	</select>
+	
+	<!-- 新增白名单用户 -->
+	<insert id="insert" parameterType="com.jrmf.domain.WhiteUser">
+		insert into qb_white_users (userName, certId, 
+	      documentType, createTime, updateTime,status,
+	      addUser, customkey,companyId,remark,reviewUser)
+	    values (#{userName,jdbcType=VARCHAR}, #{certId,jdbcType=VARCHAR}, 
+	      #{documentType,jdbcType=INTEGER}, #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR},#{status,jdbcType=INTEGER},
+	      #{addUser,jdbcType=VARCHAR},#{customkey,jdbcType=VARCHAR},#{companyId,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR},#{reviewUser,jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- 修改白名单用户 -->
+	<update id="update" parameterType="com.jrmf.domain.WhiteUser">
+		update qb_white_users set documentType=#{documentType},certId=#{certId},userName=#{userName},status=#{status},updateTime=#{updateTime},addUser=#{addUser} where id =#{id}
+	</update>
+	
+	<!-- 更改白名单用户状态 -->
+	<update id="updateStatusById" parameterType="com.jrmf.domain.WhiteUser">
+		update qb_white_users set status = #{status},reviewUser=#{reviewUser},reason=#{reason},updateTime=#{updateTime} where id=#{id}
+	</update>
+	
+	<!-- 校验商户是否已经添加过该白名单用户 -->
+	<select id="checkIsExists" parameterType="com.jrmf.domain.WhiteUser" resultType="int">
+		select count(1) from qb_white_users where documentType=#{documentType} and certId=#{certId} and customkey=#{customkey} and companyId=#{companyId}
+	</select>
+	
+	<!-- 删除白名单用户 -->
+	<delete id="deleteWhiteUserById" parameterType="int">
+		delete from qb_white_users where id = #{id}
+	</delete>
+	
+	<!-- 查询白名单详细信息 -->
+	<select id="getOne" parameterType="int" resultType="com.jrmf.domain.WhiteUser">
+		select * from qb_white_users where id =#{id}
+	</select>
+	
+	<!-- 校验是否为白名单用户 -->
+	<select id="checkIsWhiteUser" parameterType="com.jrmf.domain.WhiteUser" resultType="int">
+		select count(1) from qb_white_users where documentType=#{documentType} and certId=#{certId} and customkey=#{customkey} and companyId=#{companyId} and status=1
+	</select>
+
+</mapper>

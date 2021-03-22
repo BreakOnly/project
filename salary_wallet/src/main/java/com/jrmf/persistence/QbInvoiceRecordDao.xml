@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.QbInvoiceRecordDao" >
+
+  <sql id="Base_Column_List" >
+    id,invoiceSerialNo, customkey, companyId, status, rejectionReason, invoiceAmount, 
+    invoiceType, billingClass, invoiceTime, taxRegistrationNumber, serviceType, taxpayerType, 
+    isDiscard, orderNo, expressNo, receiveUser, companyName, createTime, updateTime, 
+    invoiceNum,accountBankName,accountNo,address,phone
+  </sql>
+  
+  <select id="selectByPrimaryKey" resultType="com.jrmf.domain.QbInvoiceRecord" parameterType="java.lang.Integer" >
+    select * from qb_invoice_record where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from qb_invoice_record
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+
+  <insert id="insert" parameterType="com.jrmf.domain.QbInvoiceRecord" >
+    insert into qb_invoice_record (id,invoiceSerialNo, customkey, 
+      companyId, status, rejectionReason, 
+      invoiceAmount, invoiceType, billingClass, 
+      invoiceTime, taxRegistrationNumber, serviceType, 
+      taxpayerType, isDiscard, orderNo, 
+      expressNo, receiveUser, companyName, 
+      createTime, updateTime, invoiceNum,accountBankName,accountNo,address,phone,addUser,approvalAmount,invoiceMethod,approval,remark
+      )
+    values (#{id,jdbcType=INTEGER}, #{invoiceSerialNo,jdbcType=VARCHAR}, #{customkey,jdbcType=VARCHAR}, 
+      #{companyId,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{rejectionReason,jdbcType=VARCHAR}, 
+      #{invoiceAmount,jdbcType=VARCHAR}, #{invoiceType,jdbcType=INTEGER}, #{billingClass,jdbcType=INTEGER}, 
+      #{invoiceTime,jdbcType=VARCHAR}, #{taxRegistrationNumber,jdbcType=VARCHAR}, #{serviceType,jdbcType=INTEGER}, 
+      #{taxpayerType,jdbcType=INTEGER}, #{isDiscard,jdbcType=INTEGER}, #{orderNo,jdbcType=VARCHAR}, 
+      #{expressNo,jdbcType=VARCHAR}, #{receiveUser,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=VARCHAR}, #{updateTime,jdbcType=VARCHAR}, #{invoiceNum,jdbcType=INTEGER},
+      #{accountBankName,jdbcType=VARCHAR}, #{accountNo,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},
+      #{addUser,jdbcType=VARCHAR},#{approvalAmount,jdbcType=VARCHAR},#{invoiceMethod,jdbcType=INTEGER},#{approval,jdbcType=INTEGER},
+      #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.jrmf.domain.QbInvoiceRecord" >
+    update qb_invoice_record
+    <set >
+      <if test="invoiceSerialNo != null" >
+        invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="customkey != null" >
+        customkey = #{customkey,jdbcType=VARCHAR},
+      </if>
+      <if test="companyId != null" >
+        companyId = #{companyId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="rejectionReason != null" >
+        rejectionReason = #{rejectionReason,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceAmount != null" >
+        invoiceAmount = #{invoiceAmount,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceType != null" >
+        invoiceType = #{invoiceType,jdbcType=INTEGER},
+      </if>
+      <if test="billingClass != null" >
+        billingClass = #{billingClass,jdbcType=INTEGER},
+      </if>
+      <if test="invoiceTime != null" >
+        invoiceTime = #{invoiceTime,jdbcType=VARCHAR},
+      </if>
+      <if test="taxRegistrationNumber != null" >
+        taxRegistrationNumber = #{taxRegistrationNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceType != null" >
+        serviceType = #{serviceType,jdbcType=INTEGER},
+      </if>
+      <if test="taxpayerType != null" >
+        taxpayerType = #{taxpayerType,jdbcType=INTEGER},
+      </if>
+      <if test="isDiscard != null" >
+        isDiscard = #{isDiscard,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        orderNo = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="expressNo != null" >
+        expressNo = #{expressNo,jdbcType=VARCHAR},
+      </if>
+      <if test="receiveUser != null" >
+        receiveUser = #{receiveUser,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        companyName = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        createTime = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null" >
+        updateTime = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="invoiceNum != null" >
+        invoiceNum = #{invoiceNum,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByPrimaryKey" parameterType="com.jrmf.domain.QbInvoiceRecord" >
+    update qb_invoice_record
+    set invoiceSerialNo = #{invoiceSerialNo,jdbcType=VARCHAR},
+      customkey = #{customkey,jdbcType=VARCHAR},
+      companyId = #{companyId,jdbcType=VARCHAR},
+      status = #{status,jdbcType=INTEGER},
+      rejectionReason = #{rejectionReason,jdbcType=VARCHAR},
+      invoiceAmount = #{invoiceAmount,jdbcType=VARCHAR},
+      invoiceType = #{invoiceType,jdbcType=INTEGER},
+      billingClass = #{billingClass,jdbcType=INTEGER},
+      invoiceTime = #{invoiceTime,jdbcType=VARCHAR},
+      taxRegistrationNumber = #{taxRegistrationNumber,jdbcType=VARCHAR},
+      serviceType = #{serviceType,jdbcType=INTEGER},
+      taxpayerType = #{taxpayerType,jdbcType=INTEGER},
+      isDiscard = #{isDiscard,jdbcType=INTEGER},
+      orderNo = #{orderNo,jdbcType=VARCHAR},
+      expressNo = #{expressNo,jdbcType=VARCHAR},
+      receiveUser = #{receiveUser,jdbcType=VARCHAR},
+      companyName = #{companyName,jdbcType=VARCHAR},
+      createTime = #{createTime,jdbcType=VARCHAR},
+      updateTime = #{updateTime,jdbcType=VARCHAR},
+      invoiceNum = #{invoiceNum,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <select id="queryRecordListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  select count(1) from (
+  	select cc.companyName merchantName,qc.companyName serviceName,qic.billingClassName,qic.serviceTypeName,qir.* from qb_invoice_record qir 
+		left join channel_custom cc on qir.customkey=cc.customkey
+		left join qb_company qc on qir.companyId=qc.userId
+		left join qb_invoice_class qic on qir.billingClass=qic.id
+	where 1=1
+	  <if test="params.joinVou==1">
+        and qir.invoiceSerialNo in 
+        (select invoiceSerialNo from qb_invoice_voucher where 1=1 
+	      <if test="params.invoiceCode!=null and params.invoiceCode!=''">
+		    and invoiceCode = #{params.invoiceCode}
+		  </if>
+		  <if test="params.invoiceNo!=null and params.invoiceNo!=''">
+		    and invoiceNo = #{params.invoiceNo}
+		  </if> 
+	  GROUP BY invoiceSerialNo) 
+	  </if>
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qir.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qir.status = #{params.status}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if>
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qir.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qir.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qir.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qir.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.startInvoiceTime!=null and params.startInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&gt;=#{params.startInvoiceTime}
+	  </if>
+	  <if test="params.endInvoiceTime!=null and params.endInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&lt;=#{params.endInvoiceTime}
+	  </if>
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+	  	<choose>
+        	<when test="params.searchType!=null and params.searchType==1">
+        	and cc.companyName = #{params.merchantName}
+        	</when>
+        	<otherwise>
+        	and cc.companyName like concat('%', #{params.merchantName}, '%')
+        	</otherwise>
+        </choose>
+	  </if>
+	  <if test="params.startInvoiceAmount!=null and params.startInvoiceAmount!=''">
+	  	and qir.invoiceAmount &gt;=#{params.startInvoiceAmount}+0
+	  </if>
+	  <if test="params.endInvoiceAmount!=null and params.endInvoiceAmount!=''">
+	  	and qir.invoiceAmount &lt;=#{params.endInvoiceAmount}+0
+	  </if>
+	  <if test="params.isDiscard!=null and params.isDiscard!=''">
+	   	and qir.isDiscard = #{params.isDiscard}
+	  </if>
+	  <if test="params.orderNo!=null and params.orderNo!=''">
+	  	and qir.orderNo like concat('%',#{params.orderNo},'%')
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qir.customkey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qir.customkey =#{params.customkey}
+	  </if>
+	  <if test="params.invoiceMethod!=null and params.invoiceMethod!=''">
+	 	and ifnull(qir.invoiceMethod,1)=#{params.invoiceMethod}
+	  </if>
+	  <if test="params.approval!=null and params.approval!=''">
+	  	and qir.approval=#{params.approval}
+	  </if>
+	  ORDER BY qir.id desc
+  ) temp
+  </select>
+  
+  <select id="queryRecordList" parameterType="com.jrmf.domain.Page" resultType="map">
+	select cc.companyName merchantName,qc.companyName serviceName,qic.billingClassName,qic.serviceTypeName,qir.* from qb_invoice_record qir 
+		left join channel_custom cc on qir.customkey=cc.customkey
+		left join qb_company qc on qir.companyId=qc.userId
+		left join qb_invoice_class qic on qir.billingClass=qic.id
+	where 1=1
+	  <if test="params.joinVou==1">
+        and qir.invoiceSerialNo in 
+        (select invoiceSerialNo from qb_invoice_voucher where 1=1 
+	      <if test="params.invoiceCode!=null and params.invoiceCode!=''">
+		    and invoiceCode = #{params.invoiceCode}
+		  </if>
+		  <if test="params.invoiceNo!=null and params.invoiceNo!=''">
+		    and invoiceNo = #{params.invoiceNo}
+		  </if> 
+	  GROUP BY invoiceSerialNo) 
+	  </if>
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qir.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qir.status = #{params.status}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if>
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qir.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qir.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qir.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qir.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.startInvoiceTime!=null and params.startInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&gt;=#{params.startInvoiceTime}
+	  </if>
+	  <if test="params.endInvoiceTime!=null and params.endInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&lt;=#{params.endInvoiceTime}
+	  </if>
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+	  	<choose>
+        	<when test="params.searchType!=null and params.searchType==1">
+        	and cc.companyName = #{params.merchantName}
+        	</when>
+        	<otherwise>
+        	and cc.companyName like concat('%', #{params.merchantName}, '%')
+        	</otherwise>
+        </choose>
+	  </if>
+	  <if test="params.startInvoiceAmount!=null and params.startInvoiceAmount!=''">
+	  	and qir.invoiceAmount &gt;=#{params.startInvoiceAmount}+0
+	  </if>
+	  <if test="params.endInvoiceAmount!=null and params.endInvoiceAmount!=''">
+	  	and qir.invoiceAmount &lt;=#{params.endInvoiceAmount}+0
+	  </if>
+	  <if test="params.isDiscard!=null and params.isDiscard!=''">
+	   	and qir.isDiscard = #{params.isDiscard}
+	  </if>
+	  <if test="params.orderNo!=null and params.orderNo!=''">
+	  	and qir.orderNo like concat('%',#{params.orderNo},'%')
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qir.customkey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qir.customkey =#{params.customkey}
+	  </if>
+	  <if test="params.invoiceMethod!=null and params.invoiceMethod!=''">
+	 	and ifnull(qir.invoiceMethod,1)=#{params.invoiceMethod}
+	  </if>
+	  <if test="params.approval!=null and params.approval!=''">
+	  	and qir.approval=#{params.approval}
+	  </if>
+	  <if test="params.businessPlatform!=null and params.businessPlatform!=''">
+		and cc.businessPlatform =#{params.businessPlatform}
+	  </if>
+	  <if test="params.originalIds != null and params.originalIds != ''">
+			or FIND_IN_SET(qir.customkey,#{params.originalIds})
+		</if>
+	  ORDER BY qir.id desc
+  </select>
+  <select id="queryRecordWithPicList" parameterType="com.jrmf.domain.Page" resultType="map">
+      select cc.companyName merchantName,qc.companyName serviceName,qic.billingClassName,qic.serviceTypeName,qir.*
+      ,GROUP_CONCAT(invoicePicUrl) invoicePicUrl
+      from qb_invoice_record qir
+      left join channel_custom cc on qir.customkey=cc.customkey
+      left join qb_company qc on qir.companyId=qc.userId
+      left join qb_invoice_class qic on qir.billingClass=qic.id
+      left join qb_invoice_pic qip on qir.invoiceSerialNo=qip.invoiceSerialNo
+	where 1=1
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qir.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qir.status = #{params.status}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if>
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qir.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qir.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qir.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qir.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.startInvoiceTime!=null and params.startInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&gt;=#{params.startInvoiceTime}
+	  </if>
+	  <if test="params.endInvoiceTime!=null and params.endInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&lt;=#{params.endInvoiceTime}
+	  </if>
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+		and cc.companyName like concat('%',#{params.merchantName},'%')
+	  </if>
+	  <if test="params.startInvoiceAmount!=null and params.startInvoiceAmount!=''">
+	  	and qir.invoiceAmount &gt;=#{params.startInvoiceAmount}+0
+	  </if>
+	  <if test="params.endInvoiceAmount!=null and params.endInvoiceAmount!=''">
+	  	and qir.invoiceAmount &lt;=#{params.endInvoiceAmount}+0
+	  </if>
+	  <if test="params.isDiscard!=null and params.isDiscard!=''">
+	   	and qir.isDiscard = #{params.isDiscard}
+	  </if>
+	  <if test="params.orderNo!=null and params.orderNo!=''">
+	  	and qir.orderNo like concat('%',#{params.orderNo},'%')
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qir.customkey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qir.customkey =#{params.customkey}
+	  </if>
+      GROUP BY qir.invoiceSerialNo
+	  ORDER BY qir.id desc
+	  <if test="pageSize !=null and offset !=null">
+            limit #{offset},#{pageSize}
+      </if>
+  </select>
+
+    <select id="queryRecordListNoPage" parameterType="com.jrmf.domain.Page" resultType="map">
+	select cc.companyName merchantName,qc.companyName serviceName,qic.billingClassName,qic.serviceTypeName,qir.* from qb_invoice_record qir 
+		left join channel_custom cc on qir.customkey=cc.customkey
+		left join qb_company qc on qir.companyId=qc.userId
+		left join qb_invoice_class qic on qir.billingClass=qic.id
+	where 1=1
+	  <if test="params.joinVou==1">
+        and qir.invoiceSerialNo in 
+        (select invoiceSerialNo from qb_invoice_voucher where 1=1 
+	      <if test="params.invoiceCode!=null and params.invoiceCode!=''">
+		    and invoiceCode = #{params.invoiceCode}
+		  </if>
+		  <if test="params.invoiceNo!=null and params.invoiceNo!=''">
+		    and invoiceNo = #{params.invoiceNo}
+		  </if> 
+	  GROUP BY invoiceSerialNo) 
+	  </if>
+	  <if test="params.startTime!=null and params.startTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+	  </if>
+	  <if test="params.endTime!=null and params.endTime!=''">
+		and date_format(qir.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+	  </if>
+	  <if test="params.companyId!=null and params.companyId!=''">
+	   	and qir.companyId = #{params.companyId}
+	  </if>
+	  <if test="params.status!=null and params.status!=''">
+	   	and qir.status = #{params.status}
+	  </if>
+	  <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+	   	and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+	  </if>
+	  <if test="params.billingClassName!=null and params.billingClassName!=''">
+	   	and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+	  </if>
+	  <if test="params.invoiceType!=null and params.invoiceType!=''">
+	   	and qir.invoiceType = #{params.invoiceType}
+	  </if>
+	  <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+	   	and qir.taxRegistrationNumber = #{params.taxRegistrationNumber}
+	  </if>
+	  <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+	   	and qir.taxpayerType = #{params.taxpayerType}
+	  </if>
+	  <if test="params.companyName!=null and params.companyName!=''">
+	   	and qir.companyName like concat('%',#{params.companyName},'%')
+	  </if>
+	  <if test="params.startInvoiceTime!=null and params.startInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&gt;=#{params.startInvoiceTime}
+	  </if>
+	  <if test="params.endInvoiceTime!=null and params.endInvoiceTime!=''">
+		and date_format(qir.invoiceTime,'%Y-%m-%d')&lt;=#{params.endInvoiceTime}
+	  </if>
+	  <if test="params.merchantName!=null and params.merchantName!=''">
+	  	<choose>
+        	<when test="params.searchType!=null and params.searchType==1">
+        	and cc.companyName = #{params.merchantName}
+        	</when>
+        	<otherwise>
+        	and cc.companyName like concat('%', #{params.merchantName}, '%')
+        	</otherwise>
+        </choose>
+	  </if>
+	  <if test="params.startInvoiceAmount!=null and params.startInvoiceAmount!=''">
+	  	and qir.invoiceAmount &gt;=#{params.startInvoiceAmount}+0
+	  </if>
+	  <if test="params.endInvoiceAmount!=null and params.endInvoiceAmount!=''">
+	  	and qir.invoiceAmount &lt;=#{params.endInvoiceAmount}+0
+	  </if>
+	  <if test="params.isDiscard!=null and params.isDiscard!=''">
+	   	and qir.isDiscard = #{params.isDiscard}
+	  </if>
+	  <if test="params.orderNo!=null and params.orderNo!=''">
+	  	and qir.orderNo like concat('%',#{params.orderNo},'%')
+	  </if>
+	  <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+		and FIND_IN_SET(qir.customkey,#{params.loginCustomer})
+	  </if>
+	  <if test="params.customkey!=null and params.customkey!=''">
+	   	and qir.customkey =#{params.customkey}
+	  </if>
+	  <if test="params.invoiceMethod!=null and params.invoiceMethod!=''">
+	 	and ifnull(qir.invoiceMethod,1)=#{params.invoiceMethod}
+	  </if>
+	  <if test="params.approval!=null and params.approval!=''">
+	  	and qir.approval=#{params.approval}
+	  </if>
+	  <if test="params.businessPlatform!=null and params.businessPlatform!=''">
+		and cc.businessPlatform =#{params.businessPlatform}
+	  </if>
+			<if test="params.originalIds != null and params.originalIds != ''">
+				or FIND_IN_SET(qir.customkey,#{params.originalIds})
+			</if>
+	  ORDER BY qir.id desc
+  </select>
+  
+  <select id="groupBillingClassByOrderNo" parameterType="String" resultType="int"> 
+ 	 select billingClass from qb_invoice_record where orderNo=#{value} and status!=3 GROUP BY billingClass 
+  </select>
+ 
+ <select id="getByInvoiceSerialNo" parameterType="String" resultType="com.jrmf.domain.QbInvoiceRecord">
+ 	select * from qb_invoice_record where invoiceSerialNo = #{invoiceSerialNo}
+ </select>
+ 
+ <!-- 获取最近一次开票记录的收寄人信息根据商户 -->
+ <select id="getRecentAddress" parameterType="String" resultType="String">
+ select receiveUser from qb_invoice_record where customkey=#{customkey} ORDER BY id desc LIMIT 1;
+ </select>
+    <select id="queryRecordListWithPicCount" resultType="java.lang.Integer">
+        select count(*)
+        from qb_invoice_record qir
+        left join channel_custom cc on qir.customkey=cc.customkey
+        left join qb_company qc on qir.companyId=qc.userId
+        left join qb_invoice_class qic on qir.billingClass=qic.id
+        left join qb_invoice_pic qip on qir.invoiceSerialNo=qip.invoiceSerialNo
+        where 1=1
+        <if test="params.startTime!=null and params.startTime!=''">
+            and date_format(qir.createTime,'%Y-%m-%d')&gt;=#{params.startTime}
+        </if>
+        <if test="params.endTime!=null and params.endTime!=''">
+            and date_format(qir.createTime,'%Y-%m-%d')&lt;=#{params.endTime}
+        </if>
+        <if test="params.companyId!=null and params.companyId!=''">
+            and qir.companyId = #{params.companyId}
+        </if>
+        <if test="params.status!=null and params.status!=''">
+            and qir.status = #{params.status}
+        </if>
+        <if test="params.serviceTypeName!=null and params.serviceTypeName!=''">
+            and qic.serviceTypeName like concat('%',#{params.serviceTypeName},'%')
+        </if>
+        <if test="params.billingClassName!=null and params.billingClassName!=''">
+            and qic.billingClassName like concat('%',#{params.billingClassName},'%')
+        </if>
+        <if test="params.invoiceType!=null and params.invoiceType!=''">
+            and qir.invoiceType = #{params.invoiceType}
+        </if>
+        <if test="params.taxRegistrationNumber!=null and params.taxRegistrationNumber!=''">
+            and qir.taxRegistrationNumber = #{params.taxRegistrationNumber}
+        </if>
+        <if test="params.taxpayerType!=null and params.taxpayerType!=''">
+            and qir.taxpayerType = #{params.taxpayerType}
+        </if>
+        <if test="params.companyName!=null and params.companyName!=''">
+            and qir.companyName like concat('%',#{params.companyName},'%')
+        </if>
+        <if test="params.startInvoiceTime!=null and params.startInvoiceTime!=''">
+            and date_format(qir.invoiceTime,'%Y-%m-%d')&gt;=#{params.startInvoiceTime}
+        </if>
+        <if test="params.endInvoiceTime!=null and params.endInvoiceTime!=''">
+            and date_format(qir.invoiceTime,'%Y-%m-%d')&lt;=#{params.endInvoiceTime}
+        </if>
+        <if test="params.merchantName!=null and params.merchantName!=''">
+            and cc.companyName like concat('%',#{params.merchantName},'%')
+        </if>
+        <if test="params.startInvoiceAmount!=null and params.startInvoiceAmount!=''">
+            and qir.invoiceAmount &gt;=#{params.startInvoiceAmount}+0
+        </if>
+        <if test="params.endInvoiceAmount!=null and params.endInvoiceAmount!=''">
+            and qir.invoiceAmount &lt;=#{params.endInvoiceAmount}+0
+        </if>
+        <if test="params.isDiscard!=null and params.isDiscard!=''">
+            and qir.isDiscard = #{params.isDiscard}
+        </if>
+        <if test="params.orderNo!=null and params.orderNo!=''">
+            and qir.orderNo like concat('%',#{params.orderNo},'%')
+        </if>
+        <if test="params.loginCustomer!=null and params.loginCustomer!=''">
+            and FIND_IN_SET(qir.customkey,#{params.loginCustomer})
+        </if>
+        <if test="params.customkey!=null and params.customkey!=''">
+            and qir.customkey =#{params.customkey}
+        </if>
+        GROUP BY qir.invoiceSerialNo
+    </select>
+    
+   <select id="selectByPrimaryKeys" parameterType="String" resultType="com.jrmf.domain.QbInvoiceRecord">
+    	select * from qb_invoice_record where FIND_IN_SET(id,#{ids}) and (status=3 or status=4)
+    </select>
+
+	<select id="getAdvanceInvoice"  resultType="com.jrmf.domain.QbInvoiceRecord">
+		SELECT
+		*
+		FROM
+		qb_invoice_record
+		WHERE
+		invoiceMethod = 2
+		AND approval != 2
+        AND customkey = #{customKey}
+        AND companyId = #{companyId}
+        AND cast( approvalAmount AS DECIMAL ( 15, 2 ) ) &lt; cast( invoiceAmount AS DECIMAL ( 15, 2 ) )
+		ORDER BY DATE(createTime) ASC limit 1
+    </select>
+
+  <update id="updateByRecharge" parameterType="com.jrmf.domain.QbInvoiceRecord" >
+		update qb_invoice_record
+		set updateTime     = now(),
+			approvalAmount = #{approvalAmount},
+			orderNo        = #{orderNo},
+			approval       = #{approval}
+		where id = #{id}
+	</update>
+
+	<select id="getCommissionInvoiceList" parameterType="map" resultType="com.jrmf.domain.QbInvoiceRecord">
+		SELECT createTime,invoiceSerialNo, invoiceAmount, status, invoiceMethod,addUser,orderNo
+		from qb_invoice_record
+		WHERE 1=1
+		<if test="customkey != null and customkey != ''">
+			and customkey = #{customkey}
+		</if>
+		<if test="companyId != null and companyId != ''">
+			and companyId = #{companyId}
+		</if>
+		<if test="orderNo != null and orderNo != ''">
+			and orderNo = #{orderNo}
+		</if>
+		<if test="invoiceSerialNo != null and invoiceSerialNo != ''">
+			and invoiceSerialNo = #{invoiceSerialNo}
+		</if>
+		<if test="status != null and status != ''">
+			and find_in_set(status,#{status})
+		</if>
+		<if test="invoiceMethod != null and invoiceMethod != ''">
+			and find_in_set(invoiceMethod,#{invoiceMethod})
+		</if>
+		<if test="month != null and month != ''">
+			and SUBSTR(createTime,1,7) = #{month}
+		</if>
+		order by createTime desc,invoiceSerialNo
+	</select>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+

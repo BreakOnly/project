@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.CustomPermissionTemplateDao" >
+
+
+	<!-- 查询菜单模板 -->
+	<select id="getList" parameterType="com.jrmf.domain.Page" resultType="map">
+		select
+		    cpt.id tempId,
+			cpt.temp_name tempName,
+			cpt.menu_ids menuIds,
+			cpt.customType,
+			cpt.type,
+			DATE_FORMAT(cpt.create_time,'%Y-%m-%d %H:%i:%S') createTime,
+			DATE_FORMAT(cpt.update_time,'%Y-%m-%d %H:%i:%S') updateTime,
+			cpt.status,
+			cpt.customkey,
+			cpt.temp_desc tempDesc,
+			cpt.add_user addUser,
+			cc.companyName 
+		from custom_permission_template cpt 
+		left join channel_custom cc on cpt.customkey=cc.customkey
+		where 1=1 and status=1 
+			 <if test="params.id!=null and params.id!=''">
+			 and id=#{params.id}
+			 </if>
+			 <if test="params.tempName!=null and params.tempName!=''">
+			 and temp_name like concat('%', #{params.tempName}, '%')
+			 </if>
+			 <if test="params.customType!=null and params.customType!=''">
+			 and customType=#{params.customType}
+			 </if>
+			 <if test="params.status!=null and params.status!=''">
+			 and status=#{params.status}
+			 </if>
+			 <if test="params.type!=null and params.type!=''">
+			 and type=#{params.type}
+			 </if>
+			 <if test="params.customKey!=null and params.customKey!=''">
+			 and cpt.customKey=#{params.customKey}
+			 </if>
+			 <if test="params.tempDesc!=null and params.tempDesc!=''">
+			 and temp_desc like concat('%', #{params.tempDesc}, '%')
+			 </if>
+			 <if test="params.companyName!=null and params.companyName!=''">
+			 and cc.companyName like concat('%', #{params.companyName}, '%')
+			 </if>
+			 <if test="params.startTime!=null and params.startTime!=''">
+			 and date_format(cpt.create_time,'%Y-%m-%d')&gt;=#{params.startTime}
+			 </if>
+			 <if test="params.endTime!=null and params.endTime!=''">
+			 and date_format(cpt.create_time,'%Y-%m-%d')&lt;=#{params.endTime}
+			 </if>
+			 ORDER BY cpt.id desc
+			 <if test="pageSize !=null and offset !=null">
+              limit #{offset},#{pageSize}
+             </if>
+	</select>
+	
+	<!-- 查询菜单模板数量 -->
+	<select id="getMenuTempCount" parameterType="com.jrmf.domain.Page" resultType="int">
+		select count(tempId) from
+		(select
+		    cpt.id tempId,
+			cpt.temp_name tempName,
+			cpt.menu_ids menuIds,
+			cpt.customType,
+			cpt.type,
+			DATE_FORMAT(cpt.create_time,'%Y-%m-%d %H:%i:%S') createTime,
+			DATE_FORMAT(cpt.update_time,'%Y-%m-%d %H:%i:%S') updateTime,
+			cpt.status,
+			cpt.customkey,
+			cpt.temp_desc tempDesc,
+			cpt.add_user addUser,
+			cc.companyName 
+		from custom_permission_template cpt 
+		left join channel_custom cc on cpt.customkey=cc.customkey
+		where 1=1 and status=1 
+			 <if test="params.id!=null and params.id!=''">
+			 and id=#{params.id}
+			 </if>
+			 <if test="params.tempName!=null and params.tempName!=''">
+			 and temp_name like concat('%', #{params.tempName}, '%')
+			 </if>
+			 <if test="params.customType!=null and params.customType!=''">
+			 and customType=#{params.customType}
+			 </if>
+			 <if test="params.status!=null and params.status!=''">
+			 and status=#{params.status}
+			 </if>
+			 <if test="params.type!=null and params.type!=''">
+			 and type=#{params.type}
+			 </if>
+			 <if test="params.customKey!=null and params.customKey!=''">
+			 and cpt.customKey=#{params.customKey}
+			 </if>
+			 <if test="params.tempDesc!=null and params.tempDesc!=''">
+			 and temp_desc like concat('%', #{params.tempDesc}, '%')
+			 </if>
+			 <if test="params.companyName!=null and params.companyName!=''">
+			 and cc.companyName like concat('%', #{params.companyName}, '%')
+			 </if>
+			 <if test="params.startTime!=null and params.startTime!=''">
+			 and date_format(cpt.create_time,'%Y-%m-%d')&gt;=#{params.startTime}
+			 </if>
+			 <if test="params.endTime!=null and params.endTime!=''">
+			 and date_format(cpt.create_time,'%Y-%m-%d')&lt;=#{params.endTime}
+			 </if>
+			 ORDER BY cpt.id desc) temp
+	</select>
+	
+	<!-- 保存菜单模板 -->
+	<insert id="insertPermissionTemplate" parameterType="com.jrmf.domain.CustomPermissionTemplate">
+		insert into custom_permission_template(temp_name,menu_ids,customType,type,temp_desc,create_time,status,customkey,add_user) values(#{tempName},#{menuIds},#{customType},#{type},#{tempDesc},#{createTime},1,#{customKey},#{addUser})
+	</insert>
+	
+	<!-- 修改菜单模板 -->
+	<update id="updateCustomPermissionTemp" parameterType="com.jrmf.domain.CustomPermissionTemplate">
+	    update custom_permission_template 
+	    <set>
+		    <if test="tempName!=null and tempName!=''">
+		     temp_name=#{tempName},
+		    </if>
+		    <if test="menuIds!=null and menuIds!=''">
+		     menu_ids = #{menuIds},
+		    </if>
+		    <if test="status!=null and status!=''">
+		     status=#{status},
+		    </if>
+		    <if test="tempDesc!=null and tempDesc!=''">
+		     temp_desc=#{tempDesc},
+		    </if>
+		    <if test="updateTime!=null">
+		     update_time=#{updateTime},
+		    </if>
+		    <if test="customType!=null">
+		     customType=#{customType}
+		    </if>
+	    </set>
+	    where id=#{id}
+	</update>
+	
+	<!-- 根据id获取模板详情 -->
+	<select id="getPermissionTempDetail" parameterType="int" resultType="com.jrmf.domain.CustomPermissionTemplate">
+	    select * from custom_permission_template where id = #{id}
+	</select>
+	
+	<!-- 根据POJO参数获取模板可选列表 -->
+	<select id="getListByPojo" parameterType="com.jrmf.domain.CustomPermissionTemplate" resultType="com.jrmf.domain.CustomPermissionTemplate">
+		select * from custom_permission_template where 1=1 and status=1
+		<if test="type!=null and type!=''">
+		and type = #{type}
+		</if>
+		<if test="customKey!=null and customKey!=''">
+		and customkey=#{customKey}
+		</if>
+		<if test="id != null and id!= ''">
+			AND id in(
+			(SELECT associated_Id FROM platform_associated_info WHERE associated_type = 3 AND custom_id = #{id})
+		)
+		</if>
+	</select>
+	
+	<!-- 保存商户权限模板分配关系 -->
+	<insert id="insertCustomPermissionRelation" parameterType="map">
+	    insert into custom_permission_relation(custom_id,permission_id,type,create_time,add_user) 
+        values(#{customId},#{tempId},#{type},#{create_time},#{add_user});
+	</insert>
+	
+	<!-- 商户勾选切换为模板则删除原有老模式数据 -->
+	<delete id="deleteCustomPermissionRelationOld" parameterType="map">
+	  	delete from custom_permission_relation where custom_id=#{customId} and type is null
+	</delete>
+	
+	<!-- 查询商户是否拥有此模板 -->
+	<select id="getCustomPermissionRelationTempCount" parameterType="map" resultType="int">
+		select count(1) from custom_permission_relation where custom_id=#{customId} and type=#{type} and permission_id=#{tempId}
+	</select>
+	
+	<!-- 删除权限分配 -->
+	<delete id="deleteCustomPermissionRelation" parameterType="map">
+		delete from custom_permission_relation where permission_id=#{tempId} and custom_id=#{customId} and type=2
+	</delete>
+	
+	<!-- 获取账户id对应的主账户key -->
+	<select id="getCustomMaster" parameterType="int" resultType="String" >
+		select masterCustom from channel_custom where id=#{value}
+	</select>
+	
+	<!-- 判断模板有无商户在使用 -->
+	<select id="checkCustomUseTemp" parameterType="map" resultType="int">
+	select count(1) count from custom_permission_relation where permission_id=#{tempId} and type=2
+	</select>
+	
+	<!-- 判断商户是否拥有老权限-->
+	<select id="checkCustomOldPermission" parameterType="map" resultType="int">
+	select count(1) count from custom_permission_relation where custom_id=#{customId} and type is null
+	</select>
+</mapper>

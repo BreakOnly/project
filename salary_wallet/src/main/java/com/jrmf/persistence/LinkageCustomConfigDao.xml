@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.LinkageCustomConfigDao">
+
+  <!-- 获取商户联动配置账户信息 -->
+  <select id="getCustomLinkConfigList" parameterType="com.jrmf.domain.Page" resultType="map">
+  select lcc.id,lcc.customKey,cc.companyName merchantName,lbc.linkageType,lbc.corporationAccountName,lbc.corporationAccount,
+  lbc.bankName,lbc.pathType,bpc.pathName,lcc.createTime from linkage_custom_config lcc
+  left join linkage_base_config lbc on lcc.configId = lbc.id
+  left join channel_custom cc on lcc.customKey = cc.customKey
+  left join business_payment_channel bpc on lbc.pathNo=bpc.pathNo
+  where 1=1
+  <if test="params.merchantName!=null and params.merchantName!=''">
+  		and cc.companyName like concat('%',#{params.merchantName},'%')
+  </if>
+  <if test="params.corporationAccountName!=null and params.corporationAccountName!=''">
+		and lbc.corporationAccountName like concat ('%',#{params.corporationAccountName},'%')
+  </if>
+  <if test="params.corporationAccount!=null and params.corporationAccount!=''">
+		and lbc.corporationAccount = #{params.corporationAccount}
+  </if>
+  <if test="params.linkageType!=null and params.linkageType!=''">
+ 		and lbc.linkageType = #{params.linkageType}
+  </if>
+  <if test="params.pathType!=null and params.pathType!=''">
+ 		and lbc.pathType = #{params.pathType}
+  </if>
+ 	<if test="params.startTime!=null and params.startTime!=''">
+		and date(lcc.createTime) &gt;= #{params.startTime}
+  </if>
+  <if test="params.endTime!=null and params.endTime!=''">
+		and date(lcc.createTime) &lt;= #{params.endTime}
+  </if>
+  <if test="params.bankName!=null and params.bankName!=''">
+		and lbc.bankName like concat('%',#{params.bankName},'%')
+  </if>
+   order by lcc.id desc
+   <if test="pageSize !=null and offset !=null">
+        limit #{offset},#{pageSize}
+  </if>
+  </select>
+
+  <select id="getCustomLinkConfigListCount" parameterType="com.jrmf.domain.Page" resultType="int">
+  select count(1) from (select lcc.id,lcc.customKey,cc.companyName merchantName,lbc.linkageType,lbc.corporationAccountName,lbc.corporationAccount,
+  lbc.bankName,lbc.pathType,bpc.pathName,lcc.createTime from linkage_custom_config lcc
+  left join linkage_base_config lbc on lcc.configId = lbc.id
+  left join channel_custom cc on lcc.customKey = cc.customKey
+  left join business_payment_channel bpc on lbc.pathNo=bpc.pathNo
+  where 1=1
+  <if test="params.merchantName!=null and params.merchantName!=''">
+  		and cc.companyName like concat('%',#{params.merchantName},'%')
+  </if>
+  <if test="params.corporationAccountName!=null and params.corporationAccountName!=''">
+		and lbc.corporationAccountName like concat ('%',#{params.corporationAccountName},'%')
+  </if>
+  <if test="params.corporationAccount!=null and params.corporationAccount!=''">
+		and lbc.corporationAccount = #{params.corporationAccount}
+  </if>
+  <if test="params.linkageType!=null and params.linkageType!=''">
+ 		and lbc.linkageType = #{params.linkageType}
+  </if>
+  <if test="params.pathType!=null and params.pathType!=''">
+ 		and lbc.pathType = #{params.pathType}
+  </if>
+ 	<if test="params.startTime!=null and params.startTime!=''">
+		and date(lcc.createTime) &gt;= #{params.startTime}
+  </if>
+  <if test="params.endTime!=null and params.endTime!=''">
+		and date(lcc.createTime) &lt;= #{params.endTime}
+  </if>
+  <if test="params.bankName!=null and params.bankName!=''">
+		and lbc.bankName like concat('%',#{params.bankName},'%')
+  </if>
+   order by lcc.id desc
+   )temp
+  </select>
+
+  <!-- 添加商户关联联动配置信息 -->
+  <insert id="insert" parameterType="com.jrmf.domain.LinkageCustomConfig" >
+    insert into linkage_custom_config (customKey, linkageType,
+      configId,createTime,addUser)
+    values (#{customKey,jdbcType=VARCHAR}, #{linkageType,jdbcType=INTEGER},
+      #{configId,jdbcType=VARCHAR},#{createTime,jdbcType=VARCHAR},
+      #{addUser,jdbcType=VARCHAR})
+  </insert>
+
+  <!-- 删除商户关联联动配置信息 -->
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from linkage_custom_config
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+    <select id="getConfigByCustomKey" resultType="com.jrmf.domain.LinkageBaseConfig">
+    SELECT
+	  lbc.*
+    FROM
+        linkage_base_config lbc
+        LEFT JOIN linkage_custom_config lcc ON lcc.configId = lbc.id
+    WHERE
+        lbc.status = 0
+        AND lcc.customKey = #{customKey}
+        AND lcc.linkageType = #{linkageType}
+        LIMIT 1
+    </select>
+
+  <!-- 根据联动配置id查询商户关联信息 -->
+  <select id="getLinkConfigByConfigId" parameterType="String" resultType="com.jrmf.domain.LinkageCustomConfig">
+  	select * from linkage_custom_config where configId = #{id}
+  </select>
+
+  <!-- 查询商户同一种联动类型下的关联配置信息 -->
+  <select id="getCustomConfigByLinkType" parameterType="com.jrmf.domain.LinkageCustomConfig" resultType="com.jrmf.domain.LinkageCustomConfig">
+  	select * from linkage_custom_config where customKey=#{customKey} and linkageType=#{linkageType}
+  </select>
+
+    <select id="getMoneyLinkageByParam" resultType="com.jrmf.domain.LinkageBaseConfig">
+        SELECT
+        lc.id,
+        cc.customkey,
+        cc.companyName,
+        lb.corporationAccountName,
+        lb.corporationAccount,
+        lb.linkageType AS pathType,
+        lb. STATUS,
+        bpc.pathName pathNo,
+        lb.bankName,
+        lb.createTime,
+        lb.updateTime
+        FROM
+        linkage_custom_config lc
+        LEFT JOIN linkage_base_config lb ON lb.id = lc.configId
+        LEFT JOIN channel_custom cc ON lc.customkey = cc.customkey
+        left join business_payment_channel bpc on lb.pathNo = bpc.pathNo
+        WHERE lb. STATUS = 0
+        <if test="companyName !=null and companyName!=''">
+            and cc.companyName like CONCAT('%',#{companyName},'%')
+        </if>
+        <if test="corporationAccountName !=null and corporationAccountName!=''">
+            and lb.corporationAccountName like CONCAT('%',#{corporationAccountName},'%')
+        </if>
+        <if test="bankName !=null and bankName!=''">
+            and lb.bankName like CONCAT('%',#{bankName},'%')
+        </if>
+        <if test="corporationAccount !=null and corporationAccount!=''">
+            and lb.corporationAccount = #{corporationAccount}
+        </if>
+        <if test="linkageType !=null">
+            and lb.linkageType = #{linkageType}
+        </if>
+        <if test="startTime !=null and startTime != ''">
+            and date(lb.createTime) &gt;= #{startTime}
+        </if>
+        <if test="endTime !=null and endTime != ''">
+            and date(lb.createTime) &lt;= #{endTime}
+        </if>
+        <if test="customkey != null and customkey != ''">
+            and FIND_IN_SET(cc.customkey,#{customkey})
+        </if>
+        order by lb.createTime desc
+        <if test="pageSize !=null and pageNo !=null">
+            limit #{pageNo},#{pageSize}
+        </if>
+    </select>
+
+	<!-- 根据id获取商户关联配置信息 -->
+	<select id="getCustomConfigById" parameterType="int" resultType="com.jrmf.domain.LinkageCustomConfig">
+		select * from linkage_custom_config where id = #{id}
+	</select>
+
+    <select id="getConfigById" resultType="com.jrmf.domain.LinkageBaseConfig">
+        SELECT
+            lbc.*
+        FROM
+            linkage_base_config lbc
+        LEFT JOIN linkage_custom_config lcc ON lcc.configId = lbc.id
+        WHERE
+        lbc.status = 0
+        AND lcc.id = #{id}
+    </select>
+
+    <select id="getLinkageConfigByCustomKey" resultType="com.jrmf.domain.LinkageBaseConfig">
+        SELECT
+	        lbc.*
+        FROM
+            linkage_base_config lbc
+        LEFT JOIN linkage_custom_config lcc ON lcc.configId = lbc.id
+        WHERE
+            lbc.status = 0
+        AND lcc.customKey = #{customKey}
+        LIMIT 1
+    </select>
+</mapper>

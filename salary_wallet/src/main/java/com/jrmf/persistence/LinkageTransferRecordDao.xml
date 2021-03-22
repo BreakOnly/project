@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jrmf.persistence.LinkageTransferRecordDao" >
+
+  <insert id="insert" parameterType="com.jrmf.domain.LinkageTransferRecord" >
+    <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into linkage_transfer_record (id, customKey, companyId,
+      tranType, status, statusDesc,
+      tranAmount, tranTime, payAccountNo,
+      payAccountName, payBankName, payBankNo,
+      isSubAccount, paySubAccount, inAccountNo,
+      inAccountName, inBankName, inBankNo,
+      pathNo, tranRemark, orderNo,
+      pathOrderNo, selOrderNo, createTime,
+      updateTime)
+    values (#{id,jdbcType=INTEGER}, #{customKey,jdbcType=VARCHAR}, #{companyId,jdbcType=VARCHAR},
+      #{tranType,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, #{statusDesc,jdbcType=VARCHAR},
+      #{tranAmount,jdbcType=VARCHAR}, now(), #{payAccountNo,jdbcType=VARCHAR},
+      #{payAccountName,jdbcType=VARCHAR}, #{payBankName,jdbcType=VARCHAR}, #{payBankNo,jdbcType=VARCHAR},
+      #{isSubAccount,jdbcType=INTEGER}, #{paySubAccount,jdbcType=VARCHAR}, #{inAccountNo,jdbcType=VARCHAR},
+      #{inAccountName,jdbcType=VARCHAR}, #{inBankName,jdbcType=VARCHAR}, #{inBankNo,jdbcType=VARCHAR},
+      #{pathNo,jdbcType=VARCHAR}, #{tranRemark,jdbcType=VARCHAR}, #{orderNo,jdbcType=VARCHAR},
+      #{pathOrderNo,jdbcType=VARCHAR}, #{selOrderNo,jdbcType=VARCHAR}, now(),
+      now())
+  </insert>
+
+  <update id="updateStatus" parameterType="com.jrmf.domain.LinkageTransferRecord" >
+    update linkage_transfer_record
+    set
+      status = #{status,jdbcType=INTEGER},
+      <if test="statusDesc !=null and statusDesc !=''">
+        statusDesc = #{statusDesc,jdbcType=VARCHAR},
+      </if>
+    <if test="selOrderNo !=null and selOrderNo !=''">
+      selOrderNo = #{selOrderNo,jdbcType=VARCHAR},
+    </if>
+      updateTime = now()
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="getPayingList" resultType="com.jrmf.domain.LinkageTransferRecord">
+    SELECT
+      *
+    FROM
+      linkage_transfer_record
+    WHERE
+	  `status` = 3
+  </select>
+
+  <select id="getList" resultType="com.jrmf.domain.LinkageTransferRecord">
+    SELECT
+        ltr.*,
+        cc.companyName customName
+    FROM
+        linkage_transfer_record ltr
+        LEFT JOIN channel_custom cc ON ltr.customKey = cc.customkey
+
+    <trim prefix=" where " suffixOverrides="and">
+      <if test="customName!=null and customName!=''">
+        cc.companyName like concat('%',#{customName},'%') and
+      </if>
+      <if test="payAccountName!=null and payAccountName!=''">
+        ltr.payAccountName = #{payAccountName} and
+      </if>
+      <if test="startTime!=null and startTime!=''">
+        date(ltr.tranTime) &gt;= #{startTime} and
+      </if>
+      <if test="endTime!=null and endTime!=''">
+        date(ltr.tranTime) &lt;= #{endTime} and
+      </if>
+      <if test="orderNo!=null and orderNo!=''">
+        ltr.orderNo = #{orderNo} and
+      </if>
+      <if test="tranType!=null">
+        ltr.tranType = #{tranType} and
+      </if>
+      <if test="status!=null">
+        ltr.status = #{status} and
+      </if>
+      <if test="inAccountName!=null and inAccountName!=''">
+        ltr.inAccountName = #{inAccountName} and
+      </if>
+      <if test="pathOrderNo!=null and pathOrderNo!=''">
+        ltr.pathOrderNo = #{pathOrderNo} and
+      </if>
+    </trim>
+    order by ltr.id desc
+  </select>
+
+
+  <select id="checkIsExistRecord" parameterType="String" resultType="com.jrmf.domain.LinkageTransferRecord">
+  	select * from linkage_transfer_record where customKey = #{customKey} and (status = 3 or status = 0)
+  </select>
+
+  <select id="checkIsExistRecordByConfigId" parameterType="int" resultType="com.jrmf.domain.LinkageTransferRecord">
+  	select * from linkage_transfer_record where customKey in(select customKey from linkage_custom_config lcc
+  	left join linkage_base_config lbc on lcc.configId = lbc.id
+	where lbc.id = #{id}) and (status = 3 or status = 0)
+  </select>
+</mapper>

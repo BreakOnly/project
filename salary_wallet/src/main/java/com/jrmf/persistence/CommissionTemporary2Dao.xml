@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.CommissionTemporary2Dao">
+  <!-- 开启二级缓存	回收策略为先进先出	自动刷新时间60s	最多缓存512个引用对象	只读 -->
+  <cache eviction="FIFO" flushInterval="600000" size="3096" readOnly="true"/>
+
+  <insert id="addCommissionTemporary" parameterType="com.jrmf.domain.CommissionTemporary">
+    INSERT INTO qb_commissionTemporary (
+    userName,
+    idCard,
+    bankCardNo,
+    bankName,
+    amount,
+    sumFee,
+    supplementFee,
+    supplementAmount,
+    calculationRates,
+    documentType,
+    batchId,
+    userId,
+    payType,
+    bankNo,
+    orderNo,
+    status,
+    statusDesc,
+    originalId,
+    companyId,
+    operatorName,
+    createTime,
+    remark,
+    sourceRemark,
+    menuId,
+    repeatcheck,
+    feeRuleType,
+    phoneNo,
+    businessManager,
+    operationsManager,
+    businessPlatform,
+    businessChannel,
+    customLabel,
+    realCompanyId,
+    businessChannelKey,
+    sourceAmount
+    ) VALUES
+    <foreach collection="commissionBatch" item="commission" separator=",">
+      (
+      #{commission.userName},
+      #{commission.idCard},
+      #{commission.bankCardNo},
+      #{commission.bankName},
+      #{commission.amount},
+      #{commission.sumFee},
+      #{commission.supplementFee},
+      #{commission.supplementAmount},
+      #{commission.calculationRates},
+      #{commission.documentType},
+      #{commission.batchId},
+      #{commission.userId},
+      #{commission.payType},
+      #{commission.bankNo},
+      #{commission.orderNo},
+      #{commission.status},
+      #{commission.statusDesc},
+      #{commission.originalId},
+      #{commission.companyId},
+      #{commission.operatorName},
+      now(),
+      #{commission.remark},
+      #{commission.remark},
+      #{commission.menuId},
+      #{commission.repeatcheck},
+      #{commission.feeRuleType},
+      #{commission.phoneNo},
+      #{commission.businessManager},
+      #{commission.operationsManager},
+      #{commission.businessPlatform},
+      #{commission.businessChannel},
+      #{commission.customLabel},
+      #{commission.realCompanyId},
+      #{commission.businessChannelKey},
+      #{commission.amount}
+      )
+    </foreach>
+  </insert>
+
+  <select id="getCommissionsByBatchId" resultType="com.jrmf.domain.CommissionTemporary">
+    SELECT
+    id,
+    userName,
+    idCard,
+    bankCardNo,
+    case bankName
+    when 'alipay' then '支付宝'
+    when 'wx' then '微信'
+    when 'wxpack' then '微信'
+    else bankName end as bankName,
+    amount,
+    sourceAmount,
+    sumFee,
+    supplementFee,
+    supplementAmount,
+    calculationRates,
+    profilt,
+    profiltRates,
+    batchId,
+    documentType,
+    payType,
+    userId,
+    bankId,
+    bankNo,
+    orderNo,
+    status,
+    statusDesc,
+    originalId,
+    companyId,
+    operatorName,
+    createTime,
+    remark,
+    menuId,
+    updateTime,
+    repeatcheck,
+    feeRuleType,
+    phoneNo,
+    businessManager,
+    operationsManager,
+    businessPlatform,
+    businessChannel,
+    customLabel,
+    rateInterval,
+    realCompanyId,
+    businessChannelKey
+    FROM qb_commissionTemporary where batchId = #{batchId}
+    <if test="originalId !=null and originalId !=''">
+      AND originalId = #{originalId}
+    </if>
+    AND status != 4
+  </select>
+
+  <select id="getCommissionedByParam" resultType="com.jrmf.domain.CommissionTemporary">
+    SELECT
+    id,
+    userName,
+    idCard,
+    bankCardNo,
+    case bankName
+    when 'alipay' then '支付宝'
+    when 'wx' then '微信'
+    when 'wxpack' then '微信'
+    else bankName end as bankName,
+    amount,
+    sourceAmount,
+    sumFee,
+    supplementFee,
+    supplementAmount,
+    calculationRates,
+    profilt,
+    profiltRates,
+    batchId,
+    documentType,
+    payType,
+    userId,
+    bankId,
+    bankNo,
+    orderNo,
+    phoneNo,
+    status,
+    statusDesc,
+    originalId,
+    companyId,
+    operatorName,
+    createTime,
+    remark,
+    menuId,
+    updateTime,
+    repeatcheck,
+    feeRuleType
+    FROM qb_commissionTemporary where status !=4
+    <if test="amount !=null and amount !=''">
+      AND amount = #{amount}
+    </if>
+    <if test="account !=null and account !=''">
+      AND bankCardNo = #{account}
+    </if>
+    <if test="batchId !=null and batchId !=''">
+      AND batchId = #{batchId}
+    </if>
+    <if test="batchIds !=null and batchIds !=''">
+      AND FIND_IN_SET(batchId,#{batchIds})
+    </if>
+    <if test="userName !=null and userName !=''">
+      AND userName = #{userName}
+    </if>
+    <if test="idCard !=null and idCard !=''">
+      AND idCard = #{idCard}
+    </if>
+    <if test="documentType !=null and documentType !=''">
+      AND documentType = #{documentType}
+    </if>
+    <if test="userId !=null and userId !=''">
+      AND userId = #{userId}
+    </if>
+    <if test="bankId !=null and bankId !=''">
+      AND bankId = #{bankId}
+    </if>
+    <if test="orderNo !=null and orderNo !=''">
+      AND orderNo = #{orderNo}
+    </if>
+    <if test="status !=null and status !=''">
+      AND status = #{status}
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      AND originalId = #{originalId}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      AND companyId = #{companyId}
+    </if>
+    <if test="menuId !=null and menuId !=''">
+      AND menuId = #{menuId}
+    </if>
+    order by createtime desc
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+  </select>
+  <select id="getCommissionedByBatchIdsAndParam" resultType="com.jrmf.domain.CommissionTemporary">
+    SELECT
+    a.id,
+    a.userName,
+    a.idCard,
+    a.bankCardNo,
+    case a.bankName
+    when 'alipay' then '支付宝'
+    when 'wx' then '微信'
+    when 'wxpack' then '微信'
+    else a.bankName end as bankName,
+    a.amount,
+    a.sumFee,
+    a.supplementFee,
+    a.supplementAmount,
+    a.calculationRates,
+    a.profilt,
+    a.profiltRates,
+    a.batchId,
+    a.documentType,
+    a.payType,
+    a.userId,
+    a.bankId,
+    a.bankNo,
+    a.orderNo,
+    a.phoneNo,
+    a.status,
+    a.statusDesc,
+    a.originalId,
+    a.companyId,
+    a.operatorName,
+    a.createTime,
+    a.remark,
+    a.menuId,
+    a.updateTime,
+    a.repeatcheck,
+    a.feeRuleType,
+    b.batchName,b.batchDesc,c.companyName customName
+    FROM qb_commissionTemporary a LEFT JOIN qb_channelinterimbatch b on a.batchId = b.orderno
+    LEFT JOIN channel_custom c on b.customkey = c.customkey where a.status !=4
+    <if test="amount !=null and amount !=''">
+      AND a.amount = #{amount}
+    </if>
+    <if test="account !=null and account !=''">
+      AND a.bankCardNo = #{account}
+    </if>
+    <if test="batchId !=null and batchId !=''">
+      AND a.batchId = #{batchId}
+    </if>
+    <if test="batchIds !=null and batchIds !=''">
+      AND FIND_IN_SET(a.batchId,#{batchIds})
+    </if>
+    <if test="userName !=null and userName !=''">
+      AND a.userName = #{userName}
+    </if>
+    <if test="idCard !=null and idCard !=''">
+      AND a.idCard = #{idCard}
+    </if>
+    <if test="documentType !=null and documentType !=''">
+      AND a.documentType = #{documentType}
+    </if>
+    <if test="userId !=null and userId !=''">
+      AND a.userId = #{userId}
+    </if>
+    <if test="bankId !=null and bankId !=''">
+      AND a.bankId = #{bankId}
+    </if>
+    <if test="orderNo !=null and orderNo !=''">
+      AND a.orderNo = #{orderNo}
+    </if>
+    <if test="status !=null and status !=''">
+      AND a.status = #{status}
+    </if>
+    <if test="originalId !=null and originalId !=''">
+      AND a.originalId = #{originalId}
+    </if>
+    <if test="companyId !=null and companyId !=''">
+      AND a.companyId = #{companyId}
+    </if>
+    <if test="menuId !=null and menuId !=''">
+      AND a.menuId = #{menuId}
+    </if>
+    <if test="customName !=null and customName !=''">
+      and c.companyName like concat('%',#{customName},'%')
+    </if>
+    <if test="batchName !=null and batchName !=''">
+      and b.batchName like concat('%',#{batchName},'%')
+    </if>
+    order by a.createtime desc
+    <if test="start !=null and limit !=null">
+      limit #{start},#{limit}
+    </if>
+  </select>
+
+  <!--该批次对应下发公司总金额  -->
+  <select id="getStockByBatchId" resultType="String">
+    SELECT IFNULL((SELECT SUM(truncate(amount, 2))
+                   FROM qb_userCommission
+                   WHERE batchId = #{batchId}
+                     and companyId = #{companyId}
+                     and status = 2
+                  ), 0) as stock
+  </select>
+
+  <update id="updateCommissionTemporary">
+    update qb_commissionTemporary
+    <trim prefix=" SET ">
+      <if test="userName !=null and userName !=''">
+        userName = #{userName},
+      </if>
+      <if test="amount !=null and amount !=''">
+        amount = #{amount},
+      </if>
+      <if test="phoneNo !=null and phoneNo !=''">
+        phoneNo = #{phoneNo},
+      </if>
+      <if test="idCard !=null and idCard !=''">
+        idCard = #{idCard},
+      </if>
+      <if test="bankName !=null and bankName !=''">
+        bankName = #{bankName},
+      </if>
+      <if test="bankCardNo !=null and bankCardNo !=''">
+        bankCardNo = #{bankCardNo},
+      </if>
+      <if test="documentType !=null and documentType !=''">
+        documentType = #{documentType},
+      </if>
+      <if test="userId !=null and userId !=''">
+        userId = #{userId},
+      </if>
+      <if test="status !=null and status !='' ">
+        status = #{status},
+      </if>
+      <if test="statusDesc !=null and statusDesc !=''">
+        statusDesc = #{statusDesc},
+      </if>
+      <if test="remark !=null and remark !=''">
+        remark = #{remark},
+      </if>
+      <if test="sumFee !=null and sumFee !=''">
+        sumFee = #{sumFee},
+      </if>
+      <if test="supplementFee !=null and supplementFee !=''">
+        supplementFee = #{supplementFee},
+      </if>
+      <if test="calculationRates !=null and calculationRates !=''">
+        calculationRates = #{calculationRates},
+      </if>
+      <if test="supplementAmount !=null and supplementAmount !=''">
+        supplementAmount = #{supplementAmount},
+      </if>
+      <if test="profilt !=null and profilt !=''">
+        profilt = #{profilt},
+      </if>
+      <if test="profiltRates !=null and profiltRates !=''">
+        profiltRates = #{profiltRates},
+      </if>
+      <if test="rateInterval !=null and rateInterval !=''">
+        rateInterval = #{rateInterval},
+      </if>
+      updateTime = now()
+    </trim>
+    where id = #{id}
+  </update>
+
+  <update id="updateStatusByBatchId">
+    update qb_commissionTemporary
+    set status     = 3
+      , updateTime = now()
+    where batchId = #{batchId}
+  </update>
+
+  <update id="deleteById" parameterType="String">
+    UPDATE qb_commissionTemporary
+    SET `status` = 4 , updateTime = now()
+    WHERE FIND_IN_SET(id,#{ids})
+    <if test="originalId !=null and originalId !=''">
+      and originalId = #{originalId}
+    </if>
+  </update>
+
+  <update id="deleteByBatchId" parameterType="String">
+    UPDATE qb_commissionTemporary
+    SET `status` = 4 , updateTime = now()
+    WHERE FIND_IN_SET(batchId,#{batchIds})
+    <if test="originalId !=null and originalId !=''">
+      and originalId = #{originalId}
+    </if>
+  </update>
+
+  <update id="updateCommToNotCheck" parameterType="java.lang.Integer">
+    update qb_commissionTemporary
+    set repeatcheck = -1
+    where id IN
+    <foreach collection="array" index="index" open="(" close=")" item="id" separator=",">
+      #{id}
+    </foreach>
+  </update>
+  <select id="getCommissionByIds" parameterType="java.lang.Integer"
+    resultType="com.jrmf.domain.CommissionTemporary">
+    select
+    id,
+    userName,
+    idCard,
+    bankCardNo,
+    case bankName
+    when 'alipay' then '支付宝'
+    when 'wx' then '微信'
+    when 'wxpack' then '微信'
+    else bankName end as bankName,
+    amount,
+    sumFee,
+    supplementFee,
+    supplementAmount,
+    calculationRates,
+    profilt,
+    profiltRates,
+    batchId,
+    documentType,
+    payType,
+    userId,
+    bankId,
+    bankNo,
+    orderNo,
+    status,
+    statusDesc,
+    originalId,
+    companyId,
+    operatorName,
+    createTime,
+    remark,
+    menuId,
+    updateTime,
+    repeatcheck,
+    feeRuleType
+    from qb_commissionTemporary
+    where id IN
+    <foreach collection="array" index="index" open="(" close=")" item="id" separator=",">
+      #{id}
+    </foreach>
+  </select>
+  <select id="getSumAmountOfBatchByCertId" resultType="String">
+    SELECT IFNULL((SUM(truncate(sourceAmount, 2))), 0) amount
+    FROM qb_commissionTemporary
+    WHERE batchId = #{batchId}
+      and idCard = #{certId}
+      and status = 1
+  </select>
+
+  <resultMap id="commissionGroup" type="com.jrmf.domain.CommissionGroup">
+    <id property="certId" column="certId"/>
+    <collection property="commissionList" ofType="com.jrmf.domain.TempCommission">
+      <result property="id" column="id"/>
+      <result property="amount" column="amount"/>
+      <result property="sourceAmount" column="sourceAmount"/>
+      <result property="userName" column="userName"/>
+      <result property="bankCardNo" column="bankCardNo"/>
+    </collection>
+  </resultMap>
+  <select id="getCommissionGroupByCertId" parameterType="map" resultMap="commissionGroup">
+    SELECT
+    t.idCard certId,
+    t.id,
+    t.amount,
+    t.userName,
+    t.bankCardNo,
+    t.sourceAmount
+    FROM
+    qb_commissiontemporary t
+    WHERE
+    batchId = #{batchId}
+    <if test="status !=null and status !=''">
+      and t.status = #{status}
+    </if>
+    <if test="certId !=null and certId !=''">
+      and t.idCard = #{certId}
+    </if>
+    order by t.createTime asc
+  </select>
+
+  <!--该批次对应下发公司总金额  -->
+  <select id="getSuccessCommissionList" resultType="com.jrmf.domain.CommissionTemporary">
+    SELECT *
+    FROM qb_commissiontemporary t
+    WHERE batchId = #{batchId}
+      AND status = 1
+  </select>
+
+
+  <update id="updateCommissionTemporarys" parameterType="com.jrmf.domain.CommissionTemporary">
+    <foreach collection="commissionBatch" item="commission" separator=";">
+      UPDATE qb_commissionTemporary
+      <set>
+        <if test="commission.status != null">
+          status = #{commission.status},
+        </if>
+        <if test="commission.statusDesc != null">
+          statusDesc = #{commission.statusDesc},
+        </if>
+        update
+      </set>
+      where id = #{commission.id}
+    </foreach>
+  </update>
+
+	<select id="getCommissionUserInfo" resultType="com.jrmf.domain.CommissionTemporary">
+		SELECT * FROM qb_commissiontemporary
+		WHERE batchId = #{batchId} AND status = '1'
+		GROUP BY userName, idCard
+	</select>
+
+  <select id="selectRealCompanyIdByBatchId" parameterType="java.lang.String" resultType="java.lang.String">
+    select realCompanyId
+    from qb_commissiontemporary
+    where batchId = #{batchId}
+    limit 1
+  </select>
+  <select id="getCommissionUserByBatchId" resultType="com.jrmf.domain.CommissionUser">
+    SELECT
+    t.idCard certId,
+    t.userName userName
+    FROM
+    qb_commissiontemporary t
+    WHERE
+    batchId = #{batchId}
+    GROUP BY t.idCard
+  </select>
+
+</mapper>

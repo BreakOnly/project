@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.YuncrUserAuthenticationDao">
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.YuncrUserAuthentication">
+    <id column="id" property="id"/>
+    <result column="birthday" property="birthday"/>
+    <result column="nation" property="nation"/>
+    <result column="sex" property="sex"/>
+    <result column="address" property="address"/>
+    <result column="name" property="name"/>
+    <result column="id_card" property="idCard"/>
+    <result column="issue_authority" property="issueAuthority"/>
+    <result column="vaild_priod" property="vaildPriod"/>
+    <result column="id_card_front_number" property="idCardFrontNumber"/>
+    <result column="id_card_reverse_number" property="idCardReverseNumber"/>
+    <result column="live_test_number" property="liveTestNumber"/>
+    <result column="true_name_number" property="trueNameNumber"/>
+    <result column="live_test_url" property="liveTestUrl"/>
+    <result column="signature_url" property="signatureUrl"/>
+    <result column="apply_type" property="applyType"/>
+    <result column="is_white_list" property="isWhiteList"/>
+    <result column="phone" property="phone"/>
+    <result column="process_node" property="processNode"/>
+    <result column="enterprise_audit" property="enterpriseAudit"/>
+    <result column="government_audit" property="governmentAudit"/>
+    <result column="enterprise_audit_date" property="enterpriseAuditDate"/>
+    <result column="government_audit_date" property="governmentAuditDate"/>
+    <result column="enterprise_refuse_reason" property="enterpriseRefuseReason"/>
+    <result column="government_refuse_reason" property="governmentRefuseReason"/>
+    <result column="business_license_number" property="businessLicenseNumber"/>
+    <result column="business_license_url" property="businessLicenseUrl"/>
+    <result column="id_card_front_url" property="idCardFrontUrl"/>
+    <result column="id_card_reverse_url" property="idCardReverseUrl"/>
+    <result column="firm_id" property="firmId"/>
+    <result column="custom_key" property="customKey"/>
+    <result column="apply_number" property="applyNumber"/>
+    <result column="callback_address" property="callbackAddress"/>
+    <result column="callback_number" property="callbackNumber"/>
+    <result column="callback_status" property="callbackStatus"/>
+    <result column="merchant_id" property="merchantId"/>
+
+    <collection property="failNodeList" ofType="com.jrmf.domain.YuncrUserFailNode">
+      <id column="id" property="id"/>
+      <result column="authentication_id" property="authenticationId"/>
+      <result column="audit_node" property="auditNode"/>
+      <result column="status" property="status"/>
+      <result column="remark" property="remark"/>
+    </collection>
+  </resultMap>
+
+  <resultMap id="openUser" type="com.jrmf.domain.OpenUser">
+    <id column="id" property="id"/>
+    <result column="avatar" property="avatar"/>
+    <result column="city" property="city"/>
+    <result column="district" property="district"/>
+    <result column="mobile_no" property="mobileNo"/>
+    <result column="nickname" property="nickName"/>
+  </resultMap>
+
+
+  <select id="findUserByCondition" resultMap="BaseResultMap">
+    SELECT yua.*,cc.username AS auditName,cu.register_type AS registerType FROM
+    yuncr_user_authentication yua
+    LEFT JOIN channel_custom cc ON yua.custom_key = cc.customkey
+    LEFT JOIN channel_user cu ON yua.phone = cu.phoneNo
+    <where>
+      <if test="idCardList != null and idCardList.size()>0">
+        and yua.id_card in
+        <foreach item="card" index="index" collection="idCardList" open="(" separator="," close=")">
+          #{card}
+        </foreach>
+      </if>
+      <if test="isWhiteList != null and isWhiteList!= '' ">
+        and yua.is_white_list = #{isWhiteList}
+      </if>
+      <if test="name != null and name!= '' ">
+        and yua.name = #{name}
+      </if>
+      <if test="idCard != null and idCard!= '' ">
+        and yua.id_card = #{idCard}
+      </if>
+      <if test="phone != null and phone!= '' ">
+        and yua.phone = #{phone}
+      </if>
+      <if test="rechargeType != null  and rechargeType == 1 ">
+        and yua.process_node <![CDATA[ <5 ]]>
+      </if>
+      <if test="rechargeType != null   and rechargeType == 2 ">
+        and yua.process_node = 5 and yua.enterprise_audit = 0
+      </if>
+      <if test="rechargeType != null   and rechargeType == 3 ">
+        <![CDATA[  and yua.process_node = 5 and yua.enterprise_audit = 1 and yua.government_audit != 1 ]]>
+      </if>
+      <if test="rechargeType != null   and rechargeType == 4 ">
+        <![CDATA[   and yua.process_node = 5 and yua.enterprise_audit = 1 and yua.government_audit = 1 ]]>
+      </if>
+      <if test="rechargeType != null   and rechargeType == 5 ">
+        <![CDATA[    and yua.process_node = 5 and  yua.enterprise_audit = 2 ]]>
+      </if>
+      <if test="registerType != null and registerType!= '' ">
+        and cu.register_type = #{registerType}
+      </if>
+      <if test="startTime != null and startTime!= '' ">
+        and date_format(yua.create_time,'%Y-%m-%d')  <![CDATA[ >= #{startTime} ]]>
+      </if>
+      <if test="endTime != null and endTime!= '' ">
+        and date_format(yua.create_time,'%Y-%m-%d')  <![CDATA[ <= #{endTime} ]]>
+      </if>
+    </where>
+    ORDER BY yua.last_update_time DESC
+  </select>
+
+  <select id="findIdCardByCompanyName" resultType="java.util.HashMap">
+
+
+
+
+
+                        SELECT qus.id,qus.certId FROM qb_users qus
+                        LEFT JOIN qb_userrelated qu ON qu.userId = qus.id
+                        LEFT JOIN channel_custom cc ON qu.originalId = cc.customkey
+                        WHERE cc.companyName like  CONCAT('%',#{companyName},'%') AND qus.userType = 11
+                        GROUP BY certId
+
+
+
+
+
+  </select>
+
+  <select id="findCustomByUserIdCard" resultType="java.util.HashMap">
+    SELECT cc.customKey,cc.companyName,qu.certId FROM
+    channel_custom cc
+    LEFT JOIN qb_userrelated qbu ON cc.customkey = qbu.originalId
+    LEFT JOIN qb_users qu ON qu.id = qbu.userId
+    WHERE qu.userType = 11 AND qu.certId in
+    <foreach collection="idCard" index="index" item="idCard" open="(" close=")" separator=",">
+      #{idCard}
+    </foreach>
+    GROUP BY customkey,certId
+  </select>
+
+  <select id="findBankInfoByUserId" resultType="java.util.HashMap">
+    SELECT yub.bank_card_number,yub.bank_card_phone,ysb.sub_bank_name,yub.authentication_id FROM
+    yuncr_user_bank yub
+    LEFT JOIN yuncr_sub_bank_info ysb ON ysb.sub_bank_id = yub.sub_bank_id
+    WHERE authentication_id IN
+    <foreach collection="ids" item="id" index="index" separator="," close=")" open="(">
+      #{id}
+    </foreach>
+    GROUP BY bank_card_number,authentication_id
+  </select>
+
+  <select id="findWeChatInfo" resultMap="openUser">
+
+
+
+                SELECT ou.id,ou.nickname,ou.avatar,ou.city,ou.province,ou.district,ou.sex,ou.open_id FROM  open_user ou
+                LEFT JOIN channel_user  cu ON cu.id = ou.channel_user_id
+                WHERE cu.phoneNo = ( SELECT phone FROM yuncr_user_authentication WHERE id= #{id} )
+
+
+
+  </select>
+
+  <select id="findUserInfoById" resultMap="BaseResultMap">
+
+
+
+                SELECT * FROM yuncr_user_authentication WHERE id = #{id}
+
+
+
+  </select>
+
+  <select id="selectErrByCode" resultType="hashmap">
+
+
+
+               SELECT * FROM interface_err_code_map WHERE err_code = #{errCode} AND source_platform = "yuncr"
+
+
+
+  </select>
+
+  <update id="updateById">
+
+
+
+                UPDATE yuncr_user_authentication  SET enterprise_audit = #{enterpriseAudit},
+                enterprise_refuse_reason = #{enterpriseRefuseReason}
+                where  id = #{id}
+
+
+
+  </update>
+
+  <select id="findUsersByIdCard" resultType="java.util.HashMap">
+
+
+
+                SELECT * FROM qb_users WHERE certId = #{idCard} AND userType = 11
+
+
+
+  </select>
+
+  <update id="updateByExampleSelective"
+    parameterType="com.jrmf.domain.YuncrUserAuthentication">
+    update yuncr_user_authentication
+
+    <trim prefix="set" suffixOverrides=",">
+      <if test="birthday != null and birthday != '' ">
+        birthday = #{birthday,jdbcType=VARCHAR},
+      </if>
+      <if test="nation != null and nation != ''">
+        nation = #{nation,jdbcType=VARCHAR},
+      </if>
+      <if test="sex != null and sex != ''">
+        sex = #{sex},
+      </if>
+      <if test="address != null and address != ''">
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="idCard != null and idCard != ''">
+        id_card = #{idCard,jdbcType=VARCHAR},
+      </if>
+      <if test="issueAuthority != null and issueAuthority != ''">
+        issue_authority = #{issueAuthority,jdbcType=VARCHAR},
+      </if>
+      <if test="vaildPriod != null and vaildPriod != ''">
+        vaild_priod = #{vaildPriod,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardFrontNumber != null and idCardFrontNumber != ''">
+        id_card_front_number = #{idCardFrontNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="idCardReverseNumber != null and idCardReverseNumber != ''">
+        id_card_reverse_number = #{idCardReverseNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="liveTestNumber != null and liveTestNumber != ''">
+        live_test_number = #{liveTestNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="trueNameNumber != null and trueNameNumber != ''">
+        true_name_number = #{trueNameNumber,jdbcType=VARCHAR},
+      </if>
+      <if test="liveTestUrl != null and liveTestUrl != ''">
+        live_test_url = #{liveTestUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="signatureUrl != null and signatureUrl != ''">
+        signature_url = #{signatureUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="applyType != null  and applyType != ''">
+        apply_type = #{applyType,jdbcType=BIT},
+      </if>
+      <if test="isWhiteList != null  and isWhiteList != ''">
+        is_white_list = #{isWhiteList,jdbcType=BIT},
+      </if>
+      <if test="phone != null and phone != ''">
+        phone = #{phone},
+      </if>
+      <if test="processNode != null and processNode != ''">
+        process_node = #{processNode},
+      </if>
+      last_update_time = now(),
+      <if test="idCardReverseUrl != null and idCardReverseUrl != ''">
+        id_card_reverse_url = #{idCardReverseUrl},
+      </if>
+      <if test="idCardFrontUrl != null and idCardFrontUrl != ''">
+        id_card_front_url = #{idCardFrontUrl},
+      </if>
+      <if test="firmId != null and firmId != ''">
+        firm_id = #{firmId},
+      </if>
+      <if test="enterpriseAudit != null and enterpriseAudit != '' or enterpriseAudit == 0 ">
+        enterprise_audit = #{enterpriseAudit},
+      </if>
+      <if test="governmentAudit != null and governmentAudit != '' or governmentAudit == 0 ">
+        government_audit = #{governmentAudit},
+      </if>
+      <if test="enterpriseRefuseReason != null and enterpriseRefuseReason != '' ">
+        enterprise_refuse_reason = #{enterpriseRefuseReason},
+      </if>
+      <if test="enterpriseAuditDate != null">
+        enterprise_audit_date = #{enterpriseAuditDate},
+      </if>
+      <if test="yuncrErrNode != null and yuncrErrNode != ''">
+        yuncr_err_node = #{yuncrErrNode},
+      </if>
+      <if test="yuncrErrMessage != null and yuncrErrMessage != ''">
+        yuncr_err_message = #{yuncrErrMessage},
+      </if>
+      <if test="customKey != null and customKey != ''">
+        custom_key = #{customKey},
+      </if>
+    </trim>
+    <choose>
+      <when test="applyNumber != null and applyNumber != ''">
+        where apply_number = #{applyNumber}
+      </when>
+      <when test=" id != null and id != '' ">
+        where id = #{id}
+      </when>
+      <otherwise>
+        where phone = #{phone}
+      </otherwise>
+    </choose>
+  </update>
+
+
+  <select id="selectByCondition" resultMap="BaseResultMap">
+    select * from yuncr_user_authentication
+    <where>
+      <if test="idCard != null">
+        and id_card = #{idCard}
+      </if>
+      <if test="idCardFrontNumber != null">
+        and id_card_front_number = #{idCardFrontNumber}
+      </if>
+      <if test="phoneNumber != null and phoneNumber!='' ">
+        and phone = #{phoneNumber}
+      </if>
+      <if test="applyNumber != null and applyNumber != ''">
+        and apply_number = #{applyNumber}
+      </if>
+    </where>
+    order by create_time desc
+  </select>
+
+  <insert id="insertApiRequestData">
+
+
+
+                insert into api_request_data(request_id,request_body,source,create_time)
+                values (#{requestId},#{requestBody},#{source},now())
+
+
+
+  </insert>
+
+  <update id="updateCallBack">
+    update yuncr_user_authentication
+    <trim prefix="set" suffixOverrides="," suffix="where id = #{id}">
+      <if test="callbackNumber != null and callbackNumber != '' ">
+        <![CDATA[ callback_number = callback_number+#{callbackNumber},]]>
+      </if>
+      <if test="callbackStatus != null and callbackStatus != '' ">
+        callback_status = #{callbackStatus},
+      </if>
+    </trim>
+  </update>
+
+  <select id="selectBank" resultType="integer">
+
+
+
+                SELECT COUNT(*) FROM yuncr_user_bank  yub
+                LEFT JOIN yuncr_user_authentication yua ON yub.authentication_id = yua.id
+                WHERE yua.id_card = #{idCard} AND yub.bank_card_number = #{bankCardNumber}
+                AND is_bind = 1
+
+
+
+  </select>
+
+  <insert id="insertBank" parameterType="com.jrmf.domain.YuncrUserBank">
+
+
+
+              INSERT INTO yuncr_user_bank ( authentication_id, bank_card_number, sub_bank_id, create_time, is_bind )
+              VALUES (#{authenticationId},#{bankCardNumber},#{subBankId},now(),'1')
+
+
+
+  </insert>
+
+  <select id="listBankInfo" resultType="com.jrmf.domain.vo.YuncrUserBankVO">
+
+
+
+                SELECT
+                  ub.id,
+                  ub.authentication_id authenticationId,
+                  bi.bank_id bankId,
+                  ub.bank_card_number bankCardNumber,
+                  sbi.sub_bank_name subBankName,
+                  sbi.opnbnk_id subBankNumber,
+                  ub.create_time createTime
+                FROM
+                  yuncr_user_bank ub
+                  LEFT JOIN yuncr_sub_bank_info sbi ON ub.sub_bank_id = sbi.sub_bank_id
+                  LEFT JOIN yuncr_bank_info bi ON sbi.bid = bi.bank_id
+                WHERE
+                  ub.authentication_id = #{id}
+                order by ub.create_time desc
+
+
+
+  </select>
+
+  <select id="getSubBankByBankName" resultType="java.util.Map">
+
+
+
+                  SELECT
+                  bi.bank_id bankId,
+                  bi.bank_name bankName,
+                  sb.sub_bank_id subBankId,
+                  sb.sub_bank_name subBankName
+                FROM
+                  yuncr_sub_bank_info sb
+                  LEFT JOIN yuncr_bank_info bi
+                  ON sb.bid = bi.bank_id
+                WHERE
+                  bi.bank_name LIKE concat(#{bankName}, '%')
+                GROUP BY bi.id
+
+
+
+  </select>
+
+  <delete id="deleteUserBankCard">
+
+
+
+                DELETE FROM yuncr_user_bank WHERE id = #{id}
+
+
+
+  </delete>
+
+  <select id="getBankByBankName" resultType="java.lang.String">
+
+
+
+                SELECT
+                  bank_id bankId
+                FROM
+                  yuncr_bank_info
+                WHERE
+                  bank_name LIKE concat(#{bankName},'%')
+
+
+
+  </select>
+
+  <update id="updateBank" parameterType="com.jrmf.domain.YuncrUserBank">
+
+
+
+                UPDATE yuncr_user_bank
+                SET bank_card_number = #{bankCardNumber}, sub_bank_id = #{subBankId}
+                WHERE id = #{id}
+
+
+
+  </update>
+
+  <select id="getAllBank" resultType="java.util.Map">
+
+
+
+                SELECT
+                  id,
+                  bank_id bankId,
+                  bank_name bankName
+                FROM
+                  yuncr_bank_info
+
+
+
+  </select>
+
+  <select id="getSubBankByBankId" resultType="java.util.Map">
+
+
+
+                  SELECT
+                  id,
+                  bid bankId,
+                  sub_bank_id subBankId,
+                  sub_bank_name subBankName
+                FROM
+                  yuncr_sub_bank_info
+                WHERE
+                  bid = #{bankId} LIMIT 1
+
+
+
+  </select>
+
+  <select id="findCallBackData" resultMap="BaseResultMap">
+    SELECT * FROM yuncr_user_authentication yua
+    WHERE
+    <![CDATA[  yua.callback_status IN(0,2)
+    AND yua.process_node = 5 AND yua.enterprise_audit !=0 AND yua.callback_address IS NOT NULL
+    AND yua.callback_number <= 9]]>
+    <if test="idCard != null and idCard != '' ">
+      AND yua.id_card = #{idCard}
+    </if>
+  </select>
+
+  <select id="findErrNodeList" resultType="com.jrmf.domain.YuncrUserFailNode">
+    select * from yuncr_user_fail_node where  authentication_id = #{authenticationId} and status = 1
+  </select>
+</mapper>

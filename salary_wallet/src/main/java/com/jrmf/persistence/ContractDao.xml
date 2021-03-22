@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.ContractDao">
+
+  <sql id="Base_Column_List">
+    id, custom_key, user_id, channel_task_id, company_id, contract_url, add_user, create_time, update_time,
+    status, status_desc, platsrl, file_no
+  </sql>
+
+  <resultMap id="BaseResultMap" type="com.jrmf.domain.Contract">
+    <id column="id" property="id" jdbcType="INTEGER"/>
+    <result column="custom_key" property="customKey" jdbcType="VARCHAR"/>
+    <result column="user_id" property="userId" jdbcType="VARCHAR"/>
+    <result column="channel_task_id" property="channelTaskId" jdbcType="INTEGER"/>
+    <result column="company_id" property="companyId" jdbcType="VARCHAR"/>
+    <result column="contract_url" property="contractUrl" jdbcType="INTEGER"/>
+    <result column="add_user" property="addUser" jdbcType="VARCHAR"/>
+    <result column="create_time" property="createTime" jdbcType="VARCHAR"/>
+    <result column="update_time" property="updateTime" jdbcType="VARCHAR"/>
+    <result column="status" property="status" jdbcType="INTEGER"/>
+    <result column="status_desc" property="statusDesc" jdbcType="VARCHAR"/>
+    <result column="platsrl" property="platsrl" jdbcType="VARCHAR"/>
+    <result column="file_no" property="fileNo" jdbcType="VARCHAR"/>
+  </resultMap>
+
+  <insert id="insertContract" parameterType="com.jrmf.domain.Contract" useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO customer_contract
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="customKey != null and customKey != ''">
+        custom_key,
+      </if>
+      <if test="userId != null and userId != ''">
+        user_id,
+      </if>
+      <if test="channelTaskId != null and channelTaskId != ''">
+        channel_task_id,
+      </if>
+      <if test="companyId != null and companyId != ''">
+        company_id,
+      </if>
+      <if test="contractUrl != null and contractUrl != ''">
+        contract_url,
+      </if>
+      <if test="fileNo != null and fileNo != ''">
+        file_no,
+      </if>
+      <if test="addUser != null and addUser != ''">
+        add_user,
+      </if>
+      <if test="status != null">
+        status,
+      </if>
+      <if test="statusDesc != null and statusDesc != ''">
+        status_desc,
+      </if>
+      <if test="platsrl != null and platsrl != ''">
+        platsrl,
+      </if>
+      create_time,
+    </trim>
+    <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+      <if test="customKey != null and customKey != ''">
+        #{customKey},
+      </if>
+      <if test="userId != null and userId != ''">
+        #{userId},
+      </if>
+      <if test="channelTaskId != null and channelTaskId != ''">
+        #{channelTaskId},
+      </if>
+      <if test="companyId != null and companyId != ''">
+        #{companyId},
+      </if>
+      <if test="contractUrl != null and contractUrl != ''">
+        #{contractUrl},
+      </if>
+      <if test="fileNo != null and fileNo != ''">
+        #{fileNo},
+      </if>
+      <if test="addUser != null and addUser != ''">
+        #{addUser},
+      </if>
+      <if test="status != null">
+        #{status},
+      </if>
+      <if test="statusDesc != null and statusDesc != ''">
+        #{statusDesc},
+      </if>
+      <if test="platsrl != null and platsrl != ''">
+        #{platsrl},
+      </if>
+      now(),
+    </trim>
+  </insert>
+
+  <update id="updateContract">
+    UPDATE customer_contract
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="customKey != null and customKey != ''">
+        custom_key = #{customKey},
+      </if>
+      <if test="userId != null and userId != ''">
+        user_id = #{userId},
+      </if>
+      <if test="channelTaskId != null and channelTaskId != ''">
+        channel_task_id = #{channelTaskId},
+      </if>
+      <if test="companyId != null and companyId != ''">
+        company_id = #{companyId},
+      </if>
+      <if test="contractUrl != null and contractUrl != ''">
+        contract_url = #{contractUrl},
+      </if>
+      <if test="fileNo != null and fileNo != ''">
+        file_no = #{fileNo},
+      </if>
+      <if test="addUser != null and addUser != ''">
+        add_user = #{addUser},
+      </if>
+      <if test="status != null">
+        status = #{status},
+      </if>
+      <if test="statusDesc != null and statusDesc != ''">
+        status_desc = #{statusDesc},
+      </if>
+      <if test="platsrl != null and platsrl != ''">
+        platsrl = #{platsrl},
+      </if>
+      update_time = now(),
+    </trim>
+    WHERE id = #{id}
+  </update>
+
+  <update id="updateContractStatusIsDelete">
+    update customer_contract set status = '4' WHERE id = #{id}
+  </update>
+
+  <select id="listContract" resultType="com.jrmf.domain.Contract">
+    SELECT
+    cc.id,
+    c.customkey customKey,
+    c.companyName customName,
+    yua.id userId,
+    yua.id_card idCard,
+    yua.`name` userName,
+    ct.id channelTaskId,
+    ct.taskName,
+    ct.eco_cate_code ecoCateCode,
+    ct.eco_cate_name ecoCateName,
+    qc.companyName as companyName,
+    cc.`status`,
+    cc.status_desc statusDesc,
+    cc.contract_url contractUrl,
+    cc.add_user addUser,
+    cc.create_time createTime,
+    cc.update_time updateTime
+    FROM
+    customer_contract cc
+    LEFT JOIN channel_custom c ON cc.custom_key = c.customkey
+    LEFT JOIN qb_company qc ON qc.userId = cc.company_id
+    LEFT JOIN yuncr_user_authentication yua ON cc.user_id = yua.id
+    LEFT JOIN channel_task ct ON cc.channel_task_id = ct.id
+    WHERE cc.status != '4'
+    <if test="customName != null and customName != ''">
+      and c.companyName like concat('%',#{customName},'%')
+    </if>
+    <if test="userName != null and userName != ''">
+      and yua.`name` like concat('%',#{userName},'%')
+    </if>
+    <if test="idCard != null and idCard != ''">
+      and yua.id_card = #{idCard}
+    </if>
+    <if test="projectName != null and projectName != ''">
+      and ct.taskName like concat('%',#{projectName},'%')
+    </if>
+    <if test="companyName != null and companyName != ''">
+      and qc.companyName like concat('%',#{companyName},'%')
+    </if>
+    <if test="status != null and status != ''">
+      and cc.status = #{status}
+    </if>
+    <if test="startTime != null and startTime != ''">
+      and date(cc.create_time) &gt;= #{startTime}
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and date(cc.create_time) &lt;= #{endTime}
+    </if>
+    <if test="customKey != null and customKey != ''">
+      and FIND_IN_SET(cc.custom_key, #{customKey})
+    </if>
+    ORDER BY cc.update_time DESC, cc.create_time DESC
+  </select>
+
+  <select id="getContractById" resultMap="BaseResultMap">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM customer_contract
+    WHERE id = #{id}
+  </select>
+
+  <select id="getProjectByCustomKey" resultType="java.util.Map">
+  SELECT
+    id,
+	  taskName,
+	  eco_cate_code ecoCateCode,
+	  eco_cate_name ecoCateName
+  FROM
+	  channel_task
+  WHERE
+  deleted_flag = '0'
+	AND biz_type = '2'
+  AND FIND_IN_SET(customKey, #{customKey})
+  </select>
+
+  <select id="getYuncrUser" resultType="java.util.Map">
+    SELECT
+    yu.id,
+    yu.id_card idCard,
+    yu.name
+    FROM
+    yuncr_user_authentication yu
+    LEFT JOIN qb_users qu ON yu.id_card = qu.certId
+    LEFT JOIN qb_userrelated qbu ON qu.id = qbu.userId
+    WHERE
+    yu.government_audit = '1' AND yu.enterprise_audit = '1'
+    AND FIND_IN_SET(qbu.originalId, #{customKey})
+    GROUP BY qu.id
+	</select>
+
+  <select id="getPlatsrl" resultType="java.lang.String">
+    SELECT platsrl FROM channel_task WHERE id = #{channelTaskId}
+  </select>
+
+  <select id="getCustomerFirm" resultType="java.util.Map">
+    SELECT
+	      cf.custom_key customKey,
+        cc.companyName
+    FROM
+	    customer_firm_info cf
+	  LEFT JOIN channel_custom cc ON cc.customKey = cf.custom_key
+    WHERE
+	      cf.`status` = '1'
+    <if test="customKey != null and customKey !='' and customKey != 'mfkj'">
+      AND FIND_IN_SET(cf.custom_key, #{customKey})
+    </if>
+  </select>
+
+  <select id="getUserAuthenticationById" resultType="java.lang.String">
+    SELECT firm_id FROM yuncr_user_authentication WHERE id = #{userId}
+  </select>
+</mapper>

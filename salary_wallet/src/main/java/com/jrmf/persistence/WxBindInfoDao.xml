@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jrmf.persistence.WxBindInfoDao">
+	<insert id="saveWxBindInfo" parameterType="com.jrmf.domain.WxBindInfo"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into qb_wx_bind_info
+        (openId,
+        clientOpenId,
+        aygStatus,
+        platForm,
+        originId,
+        companyId,
+		partnetId,
+        createTime)
+        values
+        (
+        #{openId},
+        #{clientOpenId},
+        #{aygStatus},
+        #{platForm},
+        #{originId},
+        #{companyId},
+        #{partnetId},
+        now()
+        )
+    </insert>
+	
+	<update id="updateWxBindInfo"  parameterType="com.jrmf.domain.WxBindInfo">
+		update qb_wx_bind_info
+		<trim prefix="SET" suffixOverrides=",">
+			updatetime = now(),
+			<if test="aygStatus !=null and aygStatus !=''">
+				aygStatus = #{aygStatus},
+			</if>
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<select id="geWxBindInfo" resultType="com.jrmf.domain.WxBindInfo">
+		SELECT * FROM qb_wx_bind_info 
+		where 
+		 <if test="clientOpenId !=null and clientOpenId !=''">
+			 clientOpenId = #{clientOpenId} 
+		</if>
+		<if test="originId !=null and originId !=''">
+			and originId = #{originId} 
+		</if>
+		<if test="companyId !=null and companyId !=''">
+			AND companyId = #{companyId}
+		</if>
+		<if test="platForm !=null and platForm !=''">
+			AND platForm = #{platForm}
+		</if>
+		limit 1
+	</select>
+	
+</mapper>
